@@ -1,0 +1,77 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a server to get projects from github",
+        "title": "Magic-Circle API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/api/magic-circle",
+    "paths": {
+        "/v1/sector": {
+            "post": {
+                "description": "create sector according to giving coords\ncoords is unique string",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create Sector",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sector.CreateSectorReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/sector.Sector"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "sector.CreateSectorReq": {
+            "type": "object",
+            "properties": {
+                "coords": {
+                    "type": "string"
+                }
+            }
+        },
+        "sector.Sector": {
+            "type": "object",
+            "properties": {
+                "coords": {
+                    "type": "string"
+                },
+                "int": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

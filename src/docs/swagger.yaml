@@ -1,0 +1,52 @@
+basePath: /api/magic-circle
+definitions:
+  sector.CreateSectorReq:
+    properties:
+      coords:
+        type: string
+    type: object
+  sector.Sector:
+    properties:
+      coords:
+        type: string
+      int:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: This is a server to get projects from github
+  title: Magic-Circle API
+  version: "1.0"
+paths:
+  /v1/sector:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        create sector according to giving coords
+        coords is unique string
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/sector.CreateSectorReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/sector.Sector'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Create Sector
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
