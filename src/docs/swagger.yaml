@@ -1,5 +1,47 @@
 basePath: /api/magic-circle
 definitions:
+  direction.Direction:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  direction.GetDirectionsResp:
+    properties:
+      directions:
+        items:
+          $ref: '#/definitions/direction.Direction'
+        type: array
+    type: object
+  institute.GetInstitutesResp:
+    properties:
+      institutes:
+        items:
+          $ref: '#/definitions/institute.Institute'
+        type: array
+    type: object
+  institute.Institute:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  profile.GetAllProfilesResp:
+    properties:
+      profiles:
+        items:
+          $ref: '#/definitions/profile.Profile'
+        type: array
+    type: object
+  profile.Profile:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   sector.CreateSectorReq:
     properties:
       coords:
@@ -18,6 +60,51 @@ info:
   title: Magic-Circle API
   version: "1.0"
 paths:
+  /v1/direction:
+    get:
+      description: return all directions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/direction.GetDirectionsResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all directions
+  /v1/institute:
+    get:
+      description: return all institutes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/institute.GetInstitutesResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all institutes
+  /v1/profiles:
+    get:
+      description: return all profiles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/profile.GetAllProfilesResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get all profiles
   /v1/sector:
     post:
       consumes:

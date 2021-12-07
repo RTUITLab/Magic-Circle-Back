@@ -8,6 +8,75 @@
     },
     "basePath": "/api/magic-circle",
     "paths": {
+        "/v1/direction": {
+            "get": {
+                "description": "return all directions",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all directions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/direction.GetDirectionsResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/institute": {
+            "get": {
+                "description": "return all institutes",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all institutes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/institute.GetInstitutesResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/profiles": {
+            "get": {
+                "description": "return all profiles",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all profiles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/profile.GetAllProfilesResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/sector": {
             "post": {
                 "description": "create sector according to giving coords\ncoords is unique string",
@@ -47,6 +116,72 @@
         }
     },
     "definitions": {
+        "direction.Direction": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "direction.GetDirectionsResp": {
+            "type": "object",
+            "properties": {
+                "directions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/direction.Direction"
+                    }
+                }
+            }
+        },
+        "institute.GetInstitutesResp": {
+            "type": "object",
+            "properties": {
+                "institutes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/institute.Institute"
+                    }
+                }
+            }
+        },
+        "institute.Institute": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "profile.GetAllProfilesResp": {
+            "type": "object",
+            "properties": {
+                "profiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/profile.Profile"
+                    }
+                }
+            }
+        },
+        "profile.Profile": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "sector.CreateSectorReq": {
             "type": "object",
             "properties": {

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/0B1t322/Magic-Circle/ent"
+	. "github.com/0B1t322/Magic-Circle/models/sector"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -43,17 +44,6 @@ type CreateSectorReq struct {
 	Coords	string	`json:"coords"`
 }
 
-type Sector struct {
-	ID		int		`json:"int"`
-	Coords	string	`json:"coords"`
-}
-
-func NewSector(s *ent.Sector) Sector {
-	return Sector{
-		ID: s.ID,
-		Coords: s.Coords,
-	}
-}
 
 func newLogFields(method string, err error) log.Fields {
 	return log.Fields{
