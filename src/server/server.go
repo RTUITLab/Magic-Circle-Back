@@ -6,6 +6,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/schema"
 	"github.com/0B1t322/Magic-Circle/config"
+	"github.com/0B1t322/Magic-Circle/controllers/direction"
+	"github.com/0B1t322/Magic-Circle/controllers/institute"
+	"github.com/0B1t322/Magic-Circle/controllers/profile"
 	"github.com/0B1t322/Magic-Circle/controllers/sector"
 	"github.com/0B1t322/Magic-Circle/db"
 
@@ -13,7 +16,10 @@ import (
 )
 
 type Controllers struct {
-	Sector *sector.SectorController
+	Sector    *sector.SectorController
+	Profile   *profile.ProfileController
+	Institute *institute.InstituteController
+	Direction *direction.DirectionController
 }
 
 func StartServer() error {
@@ -24,7 +30,7 @@ func StartServer() error {
 		log.WithFields(
 			log.Fields{
 				"func": "StartServer",
-				"err": err,
+				"err":  err,
 			},
 		).Error("Failed to crete db client")
 
@@ -38,7 +44,7 @@ func StartServer() error {
 		log.WithFields(
 			log.Fields{
 				"func": "StartServer",
-				"err": err,
+				"err":  err,
 			},
 		).Error("Failed to create schema")
 
@@ -47,8 +53,10 @@ func StartServer() error {
 
 	controllers := &Controllers{
 		Sector: sector.New(client),
+		Profile: profile.New(client),
+		Direction: direction.New(client),
+		Institute: institute.New(client),
 	}
-
 
 	r := NewRouter(controllers)
 	return r.Run(fmt.Sprintf(":%s", config.App.Port))

@@ -20,6 +20,21 @@ func NewRouter(c *Controllers) *gin.Engine {
 		{
 			sector.POST("", c.Sector.Create)
 		}
+
+		profile := v1.Group("/profile")
+		{
+			profile.GET("", c.Profile.GetAll)
+		}
+
+		institute := v1.Group("/institute")
+		{
+			institute.GET("", c.Institute.GetAll)
+		}
+
+		direction := v1.Group("/direction")
+		{
+			direction.GET("", c.Direction.GetAll)
+		}
 	}
 
 	return router
