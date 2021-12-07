@@ -4,7 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/0B1t322/Magic-Circle/controllers/utils"
 	"github.com/0B1t322/Magic-Circle/ent"
+	"github.com/0B1t322/Magic-Circle/ent/institute"
+	"github.com/0B1t322/Magic-Circle/ent/variant"
 	. "github.com/0B1t322/Magic-Circle/models/institute"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -71,4 +74,60 @@ func (i InstituteController) GetAll(c *gin.Context) {
 
 
 	c.JSON(http.StatusOK, GetInstitutesResp{Ins: InstitutesFromEnt(is)})
+}
+
+type DeleteInstituteByID struct {
+	ID int `json:"-" uri:"id"`
+}
+
+// DeleteByID
+//
+// @Summary Delete Institute by id
+//
+// @Description Delete Institute by id
+//
+// @Router /v1/institute/{id} [delete]
+//
+// @Param id path int true "id of institute"
+// 
+// @Produce json
+//
+// @Success 200
+//
+// @Failure 404 {string} string
+// 
+// @Failure 400 {string} string
+// 
+// @Failure 500 {string} srting
+func (p InstituteController) DeleteByID(c *gin.Context) {
+	var req DeleteInstituteByID
+	{
+		if err := c.ShouldBindUri(&req); err != nil {
+			log.WithFields(newLogFields("Delete", err)).Error("Failed to delete Institute")
+			c.String(http.StatusInternalServerError, "Failed to delete Institute")
+			c.Abort()
+			return
+		}
+	}
+	if err := utils.DeleteVariant(c, p.Client, variant.HasInsituteWith(institute.ID(req.ID))); ent.IsNotFound(err) {
+		// Pass
+	} else if err != nil {
+		log.WithFields(newLogFields("Delete", err)).Error("Failed to delete Institute")
+		c.String(http.StatusInternalServerError, "Failed to delete Institute")
+		c.Abort()
+		return
+	}
+	
+	if err := p.Client.Direction.DeleteOneID(req.ID).Exec(c); ent.IsNotFound(err) {
+		c.String(http.StatusNotFound, "Failed to delete Institute")
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("Delete", err)).Error("Failed to delete Institute")
+		c.String(http.StatusInternalServerError, "Failed to delete Institute")
+		c.Abort()
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

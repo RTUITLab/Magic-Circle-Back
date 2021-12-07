@@ -26,16 +26,19 @@ func NewRouter(c *Controllers) *gin.Engine {
 		profile := v1.Group("/profile")
 		{
 			profile.GET("", c.Profile.GetAll)
+			profile.DELETE("/:id", c.Profile.DeleteByID)
 		}
 
 		institute := v1.Group("/institute")
 		{
 			institute.GET("", c.Institute.GetAll)
+			institute.DELETE("/:id", c.Institute.DeleteByID)
 		}
 
 		direction := v1.Group("/direction")
 		{
 			direction.GET("", c.Direction.GetAll)
+			direction.DELETE("/:id", c.Direction.DeleteByID)
 		}
 
 		adjacenttable := v1.Group("/adjacenttable")

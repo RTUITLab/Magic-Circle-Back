@@ -89,6 +89,47 @@ var doc = `{
                 }
             }
         },
+        "/v1/direction/{id}": {
+            "delete": {
+                "description": "Delete Direction by id",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Delete Direction by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of institute",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/institute": {
             "get": {
                 "description": "return all institutes",
@@ -112,6 +153,47 @@ var doc = `{
                 }
             }
         },
+        "/v1/institute/{id}": {
+            "delete": {
+                "description": "Delete Institute by id",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Delete Institute by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of institute",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/profile": {
             "get": {
                 "description": "return all profiles",
@@ -124,6 +206,47 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/profile.GetAllProfilesResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/profile/{id}": {
+            "delete": {
+                "description": "Delete profile by id",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Delete profile by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of profile",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "500": {

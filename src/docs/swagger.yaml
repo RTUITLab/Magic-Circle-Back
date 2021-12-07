@@ -195,6 +195,33 @@ paths:
           schema:
             type: string
       summary: Get all directions
+  /v1/direction/{id}:
+    delete:
+      description: Delete Direction by id
+      parameters:
+      - description: id of institute
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete Direction by id
   /v1/institute:
     get:
       description: return all institutes
@@ -210,6 +237,33 @@ paths:
           schema:
             type: string
       summary: Get all institutes
+  /v1/institute/{id}:
+    delete:
+      description: Delete Institute by id
+      parameters:
+      - description: id of institute
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete Institute by id
   /v1/profile:
     get:
       description: return all profiles
@@ -225,6 +279,33 @@ paths:
           schema:
             type: string
       summary: Get all profiles
+  /v1/profile/{id}:
+    delete:
+      description: Delete profile by id
+      parameters:
+      - description: id of profile
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete profile by id
   /v1/sector:
     get:
       description: return all sectors
