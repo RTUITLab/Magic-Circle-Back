@@ -210,7 +210,7 @@ paths:
           schema:
             type: string
       summary: Get all institutes
-  /v1/profiles:
+  /v1/profile:
     get:
       description: return all profiles
       produces:

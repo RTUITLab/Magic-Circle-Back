@@ -112,7 +112,7 @@ var doc = `{
                 }
             }
         },
-        "/v1/profiles": {
+        "/v1/profile": {
             "get": {
                 "description": "return all profiles",
                 "produces": [

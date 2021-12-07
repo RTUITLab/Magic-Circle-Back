@@ -46,7 +46,7 @@ type GetAllProfilesResp struct {
 // 
 // @Description return all profiles
 // 
-// @Router /v1/profiles [get]
+// @Router /v1/profile [get]
 // 
 // @Produce json
 // 
