@@ -11,8 +11,6 @@ const (
 	FieldSectorID = "sector_id"
 	// FieldVariantID holds the string denoting the variant_id field in the database.
 	FieldVariantID = "variant_id"
-	// FieldDescription holds the string denoting the description field in the database.
-	FieldDescription = "description"
 	// EdgeVariant holds the string denoting the variant edge name in mutations.
 	EdgeVariant = "Variant"
 	// EdgeSector holds the string denoting the sector edge name in mutations.
@@ -40,7 +38,6 @@ var Columns = []string{
 	FieldID,
 	FieldSectorID,
 	FieldVariantID,
-	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -26,6 +26,20 @@ func (sc *SectorCreate) SetCoords(s string) *SectorCreate {
 	return sc
 }
 
+// SetDescription sets the "description" field.
+func (sc *SectorCreate) SetDescription(s string) *SectorCreate {
+	sc.mutation.SetDescription(s)
+	return sc
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (sc *SectorCreate) SetNillableDescription(s *string) *SectorCreate {
+	if s != nil {
+		sc.SetDescription(*s)
+	}
+	return sc
+}
+
 // AddAdjacentTableIDs adds the "AdjacentTables" edge to the AdjacentTable entity by IDs.
 func (sc *SectorCreate) AddAdjacentTableIDs(ids ...int) *SectorCreate {
 	sc.mutation.AddAdjacentTableIDs(ids...)
@@ -148,6 +162,14 @@ func (sc *SectorCreate) createSpec() (*Sector, *sqlgraph.CreateSpec) {
 			Column: sector.FieldCoords,
 		})
 		_node.Coords = value
+	}
+	if value, ok := sc.mutation.Description(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: sector.FieldDescription,
+		})
+		_node.Description = value
 	}
 	if nodes := sc.mutation.AdjacentTablesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -18,6 +18,8 @@ func (Sector) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("coords").
 			Unique(),
+		field.Text("description").
+			Optional(),
 	}
 }
 

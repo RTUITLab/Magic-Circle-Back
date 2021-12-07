@@ -17,6 +17,8 @@ type Sector struct {
 	ID int `json:"id,omitempty"`
 	// Coords holds the value of the "coords" field.
 	Coords string `json:"coords,omitempty"`
+	// Description holds the value of the "description" field.
+	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SectorQuery when eager-loading is set.
 	Edges SectorEdges `json:"edges"`
@@ -47,7 +49,7 @@ func (*Sector) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case sector.FieldID:
 			values[i] = new(sql.NullInt64)
-		case sector.FieldCoords:
+		case sector.FieldCoords, sector.FieldDescription:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Sector", columns[i])
@@ -75,6 +77,12 @@ func (s *Sector) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field coords", values[i])
 			} else if value.Valid {
 				s.Coords = value.String
+			}
+		case sector.FieldDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field description", values[i])
+			} else if value.Valid {
+				s.Description = value.String
 			}
 		}
 	}
@@ -111,6 +119,8 @@ func (s *Sector) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
 	builder.WriteString(", coords=")
 	builder.WriteString(s.Coords)
+	builder.WriteString(", description=")
+	builder.WriteString(s.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -6,6 +6,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/schema"
 	"github.com/0B1t322/Magic-Circle/config"
+	"github.com/0B1t322/Magic-Circle/controllers/adjacenttable"
 	"github.com/0B1t322/Magic-Circle/controllers/direction"
 	"github.com/0B1t322/Magic-Circle/controllers/institute"
 	"github.com/0B1t322/Magic-Circle/controllers/profile"
@@ -16,10 +17,11 @@ import (
 )
 
 type Controllers struct {
-	Sector    *sector.SectorController
-	Profile   *profile.ProfileController
-	Institute *institute.InstituteController
-	Direction *direction.DirectionController
+	Sector        *sector.SectorController
+	Profile       *profile.ProfileController
+	Institute     *institute.InstituteController
+	Direction     *direction.DirectionController
+	AdjacentTable *adjacenttable.AdjacentTableController
 }
 
 func StartServer() error {
@@ -40,6 +42,7 @@ func StartServer() error {
 	if err := client.Schema.Create(
 		context.Background(),
 		schema.WithForeignKeys(true),
+		schema.WithDropColumn(true),
 	); err != nil {
 		log.WithFields(
 			log.Fields{
@@ -52,10 +55,11 @@ func StartServer() error {
 	}
 
 	controllers := &Controllers{
-		Sector: sector.New(client),
-		Profile: profile.New(client),
+		Sector:    sector.New(client),
+		Profile:   profile.New(client),
 		Direction: direction.New(client),
 		Institute: institute.New(client),
+		AdjacentTable: adjacenttable.New(client),
 	}
 
 	r := NewRouter(controllers)

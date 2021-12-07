@@ -23,6 +23,49 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/adjacenttable": {
+            "post": {
+                "description": "Create adjacent table\nyou can create sector with this method just add description and coords to sector field\nalso you can just add coords fields and they will find sector\nthis endpoint also can get or create institute/profile/direction by name, because all names in this object is unique string\nif adjacent table with this sector and variant exist return bad request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/adjacenttable.CreateAdjacentTableReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/adjacenttable.CreateAdjacentTableResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/direction": {
             "get": {
                 "description": "return all directions",
@@ -93,6 +136,30 @@ var doc = `{
             }
         },
         "/v1/sector": {
+            "get": {
+                "description": "return all sectors",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get Sectors",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sector.GetAllSectorsResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "create sector according to giving coords\ncoords is unique string",
                 "consumes": [
@@ -128,9 +195,127 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/v1/sector/{id}": {
+            "put": {
+                "description": "update sector",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update Sector",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of sector",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sector.UpdateSectorReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sector.Sector"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "adjacenttable.CreateAdjacentTableReq": {
+            "type": "object",
+            "properties": {
+                "directionName": {
+                    "type": "string"
+                },
+                "instituteName": {
+                    "type": "string"
+                },
+                "profileName": {
+                    "type": "string"
+                },
+                "sector": {
+                    "$ref": "#/definitions/adjacenttable.CreateSectorReq"
+                }
+            }
+        },
+        "adjacenttable.CreateAdjacentTableResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "sector": {
+                    "$ref": "#/definitions/adjacenttable.Sector"
+                },
+                "variant": {
+                    "$ref": "#/definitions/adjacenttable.Variant"
+                }
+            }
+        },
+        "adjacenttable.CreateSectorReq": {
+            "type": "object",
+            "properties": {
+                "coords": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string",
+                    "x-nullable": true
+                }
+            }
+        },
+        "adjacenttable.Sector": {
+            "type": "object",
+            "properties": {
+                "coords": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "adjacenttable.Variant": {
+            "type": "object",
+            "properties": {
+                "direction": {
+                    "$ref": "#/definitions/variant.Direction"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "institute": {
+                    "$ref": "#/definitions/variant.Institute"
+                },
+                "profile": {
+                    "$ref": "#/definitions/variant.Profile"
+                }
+            }
+        },
         "direction.Direction": {
             "type": "object",
             "properties": {
@@ -202,6 +387,20 @@ var doc = `{
             "properties": {
                 "coords": {
                     "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            }
+        },
+        "sector.GetAllSectorsResp": {
+            "type": "object",
+            "properties": {
+                "sectors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sector.Sector"
+                    }
                 }
             }
         },
@@ -211,8 +410,55 @@ var doc = `{
                 "coords": {
                     "type": "string"
                 },
-                "int": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "sector.UpdateSectorReq": {
+            "type": "object",
+            "properties": {
+                "coords": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                }
+            }
+        },
+        "variant.Direction": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "variant.Institute": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "variant.Profile": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }

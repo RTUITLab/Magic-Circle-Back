@@ -1,5 +1,53 @@
 basePath: /api/magic-circle
 definitions:
+  adjacenttable.CreateAdjacentTableReq:
+    properties:
+      directionName:
+        type: string
+      instituteName:
+        type: string
+      profileName:
+        type: string
+      sector:
+        $ref: '#/definitions/adjacenttable.CreateSectorReq'
+    type: object
+  adjacenttable.CreateAdjacentTableResp:
+    properties:
+      id:
+        type: integer
+      sector:
+        $ref: '#/definitions/adjacenttable.Sector'
+      variant:
+        $ref: '#/definitions/adjacenttable.Variant'
+    type: object
+  adjacenttable.CreateSectorReq:
+    properties:
+      coords:
+        type: string
+      description:
+        type: string
+        x-nullable: true
+    type: object
+  adjacenttable.Sector:
+    properties:
+      coords:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+    type: object
+  adjacenttable.Variant:
+    properties:
+      direction:
+        $ref: '#/definitions/variant.Direction'
+      id:
+        type: integer
+      institute:
+        $ref: '#/definitions/variant.Institute'
+      profile:
+        $ref: '#/definitions/variant.Profile'
+    type: object
   direction.Direction:
     properties:
       id:
@@ -46,13 +94,52 @@ definitions:
     properties:
       coords:
         type: string
+      description:
+        type: string
+    type: object
+  sector.GetAllSectorsResp:
+    properties:
+      sectors:
+        items:
+          $ref: '#/definitions/sector.Sector'
+        type: array
     type: object
   sector.Sector:
     properties:
       coords:
         type: string
-      int:
+      description:
+        type: string
+      id:
         type: integer
+    type: object
+  sector.UpdateSectorReq:
+    properties:
+      coords:
+        type: string
+      description:
+        type: string
+    type: object
+  variant.Direction:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  variant.Institute:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  variant.Profile:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
     type: object
 info:
   contact: {}
@@ -60,6 +147,39 @@ info:
   title: Magic-Circle API
   version: "1.0"
 paths:
+  /v1/adjacenttable:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Create adjacent table
+        you can create sector with this method just add description and coords to sector field
+        also you can just add coords fields and they will find sector
+        this endpoint also can get or create institute/profile/direction by name, because all names in this object is unique string
+        if adjacent table with this sector and variant exist return bad request
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/adjacenttable.CreateAdjacentTableReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/adjacenttable.CreateAdjacentTableResp'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create
   /v1/direction:
     get:
       description: return all directions
@@ -106,6 +226,22 @@ paths:
             type: string
       summary: Get all profiles
   /v1/sector:
+    get:
+      consumes:
+      - application/json
+      description: return all sectors
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sector.GetAllSectorsResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get Sectors
     post:
       consumes:
       - application/json
@@ -131,6 +267,35 @@ paths:
           schema:
             type: string
       summary: Create Sector
+  /v1/sector/{id}:
+    put:
+      consumes:
+      - application/json
+      description: update sector
+      parameters:
+      - description: id of sector
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/sector.UpdateSectorReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sector.Sector'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Update Sector
 securityDefinitions:
   ApiKeyAuth:
     in: header

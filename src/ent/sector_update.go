@@ -33,6 +33,26 @@ func (su *SectorUpdate) SetCoords(s string) *SectorUpdate {
 	return su
 }
 
+// SetDescription sets the "description" field.
+func (su *SectorUpdate) SetDescription(s string) *SectorUpdate {
+	su.mutation.SetDescription(s)
+	return su
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (su *SectorUpdate) SetNillableDescription(s *string) *SectorUpdate {
+	if s != nil {
+		su.SetDescription(*s)
+	}
+	return su
+}
+
+// ClearDescription clears the value of the "description" field.
+func (su *SectorUpdate) ClearDescription() *SectorUpdate {
+	su.mutation.ClearDescription()
+	return su
+}
+
 // AddAdjacentTableIDs adds the "AdjacentTables" edge to the AdjacentTable entity by IDs.
 func (su *SectorUpdate) AddAdjacentTableIDs(ids ...int) *SectorUpdate {
 	su.mutation.AddAdjacentTableIDs(ids...)
@@ -153,6 +173,19 @@ func (su *SectorUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: sector.FieldCoords,
 		})
 	}
+	if value, ok := su.mutation.Description(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: sector.FieldDescription,
+		})
+	}
+	if su.mutation.DescriptionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: sector.FieldDescription,
+		})
+	}
 	if su.mutation.AdjacentTablesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -229,6 +262,26 @@ type SectorUpdateOne struct {
 // SetCoords sets the "coords" field.
 func (suo *SectorUpdateOne) SetCoords(s string) *SectorUpdateOne {
 	suo.mutation.SetCoords(s)
+	return suo
+}
+
+// SetDescription sets the "description" field.
+func (suo *SectorUpdateOne) SetDescription(s string) *SectorUpdateOne {
+	suo.mutation.SetDescription(s)
+	return suo
+}
+
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (suo *SectorUpdateOne) SetNillableDescription(s *string) *SectorUpdateOne {
+	if s != nil {
+		suo.SetDescription(*s)
+	}
+	return suo
+}
+
+// ClearDescription clears the value of the "description" field.
+func (suo *SectorUpdateOne) ClearDescription() *SectorUpdateOne {
+	suo.mutation.ClearDescription()
 	return suo
 }
 
@@ -374,6 +427,19 @@ func (suo *SectorUpdateOne) sqlSave(ctx context.Context) (_node *Sector, err err
 			Type:   field.TypeString,
 			Value:  value,
 			Column: sector.FieldCoords,
+		})
+	}
+	if value, ok := suo.mutation.Description(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: sector.FieldDescription,
+		})
+	}
+	if suo.mutation.DescriptionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: sector.FieldDescription,
 		})
 	}
 	if suo.mutation.AdjacentTablesCleared() {

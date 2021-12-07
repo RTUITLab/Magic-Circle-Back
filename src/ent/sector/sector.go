@@ -9,6 +9,8 @@ const (
 	FieldID = "id"
 	// FieldCoords holds the string denoting the coords field in the database.
 	FieldCoords = "coords"
+	// FieldDescription holds the string denoting the description field in the database.
+	FieldDescription = "description"
 	// EdgeAdjacentTables holds the string denoting the adjacenttables edge name in mutations.
 	EdgeAdjacentTables = "AdjacentTables"
 	// Table holds the table name of the sector in the database.
@@ -26,6 +28,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCoords,
+	FieldDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

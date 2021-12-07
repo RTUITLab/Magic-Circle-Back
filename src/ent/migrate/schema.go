@@ -12,7 +12,6 @@ var (
 	// AdjacentTableColumns holds the columns for the "AdjacentTable" table.
 	AdjacentTableColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "description", Type: field.TypeString, Size: 2147483647},
 		{Name: "sector_id", Type: field.TypeInt, Nullable: true},
 		{Name: "variant_id", Type: field.TypeInt, Nullable: true},
 	}
@@ -24,13 +23,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "AdjacentTable_Sector_AdjacentTables",
-				Columns:    []*schema.Column{AdjacentTableColumns[2]},
+				Columns:    []*schema.Column{AdjacentTableColumns[1]},
 				RefColumns: []*schema.Column{SectorColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "AdjacentTable_Variant_AdjacentTables",
-				Columns:    []*schema.Column{AdjacentTableColumns[3]},
+				Columns:    []*schema.Column{AdjacentTableColumns[2]},
 				RefColumns: []*schema.Column{VariantColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -73,6 +72,7 @@ var (
 	SectorColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "coords", Type: field.TypeString, Unique: true},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 	}
 	// SectorTable holds the schema information for the "Sector" table.
 	SectorTable = &schema.Table{

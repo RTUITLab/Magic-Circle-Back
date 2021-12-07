@@ -41,7 +41,6 @@ type AdjacentTableMutation struct {
 	op              Op
 	typ             string
 	id              *int
-	description     *string
 	clearedFields   map[string]struct{}
 	_Variant        *int
 	cleared_Variant bool
@@ -203,42 +202,6 @@ func (m *AdjacentTableMutation) ResetVariantID() {
 	m._Variant = nil
 }
 
-// SetDescription sets the "description" field.
-func (m *AdjacentTableMutation) SetDescription(s string) {
-	m.description = &s
-}
-
-// Description returns the value of the "description" field in the mutation.
-func (m *AdjacentTableMutation) Description() (r string, exists bool) {
-	v := m.description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDescription returns the old "description" field's value of the AdjacentTable entity.
-// If the AdjacentTable object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdjacentTableMutation) OldDescription(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
-	}
-	return oldValue.Description, nil
-}
-
-// ResetDescription resets all changes to the "description" field.
-func (m *AdjacentTableMutation) ResetDescription() {
-	m.description = nil
-}
-
 // ClearVariant clears the "Variant" edge to the Variant entity.
 func (m *AdjacentTableMutation) ClearVariant() {
 	m.cleared_Variant = true
@@ -310,15 +273,12 @@ func (m *AdjacentTableMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdjacentTableMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 2)
 	if m._Sector != nil {
 		fields = append(fields, adjacenttable.FieldSectorID)
 	}
 	if m._Variant != nil {
 		fields = append(fields, adjacenttable.FieldVariantID)
-	}
-	if m.description != nil {
-		fields = append(fields, adjacenttable.FieldDescription)
 	}
 	return fields
 }
@@ -332,8 +292,6 @@ func (m *AdjacentTableMutation) Field(name string) (ent.Value, bool) {
 		return m.SectorID()
 	case adjacenttable.FieldVariantID:
 		return m.VariantID()
-	case adjacenttable.FieldDescription:
-		return m.Description()
 	}
 	return nil, false
 }
@@ -347,8 +305,6 @@ func (m *AdjacentTableMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldSectorID(ctx)
 	case adjacenttable.FieldVariantID:
 		return m.OldVariantID(ctx)
-	case adjacenttable.FieldDescription:
-		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown AdjacentTable field %s", name)
 }
@@ -371,13 +327,6 @@ func (m *AdjacentTableMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetVariantID(v)
-		return nil
-	case adjacenttable.FieldDescription:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable field %s", name)
@@ -436,9 +385,6 @@ func (m *AdjacentTableMutation) ResetField(name string) error {
 		return nil
 	case adjacenttable.FieldVariantID:
 		m.ResetVariantID()
-		return nil
-	case adjacenttable.FieldDescription:
-		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable field %s", name)
@@ -1700,6 +1646,7 @@ type SectorMutation struct {
 	typ                    string
 	id                     *int
 	coords                 *string
+	description            *string
 	clearedFields          map[string]struct{}
 	_AdjacentTables        map[int]struct{}
 	removed_AdjacentTables map[int]struct{}
@@ -1824,6 +1771,55 @@ func (m *SectorMutation) ResetCoords() {
 	m.coords = nil
 }
 
+// SetDescription sets the "description" field.
+func (m *SectorMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *SectorMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Sector entity.
+// If the Sector object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SectorMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ClearDescription clears the value of the "description" field.
+func (m *SectorMutation) ClearDescription() {
+	m.description = nil
+	m.clearedFields[sector.FieldDescription] = struct{}{}
+}
+
+// DescriptionCleared returns if the "description" field was cleared in this mutation.
+func (m *SectorMutation) DescriptionCleared() bool {
+	_, ok := m.clearedFields[sector.FieldDescription]
+	return ok
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *SectorMutation) ResetDescription() {
+	m.description = nil
+	delete(m.clearedFields, sector.FieldDescription)
+}
+
 // AddAdjacentTableIDs adds the "AdjacentTables" edge to the AdjacentTable entity by ids.
 func (m *SectorMutation) AddAdjacentTableIDs(ids ...int) {
 	if m._AdjacentTables == nil {
@@ -1897,9 +1893,12 @@ func (m *SectorMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SectorMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.coords != nil {
 		fields = append(fields, sector.FieldCoords)
+	}
+	if m.description != nil {
+		fields = append(fields, sector.FieldDescription)
 	}
 	return fields
 }
@@ -1911,6 +1910,8 @@ func (m *SectorMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case sector.FieldCoords:
 		return m.Coords()
+	case sector.FieldDescription:
+		return m.Description()
 	}
 	return nil, false
 }
@@ -1922,6 +1923,8 @@ func (m *SectorMutation) OldField(ctx context.Context, name string) (ent.Value, 
 	switch name {
 	case sector.FieldCoords:
 		return m.OldCoords(ctx)
+	case sector.FieldDescription:
+		return m.OldDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown Sector field %s", name)
 }
@@ -1937,6 +1940,13 @@ func (m *SectorMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCoords(v)
+		return nil
+	case sector.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Sector field %s", name)
@@ -1967,7 +1977,11 @@ func (m *SectorMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *SectorMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(sector.FieldDescription) {
+		fields = append(fields, sector.FieldDescription)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1980,6 +1994,11 @@ func (m *SectorMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SectorMutation) ClearField(name string) error {
+	switch name {
+	case sector.FieldDescription:
+		m.ClearDescription()
+		return nil
+	}
 	return fmt.Errorf("unknown Sector nullable field %s", name)
 }
 
@@ -1989,6 +2008,9 @@ func (m *SectorMutation) ResetField(name string) error {
 	switch name {
 	case sector.FieldCoords:
 		m.ResetCoords()
+		return nil
+	case sector.FieldDescription:
+		m.ResetDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown Sector field %s", name)

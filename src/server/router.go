@@ -19,6 +19,8 @@ func NewRouter(c *Controllers) *gin.Engine {
 		sector := v1.Group("/sector")
 		{
 			sector.POST("", c.Sector.Create)
+			sector.PUT("/:id", c.Sector.Update)
+			sector.GET("", c.Sector.GetAll)
 		}
 
 		profile := v1.Group("/profile")
@@ -34,6 +36,11 @@ func NewRouter(c *Controllers) *gin.Engine {
 		direction := v1.Group("/direction")
 		{
 			direction.GET("", c.Direction.GetAll)
+		}
+
+		adjacenttable := v1.Group("/adjacenttable")
+		{
+			adjacenttable.POST("", c.AdjacentTable.Create)
 		}
 	}
 

@@ -33,12 +33,6 @@ func (atc *AdjacentTableCreate) SetVariantID(i int) *AdjacentTableCreate {
 	return atc
 }
 
-// SetDescription sets the "description" field.
-func (atc *AdjacentTableCreate) SetDescription(s string) *AdjacentTableCreate {
-	atc.mutation.SetDescription(s)
-	return atc
-}
-
 // SetVariant sets the "Variant" edge to the Variant entity.
 func (atc *AdjacentTableCreate) SetVariant(v *Variant) *AdjacentTableCreate {
 	return atc.SetVariantID(v.ID)
@@ -125,9 +119,6 @@ func (atc *AdjacentTableCreate) check() error {
 	if _, ok := atc.mutation.VariantID(); !ok {
 		return &ValidationError{Name: "variant_id", err: errors.New(`ent: missing required field "variant_id"`)}
 	}
-	if _, ok := atc.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "description"`)}
-	}
 	if _, ok := atc.mutation.VariantID(); !ok {
 		return &ValidationError{Name: "Variant", err: errors.New("ent: missing required edge \"Variant\"")}
 	}
@@ -161,14 +152,6 @@ func (atc *AdjacentTableCreate) createSpec() (*AdjacentTable, *sqlgraph.CreateSp
 			},
 		}
 	)
-	if value, ok := atc.mutation.Description(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: adjacenttable.FieldDescription,
-		})
-		_node.Description = value
-	}
 	if nodes := atc.mutation.VariantIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,

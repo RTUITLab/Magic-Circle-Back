@@ -19,7 +19,6 @@ func (AdjacentTable) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("sector_id"),
 		field.Int("variant_id"),
-		field.Text("description"),
 	}
 }
 

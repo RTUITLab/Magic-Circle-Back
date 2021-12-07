@@ -21,8 +21,6 @@ type AdjacentTable struct {
 	SectorID int `json:"sector_id,omitempty"`
 	// VariantID holds the value of the "variant_id" field.
 	VariantID int `json:"variant_id,omitempty"`
-	// Description holds the value of the "description" field.
-	Description string `json:"description,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AdjacentTableQuery when eager-loading is set.
 	Edges AdjacentTableEdges `json:"edges"`
@@ -74,8 +72,6 @@ func (*AdjacentTable) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case adjacenttable.FieldID, adjacenttable.FieldSectorID, adjacenttable.FieldVariantID:
 			values[i] = new(sql.NullInt64)
-		case adjacenttable.FieldDescription:
-			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type AdjacentTable", columns[i])
 		}
@@ -108,12 +104,6 @@ func (at *AdjacentTable) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field variant_id", values[i])
 			} else if value.Valid {
 				at.VariantID = int(value.Int64)
-			}
-		case adjacenttable.FieldDescription:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field description", values[i])
-			} else if value.Valid {
-				at.Description = value.String
 			}
 		}
 	}
@@ -157,8 +147,6 @@ func (at *AdjacentTable) String() string {
 	builder.WriteString(fmt.Sprintf("%v", at.SectorID))
 	builder.WriteString(", variant_id=")
 	builder.WriteString(fmt.Sprintf("%v", at.VariantID))
-	builder.WriteString(", description=")
-	builder.WriteString(at.Description)
 	builder.WriteByte(')')
 	return builder.String()
 }

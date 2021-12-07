@@ -41,12 +41,6 @@ func (atu *AdjacentTableUpdate) SetVariantID(i int) *AdjacentTableUpdate {
 	return atu
 }
 
-// SetDescription sets the "description" field.
-func (atu *AdjacentTableUpdate) SetDescription(s string) *AdjacentTableUpdate {
-	atu.mutation.SetDescription(s)
-	return atu
-}
-
 // SetVariant sets the "Variant" edge to the Variant entity.
 func (atu *AdjacentTableUpdate) SetVariant(v *Variant) *AdjacentTableUpdate {
 	return atu.SetVariantID(v.ID)
@@ -163,13 +157,6 @@ func (atu *AdjacentTableUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			}
 		}
 	}
-	if value, ok := atu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: adjacenttable.FieldDescription,
-		})
-	}
 	if atu.mutation.VariantCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -268,12 +255,6 @@ func (atuo *AdjacentTableUpdateOne) SetSectorID(i int) *AdjacentTableUpdateOne {
 // SetVariantID sets the "variant_id" field.
 func (atuo *AdjacentTableUpdateOne) SetVariantID(i int) *AdjacentTableUpdateOne {
 	atuo.mutation.SetVariantID(i)
-	return atuo
-}
-
-// SetDescription sets the "description" field.
-func (atuo *AdjacentTableUpdateOne) SetDescription(s string) *AdjacentTableUpdateOne {
-	atuo.mutation.SetDescription(s)
 	return atuo
 }
 
@@ -416,13 +397,6 @@ func (atuo *AdjacentTableUpdateOne) sqlSave(ctx context.Context) (_node *Adjacen
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := atuo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: adjacenttable.FieldDescription,
-		})
 	}
 	if atuo.mutation.VariantCleared() {
 		edge := &sqlgraph.EdgeSpec{
