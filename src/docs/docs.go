@@ -138,13 +138,30 @@ var doc = `{
         "/v1/sector": {
             "get": {
                 "description": "return all sectors",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
                 "summary": "Get Sectors",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "institute name",
+                        "name": "institute",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "direction name",
+                        "name": "direction",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "profile name",
+                        "name": "profile",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

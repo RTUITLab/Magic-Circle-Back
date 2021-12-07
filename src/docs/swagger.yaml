@@ -227,9 +227,20 @@ paths:
       summary: Get all profiles
   /v1/sector:
     get:
-      consumes:
-      - application/json
       description: return all sectors
+      parameters:
+      - description: institute name
+        in: query
+        name: institute
+        type: string
+      - description: direction name
+        in: query
+        name: direction
+        type: string
+      - description: profile name
+        in: query
+        name: profile
+        type: string
       produces:
       - application/json
       responses:

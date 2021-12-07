@@ -6,6 +6,13 @@ import (
 	"net/http"
 
 	"github.com/0B1t322/Magic-Circle/ent"
+	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/direction"
+	"github.com/0B1t322/Magic-Circle/ent/institute"
+	"github.com/0B1t322/Magic-Circle/ent/predicate"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
+	"github.com/0B1t322/Magic-Circle/ent/sector"
+	"github.com/0B1t322/Magic-Circle/ent/variant"
 	. "github.com/0B1t322/Magic-Circle/models/sector"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -184,12 +191,44 @@ func (s SectorController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, NewSector(updated))
 }
 
-func (s SectorController) getAll(ctx context.Context) ([]*ent.Sector, error) {
-	return s.Client.Sector.Query().All(ctx)
+func (s SectorController) getAll(
+	ctx 	context.Context,
+	req		GetAllSectorsReq,
+	) ([]*ent.Sector, error) {
+	builder := s.Client.Sector.Query()
+	
+	var preds []predicate.Variant
+	{
+		if req.DirectionName != "" {
+			preds = append(preds, variant.HasDirectionWith(direction.Name(req.DirectionName)))
+		}
+
+		if req.InstituteName != "" {
+			preds = append(preds, variant.HasInsituteWith(institute.Name(req.InstituteName)))
+		}
+
+		if req.ProfileName != "" {
+			preds = append(preds, variant.HasProfileWith(profile.Name(req.ProfileName)))
+		}
+	}
+
+	if len(preds) > 0 {
+		builder.Where(
+			sector.HasAdjacentTablesWith(
+				adjacenttable.HasVariantWith(
+					preds...
+				),
+			),
+		)
+	}
+
+	return builder.All(ctx)
 }
 
 type GetAllSectorsReq struct {
-
+	InstituteName		string		`json:"-" query:"institute"`
+	DirectionName		string		`json:"-" query:"direction"`
+	ProfileName			string		`json:"-" query:"profile"`
 }
 
 type GetAllSectorsResp struct {
@@ -205,7 +244,11 @@ type GetAllSectorsResp struct {
 //
 // @Router /v1/sector [get]
 // 
-// @Accept json
+// @Param institute query string false "institute name"
+// 
+// @Param direction query string false "direction name"
+// 
+// @Param profile query string false "profile name"
 //
 // @Produce json
 //
@@ -213,7 +256,16 @@ type GetAllSectorsResp struct {
 //
 // @Failure 500 {string} srting
 func (s SectorController) GetAll(c *gin.Context) {
-	get, err := s.getAll(c)
+	var req GetAllSectorsReq
+	{
+		req.InstituteName = c.Query("institute")
+		req.DirectionName = c.Query("direction")
+		req.ProfileName = c.Query("profile")
+	}
+
+	log.Infof("%+v", req)
+
+	get, err := s.getAll(c, req)
 	if err != nil {
 		log.WithFields(newLogFields("Update", err)).Error("Failed to get sectors")
 		c.String(http.StatusInternalServerError, "Failed to get sectors")
