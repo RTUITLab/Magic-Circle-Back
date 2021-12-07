@@ -63,5 +63,6 @@ func StartServer() error {
 	}
 
 	r := NewRouter(controllers)
+	log.Infof("Starting server on %s", config.App.Port)
 	return r.Run(fmt.Sprintf(":%s", config.App.Port))
 }

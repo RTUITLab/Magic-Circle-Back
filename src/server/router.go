@@ -9,7 +9,7 @@ import (
 
 func NewRouter(c *Controllers) *gin.Engine {
 	router := gin.New()
-
+	router.SetTrustedProxies(nil)
 	baseRouter := router.Group("/api/magic-circle")
 
 	baseRouter.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
