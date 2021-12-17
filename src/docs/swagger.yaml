@@ -1,5 +1,14 @@
 basePath: /api/magic-circle
 definitions:
+  adjacenttable.AdjacentTable:
+    properties:
+      id:
+        type: integer
+      sector:
+        $ref: '#/definitions/adjacenttable.Sector'
+      variant:
+        $ref: '#/definitions/adjacenttable.Variant'
+    type: object
   adjacenttable.CreateAdjacentTableReq:
     properties:
       directionName:
@@ -19,6 +28,26 @@ definitions:
         $ref: '#/definitions/adjacenttable.Sector'
       variant:
         $ref: '#/definitions/adjacenttable.Variant'
+    type: object
+  adjacenttable.CreateAdjacentTablesReq:
+    properties:
+      directionName:
+        type: string
+      instituteName:
+        type: string
+      profileName:
+        type: string
+      sectors:
+        items:
+          type: string
+        type: array
+    type: object
+  adjacenttable.CreateAdjacentTablesResp:
+    properties:
+      adjacentTables:
+        items:
+          $ref: '#/definitions/adjacenttable.AdjacentTable'
+        type: array
     type: object
   adjacenttable.CreateSectorReq:
     properties:
@@ -173,6 +202,41 @@ paths:
             $ref: '#/definitions/adjacenttable.CreateAdjacentTableResp'
         "400":
           description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create
+  /v1/adjacenttables:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Create adjacent tables
+        this method create or institute/profile/direction but require created sector in array
+        if adjacent table with this sector and variant exist return bad request
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/adjacenttable.CreateAdjacentTablesReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/adjacenttable.CreateAdjacentTablesResp'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
           schema:
             type: string
         "500":

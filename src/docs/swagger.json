@@ -51,6 +51,55 @@
                 }
             }
         },
+        "/v1/adjacenttables": {
+            "post": {
+                "description": "Create adjacent tables\nthis method create or institute/profile/direction but require created sector in array\nif adjacent table with this sector and variant exist return bad request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/adjacenttable.CreateAdjacentTablesReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/adjacenttable.CreateAdjacentTablesResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/direction": {
             "get": {
                 "description": "return all directions",
@@ -367,6 +416,20 @@
         }
     },
     "definitions": {
+        "adjacenttable.AdjacentTable": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "sector": {
+                    "$ref": "#/definitions/adjacenttable.Sector"
+                },
+                "variant": {
+                    "$ref": "#/definitions/adjacenttable.Variant"
+                }
+            }
+        },
         "adjacenttable.CreateAdjacentTableReq": {
             "type": "object",
             "properties": {
@@ -395,6 +458,37 @@
                 },
                 "variant": {
                     "$ref": "#/definitions/adjacenttable.Variant"
+                }
+            }
+        },
+        "adjacenttable.CreateAdjacentTablesReq": {
+            "type": "object",
+            "properties": {
+                "directionName": {
+                    "type": "string"
+                },
+                "instituteName": {
+                    "type": "string"
+                },
+                "profileName": {
+                    "type": "string"
+                },
+                "sectors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "adjacenttable.CreateAdjacentTablesResp": {
+            "type": "object",
+            "properties": {
+                "adjacentTables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/adjacenttable.AdjacentTable"
+                    }
                 }
             }
         },

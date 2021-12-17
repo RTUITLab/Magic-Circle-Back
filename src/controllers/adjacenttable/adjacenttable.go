@@ -107,6 +107,59 @@ func (a AdjacentTableController) create(
 	return created, nil
 }
 
+func (a AdjacentTableController) createALot(
+	ctx 	context.Context,
+	req		CreateAdjacentTablesReq,
+) ([]*ent.AdjacentTable, error) {
+	s, err := a.getSectors(ctx, req.Sectors)
+
+	i, err := a.createOrGetInstitute(ctx, req.Institute)
+	if err != nil {
+		return nil, err
+	}
+
+	d, err := a.createOrGetDirection(ctx, req.Direction)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := a.createOrGetProfile(ctx, req.Profile)
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := a.createOrGetVariant(
+		ctx,
+		i,
+		d,
+		p,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	created, err := a.createAdjacentTables(ctx, s, v)
+	if err != nil {
+		return nil, err
+	}
+
+	return created, nil	
+}
+
+func (a AdjacentTableController) getSectors(ctx context.Context, coords []string) ([]*ent.Sector, error) {
+	s, err := a.Client.Sector.Query().Where(
+		sector.CoordsIn(coords...),
+	).All(ctx)
+
+	if ent.IsNotFound(err) {
+		return nil, ErrSectorNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	return s, nil
+}
+
 // if exist retturn error
 func (a AdjacentTableController) createAdjacentTable(
 	ctx context.Context,
@@ -130,6 +183,46 @@ func (a AdjacentTableController) createAdjacentTable(
 	}
 
 	return a.Client.AdjacentTable.Create().SetSector(s).SetVariant(v).Save(ctx)
+}
+
+// if exist retturn error
+func (a AdjacentTableController) createAdjacentTables(
+	ctx context.Context,
+	s []*ent.Sector,
+	v *ent.Variant,
+) ([]*ent.AdjacentTable, error) {
+	ids := func(s []*ent.Sector) (ids []int) {
+		for _, sect := range s {
+			ids = append(ids, sect.ID)
+		}
+		return ids
+	}(s)
+
+	get, err := a.Client.AdjacentTable.Query().Where(
+		adjacenttable.HasSectorWith(
+			sector.IDIn(ids...),
+		),
+		adjacenttable.HasVariantWith(
+			variant.ID(v.ID),
+		),
+	).All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(get) > 0 {
+		return nil, ErrAdjacentTableExist
+	}
+
+	var bulk []*ent.AdjacentTableCreate
+	{
+		for _, sect := range s {
+			bulk = append(bulk, a.Client.AdjacentTable.Create().SetSector(sect).SetVariant(v))
+		}
+	}
+
+
+	return a.Client.AdjacentTable.CreateBulk(bulk...).Save(ctx)
 }
 
 // Create
@@ -200,6 +293,97 @@ func (a AdjacentTableController) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, CreateAdjacentTableResp{AdjacentTable: model.AdjacentTableFromEnt(get)})
+}
+
+
+type CreateAdjacentTablesReq struct {
+	Sectors 		[]string  `json:"sectors"`
+	CreateVariantReq `json:",inline"`
+}
+
+type CreateAdjacentTablesResp struct {
+	AdjacentTables []AdjacentTable `json:"adjacentTables"`
+}
+
+// Create
+//
+// @Summary Create
+//
+// @Description Create adjacent tables
+// 
+// @Description this method create or institute/profile/direction but require created sector in array
+// 
+// @Descrription also if adjacent table with this sector and variant exist return Bad request
+// 
+// @Description if adjacent table with this sector and variant exist return bad request
+//
+// @Router /v1/adjacenttables [post]
+//
+// @Accept json
+//
+// @Produce json
+//
+// @Param body body adjacenttable.CreateAdjacentTablesReq true "body"
+//
+// @Success 201 {object} adjacenttable.CreateAdjacentTablesResp
+//
+// @Failure 400 {string} srting
+// 
+// @Failure 404 {string} srting
+//
+// @Failure 500 {string} string
+func (a AdjacentTableController) CreateALot(c *gin.Context) {
+	var req CreateAdjacentTablesReq
+	{
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpeted body")
+			c.Abort()
+			return
+		}
+	}
+
+	created, err := a.createALot(c, req)
+	if err == ErrAdjacentTableExist {
+		c.String(http.StatusBadRequest, err.Error())
+		c.Abort()
+		return
+	} else if err == ErrSectorNotFound {
+		c.String(http.StatusNotFound, err.Error())
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("CreateALot", err)).Error("Failed to create adjecent table")
+		c.String(http.StatusInternalServerError, "Failed to create adjecent table")
+		c.Abort()
+		return
+	}
+
+	ids := func(as []*ent.AdjacentTable) (slice []int) {
+		for _, a := range as {
+			slice = append(slice, a.ID)
+		}
+		return slice
+	}(created)
+
+	get, err := a.Client.AdjacentTable.Query().Where(
+		adjacenttable.IDIn(ids...),
+	).
+	WithSector().
+	WithVariant(
+		func(vq *ent.VariantQuery) {
+			vq.WithInsitute().
+			WithDirection().
+			WithProfile()
+		},
+	).All(c)
+	if err != nil {
+		log.WithFields(newLogFields("CreateALot", err)).Error("Failed to create adjecent table")
+		c.String(http.StatusInternalServerError, "Failed to create adjecent table")
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusCreated, CreateAdjacentTablesResp{AdjacentTables: model.AdjacentTablesFromEnt(get)})
 }
 
 func (a AdjacentTableController) createOrGetVariant(

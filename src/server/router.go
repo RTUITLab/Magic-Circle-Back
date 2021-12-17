@@ -45,6 +45,11 @@ func NewRouter(c *Controllers) *gin.Engine {
 		{
 			adjacenttable.POST("", c.AdjacentTable.Create)
 		}
+
+		adjacenttables := v1.Group("/adjacenttables")
+		{
+			adjacenttables.POST("", c.AdjacentTable.CreateALot)
+		}
 	}
 
 	return router
