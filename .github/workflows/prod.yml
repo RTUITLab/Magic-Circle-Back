@@ -1,0 +1,49 @@
+name: Production build
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  SERVICE_NAME: magic-circle_backend
+  IMAGE_NAME: ghcr.io/rtuitlab/magic-circle/backend
+
+jobs:
+  build_push_image:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+    
+      - name: Build image
+        run: docker build . --file Dockerfile-prod --tag $IMAGE_NAME
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          docker tag $IMAGE_NAME $IMAGE_NAME:latest
+          docker tag $IMAGE_NAME $IMAGE_NAME:${{ github.run_number }}
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ github.run_number }}
+
+  update_service:
+    needs: [build_push_image]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update service
+        uses: appleboy/ssh-action@master
+        env:
+          IMAGE: ${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          SERVICE: ${{ env.SERVICE_NAME }}
+        with:
+          host: ${{ secrets.RTUITLAB_MANAGER_VM_HOST }}
+          username: ${{ secrets.RTUITLAB_MANAGER_VM_USERNAME }}
+          key: ${{ secrets.RTUITLAB_MANAGER_VM_SSH_KEY }}
+          envs: IMAGE,SERVICE
+          script: docker service update --image $IMAGE $SERVICE --with-registry-auth
