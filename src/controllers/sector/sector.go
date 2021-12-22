@@ -260,7 +260,7 @@ func (s SectorController) GetAll(c *gin.Context) {
 	{
 		req.InstituteName = c.Query("institute")
 		req.DirectionName = c.Query("direction")
-		req.ProfileName = c.Query("profilew")
+		req.ProfileName = c.Query("profile")
 	}
 
 	log.Infof("%+v", req)

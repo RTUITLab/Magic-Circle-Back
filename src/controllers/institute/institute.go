@@ -118,7 +118,7 @@ func (p InstituteController) DeleteByID(c *gin.Context) {
 		return
 	}
 	
-	if err := p.Client.Direction.DeleteOneID(req.ID).Exec(c); ent.IsNotFound(err) {
+	if err := p.Client.Institute.DeleteOneID(req.ID).Exec(c); ent.IsNotFound(err) {
 		c.String(http.StatusNotFound, "Failed to delete Institute")
 		c.Abort()
 		return
