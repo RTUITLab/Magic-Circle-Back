@@ -1,0 +1,33 @@
+name: Delete packages
+
+on:
+  # Choose what you need or configure new trigger
+
+  # On every push to default branch
+  push:
+    branches:
+      - master
+  # Every day in 13:00
+  schedule:
+    - cron: '0 13 * * *'
+
+env:
+  # Name of your package to delete
+  PACKAGE_NAME: magic-circle/backend
+  # Number of packages you want to keep
+  NUMBER_OF_PACKAGES_TO_KEEP: 2
+  OWNER_NAME: RTUITLab
+
+jobs:
+  delete_packages:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Delete package
+        uses: actions/delete-package-versions@v2
+        with:
+          owner: ${{ env.OWNER_NAME }}
+          package-name: ${{ env.PACKAGE_NAME }}
+          min-versions-to-keep: ${{ env.NUMBER_OF_PACKAGES_TO_KEEP }}
