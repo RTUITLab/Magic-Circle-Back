@@ -112,6 +112,9 @@ func (a AdjacentTableController) createALot(
 	req		CreateAdjacentTablesReq,
 ) ([]*ent.AdjacentTable, error) {
 	s, err := a.getSectors(ctx, req.Sectors)
+	if err != nil {
+		return nil, err
+	}
 
 	i, err := a.createOrGetInstitute(ctx, req.Institute)
 	if err != nil {
