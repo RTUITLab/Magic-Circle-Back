@@ -9,9 +9,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // InstituteUpdate is the builder for updating Institute entities.
@@ -33,19 +33,19 @@ func (iu *InstituteUpdate) SetName(s string) *InstituteUpdate {
 	return iu
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (iu *InstituteUpdate) AddVariantIDs(ids ...int) *InstituteUpdate {
-	iu.mutation.AddVariantIDs(ids...)
+// AddDirectionIDs adds the "Directions" edge to the Direction entity by IDs.
+func (iu *InstituteUpdate) AddDirectionIDs(ids ...int) *InstituteUpdate {
+	iu.mutation.AddDirectionIDs(ids...)
 	return iu
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (iu *InstituteUpdate) AddVariants(v ...*Variant) *InstituteUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// AddDirections adds the "Directions" edges to the Direction entity.
+func (iu *InstituteUpdate) AddDirections(d ...*Direction) *InstituteUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return iu.AddVariantIDs(ids...)
+	return iu.AddDirectionIDs(ids...)
 }
 
 // Mutation returns the InstituteMutation object of the builder.
@@ -53,25 +53,25 @@ func (iu *InstituteUpdate) Mutation() *InstituteMutation {
 	return iu.mutation
 }
 
-// ClearVariants clears all "Variants" edges to the Variant entity.
-func (iu *InstituteUpdate) ClearVariants() *InstituteUpdate {
-	iu.mutation.ClearVariants()
+// ClearDirections clears all "Directions" edges to the Direction entity.
+func (iu *InstituteUpdate) ClearDirections() *InstituteUpdate {
+	iu.mutation.ClearDirections()
 	return iu
 }
 
-// RemoveVariantIDs removes the "Variants" edge to Variant entities by IDs.
-func (iu *InstituteUpdate) RemoveVariantIDs(ids ...int) *InstituteUpdate {
-	iu.mutation.RemoveVariantIDs(ids...)
+// RemoveDirectionIDs removes the "Directions" edge to Direction entities by IDs.
+func (iu *InstituteUpdate) RemoveDirectionIDs(ids ...int) *InstituteUpdate {
+	iu.mutation.RemoveDirectionIDs(ids...)
 	return iu
 }
 
-// RemoveVariants removes "Variants" edges to Variant entities.
-func (iu *InstituteUpdate) RemoveVariants(v ...*Variant) *InstituteUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// RemoveDirections removes "Directions" edges to Direction entities.
+func (iu *InstituteUpdate) RemoveDirections(d ...*Direction) *InstituteUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return iu.RemoveVariantIDs(ids...)
+	return iu.RemoveDirectionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -153,33 +153,33 @@ func (iu *InstituteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: institute.FieldName,
 		})
 	}
-	if iu.mutation.VariantsCleared() {
+	if iu.mutation.DirectionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institute.VariantsTable,
-			Columns: []string{institute.VariantsColumn},
+			Table:   institute.DirectionsTable,
+			Columns: []string{institute.DirectionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iu.mutation.RemovedVariantsIDs(); len(nodes) > 0 && !iu.mutation.VariantsCleared() {
+	if nodes := iu.mutation.RemovedDirectionsIDs(); len(nodes) > 0 && !iu.mutation.DirectionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institute.VariantsTable,
-			Columns: []string{institute.VariantsColumn},
+			Table:   institute.DirectionsTable,
+			Columns: []string{institute.DirectionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}
@@ -188,17 +188,17 @@ func (iu *InstituteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iu.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := iu.mutation.DirectionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institute.VariantsTable,
-			Columns: []string{institute.VariantsColumn},
+			Table:   institute.DirectionsTable,
+			Columns: []string{institute.DirectionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}
@@ -232,19 +232,19 @@ func (iuo *InstituteUpdateOne) SetName(s string) *InstituteUpdateOne {
 	return iuo
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (iuo *InstituteUpdateOne) AddVariantIDs(ids ...int) *InstituteUpdateOne {
-	iuo.mutation.AddVariantIDs(ids...)
+// AddDirectionIDs adds the "Directions" edge to the Direction entity by IDs.
+func (iuo *InstituteUpdateOne) AddDirectionIDs(ids ...int) *InstituteUpdateOne {
+	iuo.mutation.AddDirectionIDs(ids...)
 	return iuo
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (iuo *InstituteUpdateOne) AddVariants(v ...*Variant) *InstituteUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// AddDirections adds the "Directions" edges to the Direction entity.
+func (iuo *InstituteUpdateOne) AddDirections(d ...*Direction) *InstituteUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return iuo.AddVariantIDs(ids...)
+	return iuo.AddDirectionIDs(ids...)
 }
 
 // Mutation returns the InstituteMutation object of the builder.
@@ -252,25 +252,25 @@ func (iuo *InstituteUpdateOne) Mutation() *InstituteMutation {
 	return iuo.mutation
 }
 
-// ClearVariants clears all "Variants" edges to the Variant entity.
-func (iuo *InstituteUpdateOne) ClearVariants() *InstituteUpdateOne {
-	iuo.mutation.ClearVariants()
+// ClearDirections clears all "Directions" edges to the Direction entity.
+func (iuo *InstituteUpdateOne) ClearDirections() *InstituteUpdateOne {
+	iuo.mutation.ClearDirections()
 	return iuo
 }
 
-// RemoveVariantIDs removes the "Variants" edge to Variant entities by IDs.
-func (iuo *InstituteUpdateOne) RemoveVariantIDs(ids ...int) *InstituteUpdateOne {
-	iuo.mutation.RemoveVariantIDs(ids...)
+// RemoveDirectionIDs removes the "Directions" edge to Direction entities by IDs.
+func (iuo *InstituteUpdateOne) RemoveDirectionIDs(ids ...int) *InstituteUpdateOne {
+	iuo.mutation.RemoveDirectionIDs(ids...)
 	return iuo
 }
 
-// RemoveVariants removes "Variants" edges to Variant entities.
-func (iuo *InstituteUpdateOne) RemoveVariants(v ...*Variant) *InstituteUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// RemoveDirections removes "Directions" edges to Direction entities.
+func (iuo *InstituteUpdateOne) RemoveDirections(d ...*Direction) *InstituteUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return iuo.RemoveVariantIDs(ids...)
+	return iuo.RemoveDirectionIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -376,33 +376,33 @@ func (iuo *InstituteUpdateOne) sqlSave(ctx context.Context) (_node *Institute, e
 			Column: institute.FieldName,
 		})
 	}
-	if iuo.mutation.VariantsCleared() {
+	if iuo.mutation.DirectionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institute.VariantsTable,
-			Columns: []string{institute.VariantsColumn},
+			Table:   institute.DirectionsTable,
+			Columns: []string{institute.DirectionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iuo.mutation.RemovedVariantsIDs(); len(nodes) > 0 && !iuo.mutation.VariantsCleared() {
+	if nodes := iuo.mutation.RemovedDirectionsIDs(); len(nodes) > 0 && !iuo.mutation.DirectionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institute.VariantsTable,
-			Columns: []string{institute.VariantsColumn},
+			Table:   institute.DirectionsTable,
+			Columns: []string{institute.DirectionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}
@@ -411,17 +411,17 @@ func (iuo *InstituteUpdateOne) sqlSave(ctx context.Context) (_node *Institute, e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := iuo.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := iuo.mutation.DirectionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institute.VariantsTable,
-			Columns: []string{institute.VariantsColumn},
+			Table:   institute.DirectionsTable,
+			Columns: []string{institute.DirectionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}

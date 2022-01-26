@@ -29,7 +29,6 @@ type hooks struct {
 	Institute     []ent.Hook
 	Profile       []ent.Hook
 	Sector        []ent.Hook
-	Variant       []ent.Hook
 }
 
 // Options applies the options on the config object.

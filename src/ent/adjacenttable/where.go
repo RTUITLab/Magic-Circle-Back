@@ -98,10 +98,10 @@ func SectorID(v int) predicate.AdjacentTable {
 	})
 }
 
-// VariantID applies equality check predicate on the "variant_id" field. It's identical to VariantIDEQ.
-func VariantID(v int) predicate.AdjacentTable {
+// ProfileID applies equality check predicate on the "profile_id" field. It's identical to ProfileIDEQ.
+func ProfileID(v int) predicate.AdjacentTable {
 	return predicate.AdjacentTable(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVariantID), v))
+		s.Where(sql.EQ(s.C(FieldProfileID), v))
 	})
 }
 
@@ -153,22 +153,22 @@ func SectorIDNotIn(vs ...int) predicate.AdjacentTable {
 	})
 }
 
-// VariantIDEQ applies the EQ predicate on the "variant_id" field.
-func VariantIDEQ(v int) predicate.AdjacentTable {
+// ProfileIDEQ applies the EQ predicate on the "profile_id" field.
+func ProfileIDEQ(v int) predicate.AdjacentTable {
 	return predicate.AdjacentTable(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVariantID), v))
+		s.Where(sql.EQ(s.C(FieldProfileID), v))
 	})
 }
 
-// VariantIDNEQ applies the NEQ predicate on the "variant_id" field.
-func VariantIDNEQ(v int) predicate.AdjacentTable {
+// ProfileIDNEQ applies the NEQ predicate on the "profile_id" field.
+func ProfileIDNEQ(v int) predicate.AdjacentTable {
 	return predicate.AdjacentTable(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldVariantID), v))
+		s.Where(sql.NEQ(s.C(FieldProfileID), v))
 	})
 }
 
-// VariantIDIn applies the In predicate on the "variant_id" field.
-func VariantIDIn(vs ...int) predicate.AdjacentTable {
+// ProfileIDIn applies the In predicate on the "profile_id" field.
+func ProfileIDIn(vs ...int) predicate.AdjacentTable {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -180,12 +180,12 @@ func VariantIDIn(vs ...int) predicate.AdjacentTable {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldVariantID), v...))
+		s.Where(sql.In(s.C(FieldProfileID), v...))
 	})
 }
 
-// VariantIDNotIn applies the NotIn predicate on the "variant_id" field.
-func VariantIDNotIn(vs ...int) predicate.AdjacentTable {
+// ProfileIDNotIn applies the NotIn predicate on the "profile_id" field.
+func ProfileIDNotIn(vs ...int) predicate.AdjacentTable {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -197,29 +197,29 @@ func VariantIDNotIn(vs ...int) predicate.AdjacentTable {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldVariantID), v...))
+		s.Where(sql.NotIn(s.C(FieldProfileID), v...))
 	})
 }
 
-// HasVariant applies the HasEdge predicate on the "Variant" edge.
-func HasVariant() predicate.AdjacentTable {
+// HasProfile applies the HasEdge predicate on the "Profile" edge.
+func HasProfile() predicate.AdjacentTable {
 	return predicate.AdjacentTable(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(VariantTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, VariantTable, VariantColumn),
+			sqlgraph.To(ProfileTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasVariantWith applies the HasEdge predicate on the "Variant" edge with a given conditions (other predicates).
-func HasVariantWith(preds ...predicate.Variant) predicate.AdjacentTable {
+// HasProfileWith applies the HasEdge predicate on the "Profile" edge with a given conditions (other predicates).
+func HasProfileWith(preds ...predicate.Profile) predicate.AdjacentTable {
 	return predicate.AdjacentTable(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(VariantInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, VariantTable, VariantColumn),
+			sqlgraph.To(ProfileInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ProfileTable, ProfileColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -8,8 +8,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // AdjacentTable is the model entity for the AdjacentTable schema.
@@ -19,8 +19,8 @@ type AdjacentTable struct {
 	ID int `json:"id,omitempty"`
 	// SectorID holds the value of the "sector_id" field.
 	SectorID int `json:"sector_id,omitempty"`
-	// VariantID holds the value of the "variant_id" field.
-	VariantID int `json:"variant_id,omitempty"`
+	// ProfileID holds the value of the "profile_id" field.
+	ProfileID int `json:"profile_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AdjacentTableQuery when eager-loading is set.
 	Edges AdjacentTableEdges `json:"edges"`
@@ -28,8 +28,8 @@ type AdjacentTable struct {
 
 // AdjacentTableEdges holds the relations/edges for other nodes in the graph.
 type AdjacentTableEdges struct {
-	// Variant holds the value of the Variant edge.
-	Variant *Variant `json:"Variant,omitempty"`
+	// Profile holds the value of the Profile edge.
+	Profile *Profile `json:"Profile,omitempty"`
 	// Sector holds the value of the Sector edge.
 	Sector *Sector `json:"Sector,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -37,18 +37,18 @@ type AdjacentTableEdges struct {
 	loadedTypes [2]bool
 }
 
-// VariantOrErr returns the Variant value or an error if the edge
+// ProfileOrErr returns the Profile value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e AdjacentTableEdges) VariantOrErr() (*Variant, error) {
+func (e AdjacentTableEdges) ProfileOrErr() (*Profile, error) {
 	if e.loadedTypes[0] {
-		if e.Variant == nil {
-			// The edge Variant was loaded in eager-loading,
+		if e.Profile == nil {
+			// The edge Profile was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: variant.Label}
+			return nil, &NotFoundError{label: profile.Label}
 		}
-		return e.Variant, nil
+		return e.Profile, nil
 	}
-	return nil, &NotLoadedError{edge: "Variant"}
+	return nil, &NotLoadedError{edge: "Profile"}
 }
 
 // SectorOrErr returns the Sector value or an error if the edge
@@ -70,7 +70,7 @@ func (*AdjacentTable) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case adjacenttable.FieldID, adjacenttable.FieldSectorID, adjacenttable.FieldVariantID:
+		case adjacenttable.FieldID, adjacenttable.FieldSectorID, adjacenttable.FieldProfileID:
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type AdjacentTable", columns[i])
@@ -99,20 +99,20 @@ func (at *AdjacentTable) assignValues(columns []string, values []interface{}) er
 			} else if value.Valid {
 				at.SectorID = int(value.Int64)
 			}
-		case adjacenttable.FieldVariantID:
+		case adjacenttable.FieldProfileID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field variant_id", values[i])
+				return fmt.Errorf("unexpected type %T for field profile_id", values[i])
 			} else if value.Valid {
-				at.VariantID = int(value.Int64)
+				at.ProfileID = int(value.Int64)
 			}
 		}
 	}
 	return nil
 }
 
-// QueryVariant queries the "Variant" edge of the AdjacentTable entity.
-func (at *AdjacentTable) QueryVariant() *VariantQuery {
-	return (&AdjacentTableClient{config: at.config}).QueryVariant(at)
+// QueryProfile queries the "Profile" edge of the AdjacentTable entity.
+func (at *AdjacentTable) QueryProfile() *ProfileQuery {
+	return (&AdjacentTableClient{config: at.config}).QueryProfile(at)
 }
 
 // QuerySector queries the "Sector" edge of the AdjacentTable entity.
@@ -145,8 +145,8 @@ func (at *AdjacentTable) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", at.ID))
 	builder.WriteString(", sector_id=")
 	builder.WriteString(fmt.Sprintf("%v", at.SectorID))
-	builder.WriteString(", variant_id=")
-	builder.WriteString(fmt.Sprintf("%v", at.VariantID))
+	builder.WriteString(", profile_id=")
+	builder.WriteString(fmt.Sprintf("%v", at.ProfileID))
 	builder.WriteByte(')')
 	return builder.String()
 }

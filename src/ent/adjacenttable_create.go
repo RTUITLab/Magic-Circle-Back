@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // AdjacentTableCreate is the builder for creating a AdjacentTable entity.
@@ -27,15 +27,15 @@ func (atc *AdjacentTableCreate) SetSectorID(i int) *AdjacentTableCreate {
 	return atc
 }
 
-// SetVariantID sets the "variant_id" field.
-func (atc *AdjacentTableCreate) SetVariantID(i int) *AdjacentTableCreate {
-	atc.mutation.SetVariantID(i)
+// SetProfileID sets the "profile_id" field.
+func (atc *AdjacentTableCreate) SetProfileID(i int) *AdjacentTableCreate {
+	atc.mutation.SetProfileID(i)
 	return atc
 }
 
-// SetVariant sets the "Variant" edge to the Variant entity.
-func (atc *AdjacentTableCreate) SetVariant(v *Variant) *AdjacentTableCreate {
-	return atc.SetVariantID(v.ID)
+// SetProfile sets the "Profile" edge to the Profile entity.
+func (atc *AdjacentTableCreate) SetProfile(p *Profile) *AdjacentTableCreate {
+	return atc.SetProfileID(p.ID)
 }
 
 // SetSector sets the "Sector" edge to the Sector entity.
@@ -116,11 +116,11 @@ func (atc *AdjacentTableCreate) check() error {
 	if _, ok := atc.mutation.SectorID(); !ok {
 		return &ValidationError{Name: "sector_id", err: errors.New(`ent: missing required field "sector_id"`)}
 	}
-	if _, ok := atc.mutation.VariantID(); !ok {
-		return &ValidationError{Name: "variant_id", err: errors.New(`ent: missing required field "variant_id"`)}
+	if _, ok := atc.mutation.ProfileID(); !ok {
+		return &ValidationError{Name: "profile_id", err: errors.New(`ent: missing required field "profile_id"`)}
 	}
-	if _, ok := atc.mutation.VariantID(); !ok {
-		return &ValidationError{Name: "Variant", err: errors.New("ent: missing required edge \"Variant\"")}
+	if _, ok := atc.mutation.ProfileID(); !ok {
+		return &ValidationError{Name: "Profile", err: errors.New("ent: missing required edge \"Profile\"")}
 	}
 	if _, ok := atc.mutation.SectorID(); !ok {
 		return &ValidationError{Name: "Sector", err: errors.New("ent: missing required edge \"Sector\"")}
@@ -152,24 +152,24 @@ func (atc *AdjacentTableCreate) createSpec() (*AdjacentTable, *sqlgraph.CreateSp
 			},
 		}
 	)
-	if nodes := atc.mutation.VariantIDs(); len(nodes) > 0 {
+	if nodes := atc.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   adjacenttable.VariantTable,
-			Columns: []string{adjacenttable.VariantColumn},
+			Table:   adjacenttable.ProfileTable,
+			Columns: []string{adjacenttable.ProfileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: profile.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.VariantID = nodes[0]
+		_node.ProfileID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := atc.mutation.SectorIDs(); len(nodes) > 0 {

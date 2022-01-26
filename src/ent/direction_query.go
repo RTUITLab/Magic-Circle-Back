@@ -13,8 +13,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
+	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
 )
 
 // DirectionQuery is the builder for querying Direction entities.
@@ -27,7 +28,8 @@ type DirectionQuery struct {
 	fields     []string
 	predicates []predicate.Direction
 	// eager-loading edges.
-	withVariants *VariantQuery
+	withInstitute *InstituteQuery
+	withProfile   *ProfileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,9 +66,9 @@ func (dq *DirectionQuery) Order(o ...OrderFunc) *DirectionQuery {
 	return dq
 }
 
-// QueryVariants chains the current query on the "Variants" edge.
-func (dq *DirectionQuery) QueryVariants() *VariantQuery {
-	query := &VariantQuery{config: dq.config}
+// QueryInstitute chains the current query on the "Institute" edge.
+func (dq *DirectionQuery) QueryInstitute() *InstituteQuery {
+	query := &InstituteQuery{config: dq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -77,8 +79,30 @@ func (dq *DirectionQuery) QueryVariants() *VariantQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(direction.Table, direction.FieldID, selector),
-			sqlgraph.To(variant.Table, variant.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, direction.VariantsTable, direction.VariantsColumn),
+			sqlgraph.To(institute.Table, institute.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, direction.InstituteTable, direction.InstituteColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryProfile chains the current query on the "Profile" edge.
+func (dq *DirectionQuery) QueryProfile() *ProfileQuery {
+	query := &ProfileQuery{config: dq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(direction.Table, direction.FieldID, selector),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, direction.ProfileTable, direction.ProfileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
 		return fromU, nil
@@ -262,26 +286,38 @@ func (dq *DirectionQuery) Clone() *DirectionQuery {
 		return nil
 	}
 	return &DirectionQuery{
-		config:       dq.config,
-		limit:        dq.limit,
-		offset:       dq.offset,
-		order:        append([]OrderFunc{}, dq.order...),
-		predicates:   append([]predicate.Direction{}, dq.predicates...),
-		withVariants: dq.withVariants.Clone(),
+		config:        dq.config,
+		limit:         dq.limit,
+		offset:        dq.offset,
+		order:         append([]OrderFunc{}, dq.order...),
+		predicates:    append([]predicate.Direction{}, dq.predicates...),
+		withInstitute: dq.withInstitute.Clone(),
+		withProfile:   dq.withProfile.Clone(),
 		// clone intermediate query.
 		sql:  dq.sql.Clone(),
 		path: dq.path,
 	}
 }
 
-// WithVariants tells the query-builder to eager-load the nodes that are connected to
-// the "Variants" edge. The optional arguments are used to configure the query builder of the edge.
-func (dq *DirectionQuery) WithVariants(opts ...func(*VariantQuery)) *DirectionQuery {
-	query := &VariantQuery{config: dq.config}
+// WithInstitute tells the query-builder to eager-load the nodes that are connected to
+// the "Institute" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DirectionQuery) WithInstitute(opts ...func(*InstituteQuery)) *DirectionQuery {
+	query := &InstituteQuery{config: dq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	dq.withVariants = query
+	dq.withInstitute = query
+	return dq
+}
+
+// WithProfile tells the query-builder to eager-load the nodes that are connected to
+// the "Profile" edge. The optional arguments are used to configure the query builder of the edge.
+func (dq *DirectionQuery) WithProfile(opts ...func(*ProfileQuery)) *DirectionQuery {
+	query := &ProfileQuery{config: dq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dq.withProfile = query
 	return dq
 }
 
@@ -350,8 +386,9 @@ func (dq *DirectionQuery) sqlAll(ctx context.Context) ([]*Direction, error) {
 	var (
 		nodes       = []*Direction{}
 		_spec       = dq.querySpec()
-		loadedTypes = [1]bool{
-			dq.withVariants != nil,
+		loadedTypes = [2]bool{
+			dq.withInstitute != nil,
+			dq.withProfile != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -374,16 +411,42 @@ func (dq *DirectionQuery) sqlAll(ctx context.Context) ([]*Direction, error) {
 		return nodes, nil
 	}
 
-	if query := dq.withVariants; query != nil {
+	if query := dq.withInstitute; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Direction)
+		for i := range nodes {
+			fk := nodes[i].InstituteID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(institute.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "institute_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Institute = n
+			}
+		}
+	}
+
+	if query := dq.withProfile; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Direction)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Variants = []*Variant{}
+			nodes[i].Edges.Profile = []*Profile{}
 		}
-		query.Where(predicate.Variant(func(s *sql.Selector) {
-			s.Where(sql.InValues(direction.VariantsColumn, fks...))
+		query.Where(predicate.Profile(func(s *sql.Selector) {
+			s.Where(sql.InValues(direction.ProfileColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
@@ -395,7 +458,7 @@ func (dq *DirectionQuery) sqlAll(ctx context.Context) ([]*Direction, error) {
 			if !ok {
 				return nil, fmt.Errorf(`unexpected foreign-key "direction_id" returned %v for node %v`, fk, n.ID)
 			}
-			node.Edges.Variants = append(node.Edges.Variants, n)
+			node.Edges.Profile = append(node.Edges.Profile, n)
 		}
 	}
 

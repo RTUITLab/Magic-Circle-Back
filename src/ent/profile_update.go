@@ -4,14 +4,16 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // ProfileUpdate is the builder for updating Profile entities.
@@ -33,19 +35,30 @@ func (pu *ProfileUpdate) SetName(s string) *ProfileUpdate {
 	return pu
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (pu *ProfileUpdate) AddVariantIDs(ids ...int) *ProfileUpdate {
-	pu.mutation.AddVariantIDs(ids...)
+// SetDirectionID sets the "direction_id" field.
+func (pu *ProfileUpdate) SetDirectionID(i int) *ProfileUpdate {
+	pu.mutation.SetDirectionID(i)
 	return pu
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (pu *ProfileUpdate) AddVariants(v ...*Variant) *ProfileUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetDirection sets the "Direction" edge to the Direction entity.
+func (pu *ProfileUpdate) SetDirection(d *Direction) *ProfileUpdate {
+	return pu.SetDirectionID(d.ID)
+}
+
+// AddAdjacentTableIDs adds the "AdjacentTables" edge to the AdjacentTable entity by IDs.
+func (pu *ProfileUpdate) AddAdjacentTableIDs(ids ...int) *ProfileUpdate {
+	pu.mutation.AddAdjacentTableIDs(ids...)
+	return pu
+}
+
+// AddAdjacentTables adds the "AdjacentTables" edges to the AdjacentTable entity.
+func (pu *ProfileUpdate) AddAdjacentTables(a ...*AdjacentTable) *ProfileUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return pu.AddVariantIDs(ids...)
+	return pu.AddAdjacentTableIDs(ids...)
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -53,25 +66,31 @@ func (pu *ProfileUpdate) Mutation() *ProfileMutation {
 	return pu.mutation
 }
 
-// ClearVariants clears all "Variants" edges to the Variant entity.
-func (pu *ProfileUpdate) ClearVariants() *ProfileUpdate {
-	pu.mutation.ClearVariants()
+// ClearDirection clears the "Direction" edge to the Direction entity.
+func (pu *ProfileUpdate) ClearDirection() *ProfileUpdate {
+	pu.mutation.ClearDirection()
 	return pu
 }
 
-// RemoveVariantIDs removes the "Variants" edge to Variant entities by IDs.
-func (pu *ProfileUpdate) RemoveVariantIDs(ids ...int) *ProfileUpdate {
-	pu.mutation.RemoveVariantIDs(ids...)
+// ClearAdjacentTables clears all "AdjacentTables" edges to the AdjacentTable entity.
+func (pu *ProfileUpdate) ClearAdjacentTables() *ProfileUpdate {
+	pu.mutation.ClearAdjacentTables()
 	return pu
 }
 
-// RemoveVariants removes "Variants" edges to Variant entities.
-func (pu *ProfileUpdate) RemoveVariants(v ...*Variant) *ProfileUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// RemoveAdjacentTableIDs removes the "AdjacentTables" edge to AdjacentTable entities by IDs.
+func (pu *ProfileUpdate) RemoveAdjacentTableIDs(ids ...int) *ProfileUpdate {
+	pu.mutation.RemoveAdjacentTableIDs(ids...)
+	return pu
+}
+
+// RemoveAdjacentTables removes "AdjacentTables" edges to AdjacentTable entities.
+func (pu *ProfileUpdate) RemoveAdjacentTables(a ...*AdjacentTable) *ProfileUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return pu.RemoveVariantIDs(ids...)
+	return pu.RemoveAdjacentTableIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -81,12 +100,18 @@ func (pu *ProfileUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(pu.hooks) == 0 {
+		if err = pu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = pu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ProfileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = pu.check(); err != nil {
+				return 0, err
 			}
 			pu.mutation = mutation
 			affected, err = pu.sqlSave(ctx)
@@ -128,6 +153,14 @@ func (pu *ProfileUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (pu *ProfileUpdate) check() error {
+	if _, ok := pu.mutation.DirectionID(); pu.mutation.DirectionCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"Direction\"")
+	}
+	return nil
+}
+
 func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -153,33 +186,68 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: profile.FieldName,
 		})
 	}
-	if pu.mutation.VariantsCleared() {
+	if pu.mutation.DirectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profile.VariantsTable,
-			Columns: []string{profile.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   profile.DirectionTable,
+			Columns: []string{profile.DirectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.mutation.RemovedVariantsIDs(); len(nodes) > 0 && !pu.mutation.VariantsCleared() {
+	if nodes := pu.mutation.DirectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profile.VariantsTable,
-			Columns: []string{profile.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   profile.DirectionTable,
+			Columns: []string{profile.DirectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pu.mutation.AdjacentTablesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.AdjacentTablesTable,
+			Columns: []string{profile.AdjacentTablesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: adjacenttable.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedAdjacentTablesIDs(); len(nodes) > 0 && !pu.mutation.AdjacentTablesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.AdjacentTablesTable,
+			Columns: []string{profile.AdjacentTablesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: adjacenttable.FieldID,
 				},
 			},
 		}
@@ -188,17 +256,17 @@ func (pu *ProfileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := pu.mutation.AdjacentTablesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.VariantsTable,
-			Columns: []string{profile.VariantsColumn},
+			Table:   profile.AdjacentTablesTable,
+			Columns: []string{profile.AdjacentTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: adjacenttable.FieldID,
 				},
 			},
 		}
@@ -232,19 +300,30 @@ func (puo *ProfileUpdateOne) SetName(s string) *ProfileUpdateOne {
 	return puo
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (puo *ProfileUpdateOne) AddVariantIDs(ids ...int) *ProfileUpdateOne {
-	puo.mutation.AddVariantIDs(ids...)
+// SetDirectionID sets the "direction_id" field.
+func (puo *ProfileUpdateOne) SetDirectionID(i int) *ProfileUpdateOne {
+	puo.mutation.SetDirectionID(i)
 	return puo
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (puo *ProfileUpdateOne) AddVariants(v ...*Variant) *ProfileUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetDirection sets the "Direction" edge to the Direction entity.
+func (puo *ProfileUpdateOne) SetDirection(d *Direction) *ProfileUpdateOne {
+	return puo.SetDirectionID(d.ID)
+}
+
+// AddAdjacentTableIDs adds the "AdjacentTables" edge to the AdjacentTable entity by IDs.
+func (puo *ProfileUpdateOne) AddAdjacentTableIDs(ids ...int) *ProfileUpdateOne {
+	puo.mutation.AddAdjacentTableIDs(ids...)
+	return puo
+}
+
+// AddAdjacentTables adds the "AdjacentTables" edges to the AdjacentTable entity.
+func (puo *ProfileUpdateOne) AddAdjacentTables(a ...*AdjacentTable) *ProfileUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return puo.AddVariantIDs(ids...)
+	return puo.AddAdjacentTableIDs(ids...)
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -252,25 +331,31 @@ func (puo *ProfileUpdateOne) Mutation() *ProfileMutation {
 	return puo.mutation
 }
 
-// ClearVariants clears all "Variants" edges to the Variant entity.
-func (puo *ProfileUpdateOne) ClearVariants() *ProfileUpdateOne {
-	puo.mutation.ClearVariants()
+// ClearDirection clears the "Direction" edge to the Direction entity.
+func (puo *ProfileUpdateOne) ClearDirection() *ProfileUpdateOne {
+	puo.mutation.ClearDirection()
 	return puo
 }
 
-// RemoveVariantIDs removes the "Variants" edge to Variant entities by IDs.
-func (puo *ProfileUpdateOne) RemoveVariantIDs(ids ...int) *ProfileUpdateOne {
-	puo.mutation.RemoveVariantIDs(ids...)
+// ClearAdjacentTables clears all "AdjacentTables" edges to the AdjacentTable entity.
+func (puo *ProfileUpdateOne) ClearAdjacentTables() *ProfileUpdateOne {
+	puo.mutation.ClearAdjacentTables()
 	return puo
 }
 
-// RemoveVariants removes "Variants" edges to Variant entities.
-func (puo *ProfileUpdateOne) RemoveVariants(v ...*Variant) *ProfileUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// RemoveAdjacentTableIDs removes the "AdjacentTables" edge to AdjacentTable entities by IDs.
+func (puo *ProfileUpdateOne) RemoveAdjacentTableIDs(ids ...int) *ProfileUpdateOne {
+	puo.mutation.RemoveAdjacentTableIDs(ids...)
+	return puo
+}
+
+// RemoveAdjacentTables removes "AdjacentTables" edges to AdjacentTable entities.
+func (puo *ProfileUpdateOne) RemoveAdjacentTables(a ...*AdjacentTable) *ProfileUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return puo.RemoveVariantIDs(ids...)
+	return puo.RemoveAdjacentTableIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -287,12 +372,18 @@ func (puo *ProfileUpdateOne) Save(ctx context.Context) (*Profile, error) {
 		node *Profile
 	)
 	if len(puo.hooks) == 0 {
+		if err = puo.check(); err != nil {
+			return nil, err
+		}
 		node, err = puo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ProfileMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = puo.check(); err != nil {
+				return nil, err
 			}
 			puo.mutation = mutation
 			node, err = puo.sqlSave(ctx)
@@ -332,6 +423,14 @@ func (puo *ProfileUpdateOne) ExecX(ctx context.Context) {
 	if err := puo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (puo *ProfileUpdateOne) check() error {
+	if _, ok := puo.mutation.DirectionID(); puo.mutation.DirectionCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"Direction\"")
+	}
+	return nil
 }
 
 func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err error) {
@@ -376,33 +475,68 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 			Column: profile.FieldName,
 		})
 	}
-	if puo.mutation.VariantsCleared() {
+	if puo.mutation.DirectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profile.VariantsTable,
-			Columns: []string{profile.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   profile.DirectionTable,
+			Columns: []string{profile.DirectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.mutation.RemovedVariantsIDs(); len(nodes) > 0 && !puo.mutation.VariantsCleared() {
+	if nodes := puo.mutation.DirectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profile.VariantsTable,
-			Columns: []string{profile.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   profile.DirectionTable,
+			Columns: []string{profile.DirectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.AdjacentTablesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.AdjacentTablesTable,
+			Columns: []string{profile.AdjacentTablesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: adjacenttable.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedAdjacentTablesIDs(); len(nodes) > 0 && !puo.mutation.AdjacentTablesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.AdjacentTablesTable,
+			Columns: []string{profile.AdjacentTablesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: adjacenttable.FieldID,
 				},
 			},
 		}
@@ -411,17 +545,17 @@ func (puo *ProfileUpdateOne) sqlSave(ctx context.Context) (_node *Profile, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := puo.mutation.AdjacentTablesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   profile.VariantsTable,
-			Columns: []string{profile.VariantsColumn},
+			Table:   profile.AdjacentTablesTable,
+			Columns: []string{profile.AdjacentTablesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: adjacenttable.FieldID,
 				},
 			},
 		}

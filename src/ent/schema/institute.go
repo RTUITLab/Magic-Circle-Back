@@ -16,8 +16,7 @@ type Institute struct {
 // Fields of the Institute.
 func (Institute) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
-			Unique(),
+		field.String("name").Unique(),
 	}
 }
 
@@ -30,6 +29,6 @@ func (Institute) Annotations() []schema.Annotation {
 // Edges of the Institute.
 func (Institute) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("Variants", Variant.Type),
+		edge.To("Directions", Direction.Type),
 	}
 }

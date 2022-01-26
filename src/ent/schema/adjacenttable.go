@@ -18,7 +18,7 @@ type AdjacentTable struct {
 func (AdjacentTable) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("sector_id"),
-		field.Int("variant_id"),
+		field.Int("profile_id"),
 	}
 }
 
@@ -31,10 +31,10 @@ func (AdjacentTable) Annotations() []schema.Annotation {
 // Edges of the AdjacentTable.
 func (AdjacentTable) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("Variant", Variant.Type).
+		edge.From("Profile", Profile.Type).
 			Ref("AdjacentTables").
 			Unique().
-			Field("variant_id").
+			Field("profile_id").
 			Required(),
 		edge.From("Sector", Sector.Type).
 			Ref("AdjacentTables").

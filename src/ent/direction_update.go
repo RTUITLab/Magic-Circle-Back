@@ -4,14 +4,16 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
+	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
 )
 
 // DirectionUpdate is the builder for updating Direction entities.
@@ -33,19 +35,30 @@ func (du *DirectionUpdate) SetName(s string) *DirectionUpdate {
 	return du
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (du *DirectionUpdate) AddVariantIDs(ids ...int) *DirectionUpdate {
-	du.mutation.AddVariantIDs(ids...)
+// SetInstituteID sets the "institute_id" field.
+func (du *DirectionUpdate) SetInstituteID(i int) *DirectionUpdate {
+	du.mutation.SetInstituteID(i)
 	return du
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (du *DirectionUpdate) AddVariants(v ...*Variant) *DirectionUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetInstitute sets the "Institute" edge to the Institute entity.
+func (du *DirectionUpdate) SetInstitute(i *Institute) *DirectionUpdate {
+	return du.SetInstituteID(i.ID)
+}
+
+// AddProfileIDs adds the "Profile" edge to the Profile entity by IDs.
+func (du *DirectionUpdate) AddProfileIDs(ids ...int) *DirectionUpdate {
+	du.mutation.AddProfileIDs(ids...)
+	return du
+}
+
+// AddProfile adds the "Profile" edges to the Profile entity.
+func (du *DirectionUpdate) AddProfile(p ...*Profile) *DirectionUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return du.AddVariantIDs(ids...)
+	return du.AddProfileIDs(ids...)
 }
 
 // Mutation returns the DirectionMutation object of the builder.
@@ -53,25 +66,31 @@ func (du *DirectionUpdate) Mutation() *DirectionMutation {
 	return du.mutation
 }
 
-// ClearVariants clears all "Variants" edges to the Variant entity.
-func (du *DirectionUpdate) ClearVariants() *DirectionUpdate {
-	du.mutation.ClearVariants()
+// ClearInstitute clears the "Institute" edge to the Institute entity.
+func (du *DirectionUpdate) ClearInstitute() *DirectionUpdate {
+	du.mutation.ClearInstitute()
 	return du
 }
 
-// RemoveVariantIDs removes the "Variants" edge to Variant entities by IDs.
-func (du *DirectionUpdate) RemoveVariantIDs(ids ...int) *DirectionUpdate {
-	du.mutation.RemoveVariantIDs(ids...)
+// ClearProfile clears all "Profile" edges to the Profile entity.
+func (du *DirectionUpdate) ClearProfile() *DirectionUpdate {
+	du.mutation.ClearProfile()
 	return du
 }
 
-// RemoveVariants removes "Variants" edges to Variant entities.
-func (du *DirectionUpdate) RemoveVariants(v ...*Variant) *DirectionUpdate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// RemoveProfileIDs removes the "Profile" edge to Profile entities by IDs.
+func (du *DirectionUpdate) RemoveProfileIDs(ids ...int) *DirectionUpdate {
+	du.mutation.RemoveProfileIDs(ids...)
+	return du
+}
+
+// RemoveProfile removes "Profile" edges to Profile entities.
+func (du *DirectionUpdate) RemoveProfile(p ...*Profile) *DirectionUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return du.RemoveVariantIDs(ids...)
+	return du.RemoveProfileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -81,12 +100,18 @@ func (du *DirectionUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(du.hooks) == 0 {
+		if err = du.check(); err != nil {
+			return 0, err
+		}
 		affected, err = du.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*DirectionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = du.check(); err != nil {
+				return 0, err
 			}
 			du.mutation = mutation
 			affected, err = du.sqlSave(ctx)
@@ -128,6 +153,14 @@ func (du *DirectionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (du *DirectionUpdate) check() error {
+	if _, ok := du.mutation.InstituteID(); du.mutation.InstituteCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"Institute\"")
+	}
+	return nil
+}
+
 func (du *DirectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -153,33 +186,68 @@ func (du *DirectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: direction.FieldName,
 		})
 	}
-	if du.mutation.VariantsCleared() {
+	if du.mutation.InstituteCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   direction.VariantsTable,
-			Columns: []string{direction.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   direction.InstituteTable,
+			Columns: []string{direction.InstituteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: institute.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.RemovedVariantsIDs(); len(nodes) > 0 && !du.mutation.VariantsCleared() {
+	if nodes := du.mutation.InstituteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   direction.VariantsTable,
-			Columns: []string{direction.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   direction.InstituteTable,
+			Columns: []string{direction.InstituteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: institute.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if du.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   direction.ProfileTable,
+			Columns: []string{direction.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: profile.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := du.mutation.RemovedProfileIDs(); len(nodes) > 0 && !du.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   direction.ProfileTable,
+			Columns: []string{direction.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: profile.FieldID,
 				},
 			},
 		}
@@ -188,17 +256,17 @@ func (du *DirectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := du.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := du.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   direction.VariantsTable,
-			Columns: []string{direction.VariantsColumn},
+			Table:   direction.ProfileTable,
+			Columns: []string{direction.ProfileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: profile.FieldID,
 				},
 			},
 		}
@@ -232,19 +300,30 @@ func (duo *DirectionUpdateOne) SetName(s string) *DirectionUpdateOne {
 	return duo
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (duo *DirectionUpdateOne) AddVariantIDs(ids ...int) *DirectionUpdateOne {
-	duo.mutation.AddVariantIDs(ids...)
+// SetInstituteID sets the "institute_id" field.
+func (duo *DirectionUpdateOne) SetInstituteID(i int) *DirectionUpdateOne {
+	duo.mutation.SetInstituteID(i)
 	return duo
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (duo *DirectionUpdateOne) AddVariants(v ...*Variant) *DirectionUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetInstitute sets the "Institute" edge to the Institute entity.
+func (duo *DirectionUpdateOne) SetInstitute(i *Institute) *DirectionUpdateOne {
+	return duo.SetInstituteID(i.ID)
+}
+
+// AddProfileIDs adds the "Profile" edge to the Profile entity by IDs.
+func (duo *DirectionUpdateOne) AddProfileIDs(ids ...int) *DirectionUpdateOne {
+	duo.mutation.AddProfileIDs(ids...)
+	return duo
+}
+
+// AddProfile adds the "Profile" edges to the Profile entity.
+func (duo *DirectionUpdateOne) AddProfile(p ...*Profile) *DirectionUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return duo.AddVariantIDs(ids...)
+	return duo.AddProfileIDs(ids...)
 }
 
 // Mutation returns the DirectionMutation object of the builder.
@@ -252,25 +331,31 @@ func (duo *DirectionUpdateOne) Mutation() *DirectionMutation {
 	return duo.mutation
 }
 
-// ClearVariants clears all "Variants" edges to the Variant entity.
-func (duo *DirectionUpdateOne) ClearVariants() *DirectionUpdateOne {
-	duo.mutation.ClearVariants()
+// ClearInstitute clears the "Institute" edge to the Institute entity.
+func (duo *DirectionUpdateOne) ClearInstitute() *DirectionUpdateOne {
+	duo.mutation.ClearInstitute()
 	return duo
 }
 
-// RemoveVariantIDs removes the "Variants" edge to Variant entities by IDs.
-func (duo *DirectionUpdateOne) RemoveVariantIDs(ids ...int) *DirectionUpdateOne {
-	duo.mutation.RemoveVariantIDs(ids...)
+// ClearProfile clears all "Profile" edges to the Profile entity.
+func (duo *DirectionUpdateOne) ClearProfile() *DirectionUpdateOne {
+	duo.mutation.ClearProfile()
 	return duo
 }
 
-// RemoveVariants removes "Variants" edges to Variant entities.
-func (duo *DirectionUpdateOne) RemoveVariants(v ...*Variant) *DirectionUpdateOne {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// RemoveProfileIDs removes the "Profile" edge to Profile entities by IDs.
+func (duo *DirectionUpdateOne) RemoveProfileIDs(ids ...int) *DirectionUpdateOne {
+	duo.mutation.RemoveProfileIDs(ids...)
+	return duo
+}
+
+// RemoveProfile removes "Profile" edges to Profile entities.
+func (duo *DirectionUpdateOne) RemoveProfile(p ...*Profile) *DirectionUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return duo.RemoveVariantIDs(ids...)
+	return duo.RemoveProfileIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -287,12 +372,18 @@ func (duo *DirectionUpdateOne) Save(ctx context.Context) (*Direction, error) {
 		node *Direction
 	)
 	if len(duo.hooks) == 0 {
+		if err = duo.check(); err != nil {
+			return nil, err
+		}
 		node, err = duo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*DirectionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = duo.check(); err != nil {
+				return nil, err
 			}
 			duo.mutation = mutation
 			node, err = duo.sqlSave(ctx)
@@ -332,6 +423,14 @@ func (duo *DirectionUpdateOne) ExecX(ctx context.Context) {
 	if err := duo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (duo *DirectionUpdateOne) check() error {
+	if _, ok := duo.mutation.InstituteID(); duo.mutation.InstituteCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"Institute\"")
+	}
+	return nil
 }
 
 func (duo *DirectionUpdateOne) sqlSave(ctx context.Context) (_node *Direction, err error) {
@@ -376,33 +475,68 @@ func (duo *DirectionUpdateOne) sqlSave(ctx context.Context) (_node *Direction, e
 			Column: direction.FieldName,
 		})
 	}
-	if duo.mutation.VariantsCleared() {
+	if duo.mutation.InstituteCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   direction.VariantsTable,
-			Columns: []string{direction.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   direction.InstituteTable,
+			Columns: []string{direction.InstituteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: institute.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.RemovedVariantsIDs(); len(nodes) > 0 && !duo.mutation.VariantsCleared() {
+	if nodes := duo.mutation.InstituteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   direction.VariantsTable,
-			Columns: []string{direction.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   direction.InstituteTable,
+			Columns: []string{direction.InstituteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: institute.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if duo.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   direction.ProfileTable,
+			Columns: []string{direction.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: profile.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := duo.mutation.RemovedProfileIDs(); len(nodes) > 0 && !duo.mutation.ProfileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   direction.ProfileTable,
+			Columns: []string{direction.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: profile.FieldID,
 				},
 			},
 		}
@@ -411,17 +545,17 @@ func (duo *DirectionUpdateOne) sqlSave(ctx context.Context) (_node *Direction, e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := duo.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := duo.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   direction.VariantsTable,
-			Columns: []string{direction.VariantsColumn},
+			Table:   direction.ProfileTable,
+			Columns: []string{direction.ProfileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: profile.FieldID,
 				},
 			},
 		}

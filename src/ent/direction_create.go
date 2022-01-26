@@ -10,7 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
+	"github.com/0B1t322/Magic-Circle/ent/institute"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
 )
 
 // DirectionCreate is the builder for creating a Direction entity.
@@ -26,19 +27,30 @@ func (dc *DirectionCreate) SetName(s string) *DirectionCreate {
 	return dc
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (dc *DirectionCreate) AddVariantIDs(ids ...int) *DirectionCreate {
-	dc.mutation.AddVariantIDs(ids...)
+// SetInstituteID sets the "institute_id" field.
+func (dc *DirectionCreate) SetInstituteID(i int) *DirectionCreate {
+	dc.mutation.SetInstituteID(i)
 	return dc
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (dc *DirectionCreate) AddVariants(v ...*Variant) *DirectionCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetInstitute sets the "Institute" edge to the Institute entity.
+func (dc *DirectionCreate) SetInstitute(i *Institute) *DirectionCreate {
+	return dc.SetInstituteID(i.ID)
+}
+
+// AddProfileIDs adds the "Profile" edge to the Profile entity by IDs.
+func (dc *DirectionCreate) AddProfileIDs(ids ...int) *DirectionCreate {
+	dc.mutation.AddProfileIDs(ids...)
+	return dc
+}
+
+// AddProfile adds the "Profile" edges to the Profile entity.
+func (dc *DirectionCreate) AddProfile(p ...*Profile) *DirectionCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return dc.AddVariantIDs(ids...)
+	return dc.AddProfileIDs(ids...)
 }
 
 // Mutation returns the DirectionMutation object of the builder.
@@ -114,6 +126,12 @@ func (dc *DirectionCreate) check() error {
 	if _, ok := dc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
+	if _, ok := dc.mutation.InstituteID(); !ok {
+		return &ValidationError{Name: "institute_id", err: errors.New(`ent: missing required field "institute_id"`)}
+	}
+	if _, ok := dc.mutation.InstituteID(); !ok {
+		return &ValidationError{Name: "Institute", err: errors.New("ent: missing required edge \"Institute\"")}
+	}
 	return nil
 }
 
@@ -149,17 +167,37 @@ func (dc *DirectionCreate) createSpec() (*Direction, *sqlgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if nodes := dc.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := dc.mutation.InstituteIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   direction.VariantsTable,
-			Columns: []string{direction.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   direction.InstituteTable,
+			Columns: []string{direction.InstituteColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: institute.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.InstituteID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dc.mutation.ProfileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   direction.ProfileTable,
+			Columns: []string{direction.ProfileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: profile.FieldID,
 				},
 			},
 		}

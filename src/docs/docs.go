@@ -23,16 +23,16 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/adjacenttable": {
+        "/v1/": {
             "post": {
-                "description": "Create adjacent table\nyou can create sector with this method just add description and coords to sector field\nalso you can just add coords fields and they will find sector\nthis endpoint also can get or create institute/profile/direction by name, because all names in this object is unique string\nif adjacent table with this sector and variant exist return bad request",
+                "description": "to create only institute you need to put into body only name of institute according to schema\nto create some relation you need to put to institute id and put into direction name",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Create",
+                "summary": "create institute or direction or profile",
                 "parameters": [
                     {
                         "description": "body",
@@ -40,7 +40,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/adjacenttable.CreateAdjacentTableReq"
+                            "$ref": "#/definitions/root.CreateInstDirProf"
                         }
                     }
                 ],
@@ -48,50 +48,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/adjacenttable.CreateAdjacentTableResp"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/adjacenttables": {
-            "post": {
-                "description": "Create adjacent tables\nthis method create or institute/profile/direction but require created sector in array\nif adjacent table with this sector and variant exist return bad request",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Create",
-                "parameters": [
-                    {
-                        "description": "body",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/adjacenttable.CreateAdjacentTablesReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/adjacenttable.CreateAdjacentTablesResp"
+                            "$ref": "#/definitions/root.CreateInstDirProfResp"
                         }
                     },
                     "400": {
@@ -107,10 +64,47 @@ var doc = `{
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "delete relate between profile and sectors",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/root.DeleteRelateReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": ""
                     }
                 }
             }
@@ -139,6 +133,51 @@ var doc = `{
             }
         },
         "/v1/direction/{id}": {
+            "put": {
+                "description": "update direction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update dirction",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of direction",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/direction.UpdateDirectionReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/direction.UpdateDirectionResp"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            },
             "delete": {
                 "description": "Delete Direction by id",
                 "produces": [
@@ -203,6 +242,51 @@ var doc = `{
             }
         },
         "/v1/institute/{id}": {
+            "put": {
+                "description": "update institute",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update institute",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of institute",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/institute.UpdateInstituteReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/institute.UpdateInstituteResp"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            },
             "delete": {
                 "description": "Delete Institute by id",
                 "produces": [
@@ -267,6 +351,51 @@ var doc = `{
             }
         },
         "/v1/profile/{id}": {
+            "put": {
+                "description": "update profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Update profile",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of profile",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/profile.UpdateProfileReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/profile.UpdateProfileResp"
+                        }
+                    },
+                    "400": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": ""
+                    },
+                    "500": {
+                        "description": ""
+                    }
+                }
+            },
             "delete": {
                 "description": "Delete profile by id",
                 "produces": [
@@ -309,7 +438,7 @@ var doc = `{
         },
         "/v1/sector": {
             "get": {
-                "description": "return all sectors",
+                "description": "return all sectors\nquey params can make a logical predicates for example\nrequest: \"/sectors?instutute=1+2\u0026profile=1\" equal \"WHERE (institute_id=1 and profile_id=1) or institute_id=2\"",
                 "produces": [
                     "application/json"
                 ],
@@ -427,129 +556,43 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "delete sector and all adjacenttables that relate with this sector",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Delete Sector",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id of sector",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
-        "adjacenttable.AdjacentTable": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "sector": {
-                    "$ref": "#/definitions/adjacenttable.Sector"
-                },
-                "variant": {
-                    "$ref": "#/definitions/adjacenttable.Variant"
-                }
-            }
-        },
-        "adjacenttable.CreateAdjacentTableReq": {
-            "type": "object",
-            "properties": {
-                "directionName": {
-                    "type": "string"
-                },
-                "instituteName": {
-                    "type": "string"
-                },
-                "profileName": {
-                    "type": "string"
-                },
-                "sector": {
-                    "$ref": "#/definitions/adjacenttable.CreateSectorReq"
-                }
-            }
-        },
-        "adjacenttable.CreateAdjacentTableResp": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "sector": {
-                    "$ref": "#/definitions/adjacenttable.Sector"
-                },
-                "variant": {
-                    "$ref": "#/definitions/adjacenttable.Variant"
-                }
-            }
-        },
-        "adjacenttable.CreateAdjacentTablesReq": {
-            "type": "object",
-            "properties": {
-                "directionName": {
-                    "type": "string"
-                },
-                "instituteName": {
-                    "type": "string"
-                },
-                "profileName": {
-                    "type": "string"
-                },
-                "sectors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "adjacenttable.CreateAdjacentTablesResp": {
-            "type": "object",
-            "properties": {
-                "adjacentTables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/adjacenttable.AdjacentTable"
-                    }
-                }
-            }
-        },
-        "adjacenttable.CreateSectorReq": {
-            "type": "object",
-            "properties": {
-                "coords": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string",
-                    "x-nullable": true
-                }
-            }
-        },
-        "adjacenttable.Sector": {
-            "type": "object",
-            "properties": {
-                "coords": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "adjacenttable.Variant": {
-            "type": "object",
-            "properties": {
-                "direction": {
-                    "$ref": "#/definitions/variant.Direction"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "institute": {
-                    "$ref": "#/definitions/variant.Institute"
-                },
-                "profile": {
-                    "$ref": "#/definitions/variant.Profile"
-                }
-            }
-        },
         "direction.Direction": {
             "type": "object",
             "properties": {
@@ -558,6 +601,12 @@ var doc = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "profiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/profile.Profile"
+                    }
                 }
             }
         },
@@ -569,6 +618,25 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/direction.Direction"
                     }
+                }
+            }
+        },
+        "direction.UpdateDirectionReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "direction.UpdateDirectionResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -584,6 +652,31 @@ var doc = `{
             }
         },
         "institute.Institute": {
+            "type": "object",
+            "properties": {
+                "directions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/direction.Direction"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "institute.UpdateInstituteReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "institute.UpdateInstituteResp": {
             "type": "object",
             "properties": {
                 "id": {
@@ -613,6 +706,122 @@ var doc = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "profile.UpdateProfileReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "profile.UpdateProfileResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "root.CreateInstDirProf": {
+            "type": "object",
+            "properties": {
+                "direction": {
+                    "$ref": "#/definitions/root.GetOrCreateReq"
+                },
+                "institute": {
+                    "$ref": "#/definitions/root.GetOrCreateReq"
+                },
+                "profile": {
+                    "$ref": "#/definitions/root.GetOrCreateReq"
+                },
+                "sectors": {
+                    "$ref": "#/definitions/root.Sectors"
+                }
+            }
+        },
+        "root.CreateInstDirProfResp": {
+            "type": "object",
+            "properties": {
+                "direction": {
+                    "$ref": "#/definitions/root.CreatedDirection"
+                },
+                "institute": {
+                    "$ref": "#/definitions/root.CreatedInstitute"
+                },
+                "profile": {
+                    "$ref": "#/definitions/root.CreatedProfile"
+                }
+            }
+        },
+        "root.CreatedDirection": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "root.CreatedInstitute": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "root.CreatedProfile": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "root.DeleteRelateReq": {
+            "type": "object",
+            "properties": {
+                "profile_id": {
+                    "type": "integer"
+                },
+                "sectors": {
+                    "$ref": "#/definitions/root.Sectors"
+                }
+            }
+        },
+        "root.GetOrCreateReq": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "root.Sectors": {
+            "type": "object",
+            "properties": {
+                "coords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -659,39 +868,6 @@ var doc = `{
                     "type": "string"
                 },
                 "description": {
-                    "type": "string"
-                }
-            }
-        },
-        "variant.Direction": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "variant.Institute": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "variant.Profile": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
                     "type": "string"
                 }
             }

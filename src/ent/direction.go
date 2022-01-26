@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
+	"github.com/0B1t322/Magic-Circle/ent/institute"
 )
 
 // Direction is the model entity for the Direction schema.
@@ -17,6 +18,8 @@ type Direction struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// InstituteID holds the value of the "institute_id" field.
+	InstituteID int `json:"institute_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the DirectionQuery when eager-loading is set.
 	Edges DirectionEdges `json:"edges"`
@@ -24,20 +27,36 @@ type Direction struct {
 
 // DirectionEdges holds the relations/edges for other nodes in the graph.
 type DirectionEdges struct {
-	// Variants holds the value of the Variants edge.
-	Variants []*Variant `json:"Variants,omitempty"`
+	// Institute holds the value of the Institute edge.
+	Institute *Institute `json:"Institute,omitempty"`
+	// Profile holds the value of the Profile edge.
+	Profile []*Profile `json:"Profile,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
-// VariantsOrErr returns the Variants value or an error if the edge
-// was not loaded in eager-loading.
-func (e DirectionEdges) VariantsOrErr() ([]*Variant, error) {
+// InstituteOrErr returns the Institute value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e DirectionEdges) InstituteOrErr() (*Institute, error) {
 	if e.loadedTypes[0] {
-		return e.Variants, nil
+		if e.Institute == nil {
+			// The edge Institute was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: institute.Label}
+		}
+		return e.Institute, nil
 	}
-	return nil, &NotLoadedError{edge: "Variants"}
+	return nil, &NotLoadedError{edge: "Institute"}
+}
+
+// ProfileOrErr returns the Profile value or an error if the edge
+// was not loaded in eager-loading.
+func (e DirectionEdges) ProfileOrErr() ([]*Profile, error) {
+	if e.loadedTypes[1] {
+		return e.Profile, nil
+	}
+	return nil, &NotLoadedError{edge: "Profile"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -45,7 +64,7 @@ func (*Direction) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case direction.FieldID:
+		case direction.FieldID, direction.FieldInstituteID:
 			values[i] = new(sql.NullInt64)
 		case direction.FieldName:
 			values[i] = new(sql.NullString)
@@ -76,14 +95,25 @@ func (d *Direction) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				d.Name = value.String
 			}
+		case direction.FieldInstituteID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field institute_id", values[i])
+			} else if value.Valid {
+				d.InstituteID = int(value.Int64)
+			}
 		}
 	}
 	return nil
 }
 
-// QueryVariants queries the "Variants" edge of the Direction entity.
-func (d *Direction) QueryVariants() *VariantQuery {
-	return (&DirectionClient{config: d.config}).QueryVariants(d)
+// QueryInstitute queries the "Institute" edge of the Direction entity.
+func (d *Direction) QueryInstitute() *InstituteQuery {
+	return (&DirectionClient{config: d.config}).QueryInstitute(d)
+}
+
+// QueryProfile queries the "Profile" edge of the Direction entity.
+func (d *Direction) QueryProfile() *ProfileQuery {
+	return (&DirectionClient{config: d.config}).QueryProfile(d)
 }
 
 // Update returns a builder for updating this Direction.
@@ -111,6 +141,8 @@ func (d *Direction) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", d.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(d.Name)
+	builder.WriteString(", institute_id=")
+	builder.WriteString(fmt.Sprintf("%v", d.InstituteID))
 	builder.WriteByte(')')
 	return builder.String()
 }

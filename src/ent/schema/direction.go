@@ -16,8 +16,8 @@ type Direction struct {
 // Fields of the Direction.
 func (Direction) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
-			Unique(),
+		field.String("name"),
+		field.Int("institute_id"),
 	}
 }
 
@@ -30,6 +30,11 @@ func (Direction) Annotations() []schema.Annotation {
 // Edges of the Direction.
 func (Direction) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("Variants", Variant.Type),
+		edge.From("Institute", Institute.Type).
+			Ref("Directions").
+			Unique().
+			Field("institute_id").
+			Required(),
+		edge.To("Profile", Profile.Type),
 	}
 }

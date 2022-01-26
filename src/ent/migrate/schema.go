@@ -12,8 +12,8 @@ var (
 	// AdjacentTableColumns holds the columns for the "AdjacentTable" table.
 	AdjacentTableColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "profile_id", Type: field.TypeInt, Nullable: true},
 		{Name: "sector_id", Type: field.TypeInt, Nullable: true},
-		{Name: "variant_id", Type: field.TypeInt, Nullable: true},
 	}
 	// AdjacentTableTable holds the schema information for the "AdjacentTable" table.
 	AdjacentTableTable = &schema.Table{
@@ -22,15 +22,15 @@ var (
 		PrimaryKey: []*schema.Column{AdjacentTableColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "AdjacentTable_Sector_AdjacentTables",
+				Symbol:     "AdjacentTable_Profile_AdjacentTables",
 				Columns:    []*schema.Column{AdjacentTableColumns[1]},
-				RefColumns: []*schema.Column{SectorColumns[0]},
+				RefColumns: []*schema.Column{ProfileColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "AdjacentTable_Variant_AdjacentTables",
+				Symbol:     "AdjacentTable_Sector_AdjacentTables",
 				Columns:    []*schema.Column{AdjacentTableColumns[2]},
-				RefColumns: []*schema.Column{VariantColumns[0]},
+				RefColumns: []*schema.Column{SectorColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -38,13 +38,22 @@ var (
 	// DirectionColumns holds the columns for the "Direction" table.
 	DirectionColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "institute_id", Type: field.TypeInt, Nullable: true},
 	}
 	// DirectionTable holds the schema information for the "Direction" table.
 	DirectionTable = &schema.Table{
 		Name:       "Direction",
 		Columns:    DirectionColumns,
 		PrimaryKey: []*schema.Column{DirectionColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "Direction_Institute_Directions",
+				Columns:    []*schema.Column{DirectionColumns[2]},
+				RefColumns: []*schema.Column{InstituteColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// InstituteColumns holds the columns for the "Institute" table.
 	InstituteColumns = []*schema.Column{
@@ -60,13 +69,22 @@ var (
 	// ProfileColumns holds the columns for the "Profile" table.
 	ProfileColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "direction_id", Type: field.TypeInt, Nullable: true},
 	}
 	// ProfileTable holds the schema information for the "Profile" table.
 	ProfileTable = &schema.Table{
 		Name:       "Profile",
 		Columns:    ProfileColumns,
 		PrimaryKey: []*schema.Column{ProfileColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "Profile_Direction_Profile",
+				Columns:    []*schema.Column{ProfileColumns[2]},
+				RefColumns: []*schema.Column{DirectionColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// SectorColumns holds the columns for the "Sector" table.
 	SectorColumns = []*schema.Column{
@@ -80,39 +98,6 @@ var (
 		Columns:    SectorColumns,
 		PrimaryKey: []*schema.Column{SectorColumns[0]},
 	}
-	// VariantColumns holds the columns for the "Variant" table.
-	VariantColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "direction_id", Type: field.TypeInt, Nullable: true},
-		{Name: "insitute_id", Type: field.TypeInt, Nullable: true},
-		{Name: "profile_id", Type: field.TypeInt, Nullable: true},
-	}
-	// VariantTable holds the schema information for the "Variant" table.
-	VariantTable = &schema.Table{
-		Name:       "Variant",
-		Columns:    VariantColumns,
-		PrimaryKey: []*schema.Column{VariantColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "Variant_Direction_Variants",
-				Columns:    []*schema.Column{VariantColumns[1]},
-				RefColumns: []*schema.Column{DirectionColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "Variant_Institute_Variants",
-				Columns:    []*schema.Column{VariantColumns[2]},
-				RefColumns: []*schema.Column{InstituteColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "Variant_Profile_Variants",
-				Columns:    []*schema.Column{VariantColumns[3]},
-				RefColumns: []*schema.Column{ProfileColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AdjacentTableTable,
@@ -120,32 +105,27 @@ var (
 		InstituteTable,
 		ProfileTable,
 		SectorTable,
-		VariantTable,
 	}
 )
 
 func init() {
-	AdjacentTableTable.ForeignKeys[0].RefTable = SectorTable
-	AdjacentTableTable.ForeignKeys[1].RefTable = VariantTable
+	AdjacentTableTable.ForeignKeys[0].RefTable = ProfileTable
+	AdjacentTableTable.ForeignKeys[1].RefTable = SectorTable
 	AdjacentTableTable.Annotation = &entsql.Annotation{
 		Table: "AdjacentTable",
 	}
+	DirectionTable.ForeignKeys[0].RefTable = InstituteTable
 	DirectionTable.Annotation = &entsql.Annotation{
 		Table: "Direction",
 	}
 	InstituteTable.Annotation = &entsql.Annotation{
 		Table: "Institute",
 	}
+	ProfileTable.ForeignKeys[0].RefTable = DirectionTable
 	ProfileTable.Annotation = &entsql.Annotation{
 		Table: "Profile",
 	}
 	SectorTable.Annotation = &entsql.Annotation{
 		Table: "Sector",
-	}
-	VariantTable.ForeignKeys[0].RefTable = DirectionTable
-	VariantTable.ForeignKeys[1].RefTable = InstituteTable
-	VariantTable.ForeignKeys[2].RefTable = ProfileTable
-	VariantTable.Annotation = &entsql.Annotation{
-		Table: "Variant",
 	}
 }

@@ -9,17 +9,17 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgeVariants holds the string denoting the variants edge name in mutations.
-	EdgeVariants = "Variants"
+	// EdgeDirections holds the string denoting the directions edge name in mutations.
+	EdgeDirections = "Directions"
 	// Table holds the table name of the institute in the database.
 	Table = "Institute"
-	// VariantsTable is the table that holds the Variants relation/edge.
-	VariantsTable = "Variant"
-	// VariantsInverseTable is the table name for the Variant entity.
-	// It exists in this package in order to avoid circular dependency with the "variant" package.
-	VariantsInverseTable = "Variant"
-	// VariantsColumn is the table column denoting the Variants relation/edge.
-	VariantsColumn = "insitute_id"
+	// DirectionsTable is the table that holds the Directions relation/edge.
+	DirectionsTable = "Direction"
+	// DirectionsInverseTable is the table name for the Direction entity.
+	// It exists in this package in order to avoid circular dependency with the "direction" package.
+	DirectionsInverseTable = "Direction"
+	// DirectionsColumn is the table column denoting the Directions relation/edge.
+	DirectionsColumn = "institute_id"
 )
 
 // Columns holds all SQL columns for institute fields.

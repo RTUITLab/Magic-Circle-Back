@@ -1,88 +1,15 @@
 basePath: /api/magic-circle
 definitions:
-  adjacenttable.AdjacentTable:
-    properties:
-      id:
-        type: integer
-      sector:
-        $ref: '#/definitions/adjacenttable.Sector'
-      variant:
-        $ref: '#/definitions/adjacenttable.Variant'
-    type: object
-  adjacenttable.CreateAdjacentTableReq:
-    properties:
-      directionName:
-        type: string
-      instituteName:
-        type: string
-      profileName:
-        type: string
-      sector:
-        $ref: '#/definitions/adjacenttable.CreateSectorReq'
-    type: object
-  adjacenttable.CreateAdjacentTableResp:
-    properties:
-      id:
-        type: integer
-      sector:
-        $ref: '#/definitions/adjacenttable.Sector'
-      variant:
-        $ref: '#/definitions/adjacenttable.Variant'
-    type: object
-  adjacenttable.CreateAdjacentTablesReq:
-    properties:
-      directionName:
-        type: string
-      instituteName:
-        type: string
-      profileName:
-        type: string
-      sectors:
-        items:
-          type: string
-        type: array
-    type: object
-  adjacenttable.CreateAdjacentTablesResp:
-    properties:
-      adjacentTables:
-        items:
-          $ref: '#/definitions/adjacenttable.AdjacentTable'
-        type: array
-    type: object
-  adjacenttable.CreateSectorReq:
-    properties:
-      coords:
-        type: string
-      description:
-        type: string
-        x-nullable: true
-    type: object
-  adjacenttable.Sector:
-    properties:
-      coords:
-        type: string
-      description:
-        type: string
-      id:
-        type: integer
-    type: object
-  adjacenttable.Variant:
-    properties:
-      direction:
-        $ref: '#/definitions/variant.Direction'
-      id:
-        type: integer
-      institute:
-        $ref: '#/definitions/variant.Institute'
-      profile:
-        $ref: '#/definitions/variant.Profile'
-    type: object
   direction.Direction:
     properties:
       id:
         type: integer
       name:
         type: string
+      profiles:
+        items:
+          $ref: '#/definitions/profile.Profile'
+        type: array
     type: object
   direction.GetDirectionsResp:
     properties:
@@ -90,6 +17,18 @@ definitions:
         items:
           $ref: '#/definitions/direction.Direction'
         type: array
+    type: object
+  direction.UpdateDirectionReq:
+    properties:
+      name:
+        type: string
+    type: object
+  direction.UpdateDirectionResp:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   institute.GetInstitutesResp:
     properties:
@@ -99,6 +38,22 @@ definitions:
         type: array
     type: object
   institute.Institute:
+    properties:
+      directions:
+        items:
+          $ref: '#/definitions/direction.Direction'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  institute.UpdateInstituteReq:
+    properties:
+      name:
+        type: string
+    type: object
+  institute.UpdateInstituteResp:
     properties:
       id:
         type: integer
@@ -118,6 +73,80 @@ definitions:
         type: integer
       name:
         type: string
+    type: object
+  profile.UpdateProfileReq:
+    properties:
+      name:
+        type: string
+    type: object
+  profile.UpdateProfileResp:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  root.CreateInstDirProf:
+    properties:
+      direction:
+        $ref: '#/definitions/root.GetOrCreateReq'
+      institute:
+        $ref: '#/definitions/root.GetOrCreateReq'
+      profile:
+        $ref: '#/definitions/root.GetOrCreateReq'
+      sectors:
+        $ref: '#/definitions/root.Sectors'
+    type: object
+  root.CreateInstDirProfResp:
+    properties:
+      direction:
+        $ref: '#/definitions/root.CreatedDirection'
+      institute:
+        $ref: '#/definitions/root.CreatedInstitute'
+      profile:
+        $ref: '#/definitions/root.CreatedProfile'
+    type: object
+  root.CreatedDirection:
+    properties:
+      ID:
+        type: integer
+      name:
+        type: string
+    type: object
+  root.CreatedInstitute:
+    properties:
+      ID:
+        type: integer
+      name:
+        type: string
+    type: object
+  root.CreatedProfile:
+    properties:
+      ID:
+        type: integer
+      name:
+        type: string
+    type: object
+  root.DeleteRelateReq:
+    properties:
+      profile_id:
+        type: integer
+      sectors:
+        $ref: '#/definitions/root.Sectors'
+    type: object
+  root.GetOrCreateReq:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  root.Sectors:
+    properties:
+      coords:
+        items:
+          type: string
+        type: array
     type: object
   sector.CreateSectorReq:
     properties:
@@ -149,88 +178,28 @@ definitions:
       description:
         type: string
     type: object
-  variant.Direction:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
-  variant.Institute:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
-  variant.Profile:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
 info:
   contact: {}
   description: This is a server to get projects from github
   title: Magic-Circle API
   version: "1.0"
 paths:
-  /v1/adjacenttable:
-    post:
+  /v1/:
+    delete:
       consumes:
       - application/json
-      description: |-
-        Create adjacent table
-        you can create sector with this method just add description and coords to sector field
-        also you can just add coords fields and they will find sector
-        this endpoint also can get or create institute/profile/direction by name, because all names in this object is unique string
-        if adjacent table with this sector and variant exist return bad request
       parameters:
       - description: body
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/adjacenttable.CreateAdjacentTableReq'
+          $ref: '#/definitions/root.DeleteRelateReq'
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adjacenttable.CreateAdjacentTableResp'
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Create
-  /v1/adjacenttables:
-    post:
-      consumes:
-      - application/json
-      description: |-
-        Create adjacent tables
-        this method create or institute/profile/direction but require created sector in array
-        if adjacent table with this sector and variant exist return bad request
-      parameters:
-      - description: body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/adjacenttable.CreateAdjacentTablesReq'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/adjacenttable.CreateAdjacentTablesResp'
+        "200":
+          description: ""
         "400":
           description: Bad Request
           schema:
@@ -240,10 +209,39 @@ paths:
           schema:
             type: string
         "500":
-          description: Internal Server Error
+          description: ""
+      summary: delete relate between profile and sectors
+    post:
+      consumes:
+      - application/json
+      description: |-
+        to create only institute you need to put into body only name of institute according to schema
+        to create some relation you need to put to institute id and put into direction name
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/root.CreateInstDirProf'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/root.CreateInstDirProfResp'
+        "400":
+          description: Bad Request
           schema:
             type: string
-      summary: Create
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: ""
+      summary: create institute or direction or profile
   /v1/direction:
     get:
       description: return all directions
@@ -286,6 +284,36 @@ paths:
           schema:
             type: string
       summary: Delete Direction by id
+    put:
+      consumes:
+      - application/json
+      description: update direction
+      parameters:
+      - description: id of direction
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/direction.UpdateDirectionReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/direction.UpdateDirectionResp'
+        "400":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: Update dirction
   /v1/institute:
     get:
       description: return all institutes
@@ -328,6 +356,36 @@ paths:
           schema:
             type: string
       summary: Delete Institute by id
+    put:
+      consumes:
+      - application/json
+      description: update institute
+      parameters:
+      - description: id of institute
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/institute.UpdateInstituteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/institute.UpdateInstituteResp'
+        "400":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: Update institute
   /v1/profile:
     get:
       description: return all profiles
@@ -370,9 +428,42 @@ paths:
           schema:
             type: string
       summary: Delete profile by id
+    put:
+      consumes:
+      - application/json
+      description: update profile
+      parameters:
+      - description: id of profile
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/profile.UpdateProfileReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/profile.UpdateProfileResp'
+        "400":
+          description: ""
+        "404":
+          description: ""
+        "500":
+          description: ""
+      summary: Update profile
   /v1/sector:
     get:
-      description: return all sectors
+      description: |-
+        return all sectors
+        quey params can make a logical predicates for example
+        request: "/sectors?instutute=1+2&profile=1" equal "WHERE (institute_id=1 and profile_id=1) or institute_id=2"
       parameters:
       - description: institute name
         in: query
@@ -424,6 +515,28 @@ paths:
             type: string
       summary: Create Sector
   /v1/sector/{id}:
+    delete:
+      description: delete sector and all adjacenttables that relate with this sector
+      parameters:
+      - description: id of sector
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete Sector
     put:
       consumes:
       - application/json

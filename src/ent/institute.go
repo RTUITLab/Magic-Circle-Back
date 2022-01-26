@@ -24,20 +24,20 @@ type Institute struct {
 
 // InstituteEdges holds the relations/edges for other nodes in the graph.
 type InstituteEdges struct {
-	// Variants holds the value of the Variants edge.
-	Variants []*Variant `json:"Variants,omitempty"`
+	// Directions holds the value of the Directions edge.
+	Directions []*Direction `json:"Directions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// VariantsOrErr returns the Variants value or an error if the edge
+// DirectionsOrErr returns the Directions value or an error if the edge
 // was not loaded in eager-loading.
-func (e InstituteEdges) VariantsOrErr() ([]*Variant, error) {
+func (e InstituteEdges) DirectionsOrErr() ([]*Direction, error) {
 	if e.loadedTypes[0] {
-		return e.Variants, nil
+		return e.Directions, nil
 	}
-	return nil, &NotLoadedError{edge: "Variants"}
+	return nil, &NotLoadedError{edge: "Directions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -81,9 +81,9 @@ func (i *Institute) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryVariants queries the "Variants" edge of the Institute entity.
-func (i *Institute) QueryVariants() *VariantQuery {
-	return (&InstituteClient{config: i.config}).QueryVariants(i)
+// QueryDirections queries the "Directions" edge of the Institute entity.
+func (i *Institute) QueryDirections() *DirectionQuery {
+	return (&InstituteClient{config: i.config}).QueryDirections(i)
 }
 
 // Update returns a builder for updating this Institute.

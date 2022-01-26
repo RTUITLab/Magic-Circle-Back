@@ -2,24 +2,24 @@ package adjacenttable
 
 import (
 	"github.com/0B1t322/Magic-Circle/ent"
+	"github.com/0B1t322/Magic-Circle/models/profile"
 	"github.com/0B1t322/Magic-Circle/models/sector"
-	"github.com/0B1t322/Magic-Circle/models/variant"
 )
 
 type Sector = sector.Sector
-type Variant = variant.Variant
+type Profile = profile.Profile
 
 type AdjacentTable struct {
-	ID          int     `json:"id"`
-	Sector      Sector  `json:"sector"`
-	Variant     Variant `json:"variant"`
+	ID          int     	`json:"id"`
+	Sector      Sector  	`json:"sector"`
+	Profle		Profile		`json:"profile"`
 }
 
 func AdjacentTableFromEnt(a *ent.AdjacentTable) AdjacentTable {
 	return AdjacentTable{
 		ID: a.ID,
 		Sector: sector.NewSector(a.Edges.Sector),
-		Variant: variant.VariantFromEnt(a.Edges.Variant),
+		Profle: profile.ProfileFromEnt(a.Edges.Profile),
 	}
 }
 
