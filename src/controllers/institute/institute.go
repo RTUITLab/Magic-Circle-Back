@@ -125,7 +125,6 @@ func (p InstituteController) DeleteByID(c *gin.Context) {
 		// Pass
 		// Можно удалять мы не нашли профилей
 	} else if !ent.IsNotFound(err) {
-		log.Infof("%+v", insts)
 		c.String(http.StatusBadRequest, "Institute has profiles or directions")
 		c.Abort()
 		return

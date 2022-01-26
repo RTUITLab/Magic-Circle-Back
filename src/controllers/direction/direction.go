@@ -108,11 +108,11 @@ func (p DirectionController) DeleteByID(c *gin.Context) {
 	}
 
 	// Если у направления есть профиль то нельзя удалить
-	if _, err := p.Client.Profile.Query().Where(
+	if profs, err := p.Client.Profile.Query().Where(
 		profile.HasDirectionWith(
 			direction.ID(req.ID),
 		),
-	).All(c); ent.IsNotFound(err) {
+	).All(c); ent.IsNotFound(err) || len(profs) == 0 {
 		// Pass
 		// Можно удалять мы не нашли профилей
 	} else if !ent.IsNotFound(err) {
