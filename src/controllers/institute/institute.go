@@ -116,14 +116,16 @@ func (p InstituteController) DeleteByID(c *gin.Context) {
 		}
 	}
 	// Если у направления есть профиль то нельзя удалить
-	if _, err := p.Client.Institute.Query().Where(
-		institute.Or(
+	if insts, err := p.Client.Institute.Query().Where(
+		institute.And(
 			institute.HasDirections(),
+			institute.ID(req.ID),
 		),
-	).All(c); ent.IsNotFound(err) {
+	).All(c); ent.IsNotFound(err) || len(insts) == 0 {
 		// Pass
 		// Можно удалять мы не нашли профилей
 	} else if !ent.IsNotFound(err) {
+		log.Infof("%+v", insts)
 		c.String(http.StatusBadRequest, "Institute has profiles or directions")
 		c.Abort()
 		return
