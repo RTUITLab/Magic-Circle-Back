@@ -144,6 +144,10 @@ func (r RootController) getOrCreateProfile(
 	prof *GetOrCreateReq,
 	dir *ent.Direction,
 ) (*ent.Profile, error) {
+	if prof == nil {
+		return nil, nil
+	}
+	
 	if prof.ID != nil {
 		get, err := r.Client.Profile.Get(ctx, *prof.ID)
 		if ent.IsNotFound(err) {
