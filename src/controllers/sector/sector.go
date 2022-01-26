@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/0B1t322/Magic-Circle/ent"
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
@@ -12,8 +13,8 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 	. "github.com/0B1t322/Magic-Circle/models/sector"
+	"github.com/0B1t322/Magic-Circle/pkg/queue"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -112,7 +113,7 @@ type UpdateSectorReq struct {
 }
 
 func (s SectorController) update(
-	ctx context.Context, 
+	ctx context.Context,
 	req UpdateSectorReq,
 ) (*ent.Sector, error) {
 	builder := s.Client.Sector.UpdateOneID(req.ID)
@@ -146,7 +147,7 @@ func (s SectorController) update(
 // @Router /v1/sector/{id} [put]
 //
 // @Param id path string true "id of sector"
-// 
+//
 // @Accept json
 //
 // @Produce json
@@ -191,32 +192,90 @@ func (s SectorController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, NewSector(updated))
 }
 
-func (s SectorController) getAll(
-	ctx 	context.Context,
-	req		GetAllSectorsReq,
-	) ([]*ent.Sector, error) {
-	builder := s.Client.Sector.Query()
-	
-	var preds []predicate.Variant
+func buildInstPredicate(instId int) predicate.AdjacentTable {
+	return adjacenttable.HasProfileWith(
+		profile.HasDirectionWith(
+			direction.HasInstituteWith(
+				institute.ID(instId),
+			),
+		),
+	)
+}
+
+func buildDirPredicate(dirId int) predicate.AdjacentTable {
+	return adjacenttable.HasProfileWith(
+		profile.HasDirectionWith(
+			direction.ID(dirId),
+		),
+	)
+}
+
+func buildProfPredicate(profId int) predicate.AdjacentTable {
+	return adjacenttable.HasProfileWith(
+		profile.ID(profId),
+	)
+}
+
+func buildPredicate(inst, prof, dir int) (pred predicate.AdjacentTable) {
+	var preds []predicate.AdjacentTable
 	{
-		if req.DirectionName != "" {
-			preds = append(preds, variant.HasDirectionWith(direction.Name(req.DirectionName)))
+		if inst != -1 {
+			preds = append(preds, buildInstPredicate(inst))
 		}
 
-		if req.InstituteName != "" {
-			preds = append(preds, variant.HasInsituteWith(institute.Name(req.InstituteName)))
+		if prof != -1 {
+			preds = append(preds, buildProfPredicate(prof))
 		}
 
-		if req.ProfileName != "" {
-			preds = append(preds, variant.HasProfileWith(profile.Name(req.ProfileName)))
+		if dir != -1 {
+			preds = append(preds, buildDirPredicate(dir))
 		}
+	}
+
+	return adjacenttable.And(
+		preds...,
+	)
+}
+
+func (s SectorController) getAll(
+	ctx context.Context,
+	req GetAllSectorsReq,
+) ([]*ent.Sector, error) {
+	builder := s.Client.Sector.Query()
+
+	var preds []predicate.AdjacentTable
+	{
+		castFunc := queue.StringQueueToIntQueue(queue.StringQueueToIntOpts{IfNotIntElemIgnore: true})
+		var (
+			insts, _ = castFunc(queue.NewStringQueue(strings.Split(req.InstituteName, " ")))
+			profs, _ = castFunc(queue.NewStringQueue(strings.Split(req.ProfileName, " ")))
+			dirs, _  = castFunc(queue.NewStringQueue(strings.Split(req.DirectionName, " ")))
+		)
+
+		for {
+			inst, errInst := insts.Get()
+			prof, errProf := profs.Get()
+			dirs, errDirs := dirs.Get()
+
+			if errInst == queue.QueueIsEmpty &&
+				errProf == queue.QueueIsEmpty &&
+				errDirs == queue.QueueIsEmpty {
+				break
+			}
+
+			preds = append(
+				preds,
+				buildPredicate(inst, prof, dirs),
+			)
+		}
+
 	}
 
 	if len(preds) > 0 {
 		builder.Where(
 			sector.HasAdjacentTablesWith(
-				adjacenttable.HasVariantWith(
-					preds...
+				adjacenttable.Or(
+					preds...,
 				),
 			),
 		)
@@ -226,15 +285,14 @@ func (s SectorController) getAll(
 }
 
 type GetAllSectorsReq struct {
-	InstituteName		string		`json:"-" query:"institute"`
-	DirectionName		string		`json:"-" query:"direction"`
-	ProfileName			string		`json:"-" query:"profile"`
+	InstituteName string `json:"-" query:"institute"`
+	DirectionName string `json:"-" query:"direction"`
+	ProfileName   string `json:"-" query:"profile"`
 }
 
 type GetAllSectorsResp struct {
-	Sectors []Sector		`json:"sectors"`
+	Sectors []Sector `json:"sectors"`
 }
-
 
 // GetSectors
 //
@@ -242,12 +300,15 @@ type GetAllSectorsResp struct {
 //
 // @Description return all sectors
 //
+// @Description quey params can make a logical predicates for example
+// @Description request: "/sectors?instutute=1+2&profile=1" equal "WHERE (institute_id=1 and profile_id=1) or institute_id=2"
+//
 // @Router /v1/sector [get]
-// 
+//
 // @Param institute query string false "institute name"
-// 
+//
 // @Param direction query string false "direction name"
-// 
+//
 // @Param profile query string false "profile name"
 //
 // @Produce json
@@ -263,15 +324,83 @@ func (s SectorController) GetAll(c *gin.Context) {
 		req.ProfileName = c.Query("profile")
 	}
 
-	log.Infof("%+v", req)
-
 	get, err := s.getAll(c, req)
 	if err != nil {
-		log.WithFields(newLogFields("Update", err)).Error("Failed to get sectors")
+		log.WithFields(newLogFields("GetAll", err)).Error("Failed to get sectors")
 		c.String(http.StatusInternalServerError, "Failed to get sectors")
 		c.Abort()
 		return
 	}
 
 	c.JSON(http.StatusOK, GetAllSectorsResp{Sectors: NewSectors(get)})
+}
+
+type DeleteSectorReq struct {
+	ID int `json:"-" uri:"id"`
+}
+
+func (s SectorController) deleteSector(ctx context.Context, id int) error {
+	// delete all adjecent tables that relate with sector
+	_, err := s.Client.AdjacentTable.Delete().
+			Where(
+				adjacenttable.HasSectorWith(
+					sector.ID(id),
+				),
+			).Exec(ctx)
+	
+	if ent.IsNotFound(err) {
+		// Pass
+	} else if err != nil {
+		return err
+	}
+
+	// Delete sector
+	if err := s.Client.Sector.DeleteOneID(id).Exec(ctx); ent.IsNotFound(err) {
+		return ErrSectorNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteSector
+//
+// @Summary Delete Sector
+//
+// @Description delete sector and all adjacenttables that relate with this sector
+//
+// @Router /v1/sector/{id} [delete]
+//
+// @Param id path string true "id of sector"
+//
+// @Produce json
+//
+// @Success 200
+//
+// @Failure 500 {string} srting
+// 
+// @Failure 404 {string} srting
+func (s SectorController) DeleteSector(c *gin.Context) {
+	var req DeleteSectorReq
+	{
+		if err := c.ShouldBindUri(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+	}
+
+	if err := s.deleteSector(c, req.ID); err == ErrSectorNotFound {
+		c.String(http.StatusNotFound, err.Error())
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("Delete", err)).Error("Failed to delete sector")
+		c.String(http.StatusInternalServerError, "Failed to delete")
+		c.Abort()
+		return
+	}
+
+	c.Status(http.StatusOK)
 }

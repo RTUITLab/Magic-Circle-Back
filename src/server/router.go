@@ -27,29 +27,35 @@ func NewRouter(c *Controllers) *gin.Engine {
 		{
 			profile.GET("", c.Profile.GetAll)
 			profile.DELETE("/:id", c.Profile.DeleteByID)
+			profile.PUT("/:id", c.Profile.UpdateProfile)
 		}
 
 		institute := v1.Group("/institute")
 		{
 			institute.GET("", c.Institute.GetAll)
 			institute.DELETE("/:id", c.Institute.DeleteByID)
+			institute.PUT("/:id", c.Institute.UpdateInstitute)
 		}
 
 		direction := v1.Group("/direction")
 		{
 			direction.GET("", c.Direction.GetAll)
 			direction.DELETE("/:id", c.Direction.DeleteByID)
+			direction.PUT("/:id", c.Direction.UpdateDirection)
 		}
 
-		adjacenttable := v1.Group("/adjacenttable")
-		{
-			adjacenttable.POST("", c.AdjacentTable.Create)
-		}
+		// adjacenttable := v1.Group("/adjacenttable")
+		// {
+		// 	adjacenttable.POST("", c.AdjacentTable.Create)
+		// }
 
-		adjacenttables := v1.Group("/adjacenttables")
-		{
-			adjacenttables.POST("", c.AdjacentTable.CreateALot)
-		}
+		// adjacenttables := v1.Group("/adjacenttables")
+		// {
+		// 	adjacenttables.POST("", c.AdjacentTable.CreateALot)
+		// }
+
+		v1.POST("/", c.Root.CreateInstDirProf)
+		v1.DELETE("/", c.Root.DeleteRelate)
 	}
 
 	return router

@@ -22,8 +22,6 @@ type Tx struct {
 	Profile *ProfileClient
 	// Sector is the client for interacting with the Sector builders.
 	Sector *SectorClient
-	// Variant is the client for interacting with the Variant builders.
-	Variant *VariantClient
 
 	// lazily loaded.
 	client     *Client
@@ -164,7 +162,6 @@ func (tx *Tx) init() {
 	tx.Institute = NewInstituteClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
 	tx.Sector = NewSectorClient(tx.config)
-	tx.Variant = NewVariantClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

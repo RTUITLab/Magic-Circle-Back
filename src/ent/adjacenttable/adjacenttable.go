@@ -9,21 +9,21 @@ const (
 	FieldID = "id"
 	// FieldSectorID holds the string denoting the sector_id field in the database.
 	FieldSectorID = "sector_id"
-	// FieldVariantID holds the string denoting the variant_id field in the database.
-	FieldVariantID = "variant_id"
-	// EdgeVariant holds the string denoting the variant edge name in mutations.
-	EdgeVariant = "Variant"
+	// FieldProfileID holds the string denoting the profile_id field in the database.
+	FieldProfileID = "profile_id"
+	// EdgeProfile holds the string denoting the profile edge name in mutations.
+	EdgeProfile = "Profile"
 	// EdgeSector holds the string denoting the sector edge name in mutations.
 	EdgeSector = "Sector"
 	// Table holds the table name of the adjacenttable in the database.
 	Table = "AdjacentTable"
-	// VariantTable is the table that holds the Variant relation/edge.
-	VariantTable = "AdjacentTable"
-	// VariantInverseTable is the table name for the Variant entity.
-	// It exists in this package in order to avoid circular dependency with the "variant" package.
-	VariantInverseTable = "Variant"
-	// VariantColumn is the table column denoting the Variant relation/edge.
-	VariantColumn = "variant_id"
+	// ProfileTable is the table that holds the Profile relation/edge.
+	ProfileTable = "AdjacentTable"
+	// ProfileInverseTable is the table name for the Profile entity.
+	// It exists in this package in order to avoid circular dependency with the "profile" package.
+	ProfileInverseTable = "Profile"
+	// ProfileColumn is the table column denoting the Profile relation/edge.
+	ProfileColumn = "profile_id"
 	// SectorTable is the table that holds the Sector relation/edge.
 	SectorTable = "AdjacentTable"
 	// SectorInverseTable is the table name for the Sector entity.
@@ -37,7 +37,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldSectorID,
-	FieldVariantID,
+	FieldProfileID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

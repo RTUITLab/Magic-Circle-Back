@@ -9,23 +9,35 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgeVariants holds the string denoting the variants edge name in mutations.
-	EdgeVariants = "Variants"
+	// FieldDirectionID holds the string denoting the direction_id field in the database.
+	FieldDirectionID = "direction_id"
+	// EdgeDirection holds the string denoting the direction edge name in mutations.
+	EdgeDirection = "Direction"
+	// EdgeAdjacentTables holds the string denoting the adjacenttables edge name in mutations.
+	EdgeAdjacentTables = "AdjacentTables"
 	// Table holds the table name of the profile in the database.
 	Table = "Profile"
-	// VariantsTable is the table that holds the Variants relation/edge.
-	VariantsTable = "Variant"
-	// VariantsInverseTable is the table name for the Variant entity.
-	// It exists in this package in order to avoid circular dependency with the "variant" package.
-	VariantsInverseTable = "Variant"
-	// VariantsColumn is the table column denoting the Variants relation/edge.
-	VariantsColumn = "profile_id"
+	// DirectionTable is the table that holds the Direction relation/edge.
+	DirectionTable = "Profile"
+	// DirectionInverseTable is the table name for the Direction entity.
+	// It exists in this package in order to avoid circular dependency with the "direction" package.
+	DirectionInverseTable = "Direction"
+	// DirectionColumn is the table column denoting the Direction relation/edge.
+	DirectionColumn = "direction_id"
+	// AdjacentTablesTable is the table that holds the AdjacentTables relation/edge.
+	AdjacentTablesTable = "AdjacentTable"
+	// AdjacentTablesInverseTable is the table name for the AdjacentTable entity.
+	// It exists in this package in order to avoid circular dependency with the "adjacenttable" package.
+	AdjacentTablesInverseTable = "AdjacentTable"
+	// AdjacentTablesColumn is the table column denoting the AdjacentTables relation/edge.
+	AdjacentTablesColumn = "profile_id"
 )
 
 // Columns holds all SQL columns for profile fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldDirectionID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -16,15 +16,20 @@ type Profile struct {
 // Fields of the Profile.
 func (Profile) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").
-			Unique(),
+		field.String("name"),
+		field.Int("direction_id"),
 	}
 }
 
 // Edges of the Profile.
 func (Profile) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("Variants", Variant.Type),
+		edge.From("Direction", Direction.Type).
+			Ref("Profile").
+			Unique().
+			Field("direction_id").
+			Required(),
+		edge.To("AdjacentTables", AdjacentTable.Type),
 	}
 }
 

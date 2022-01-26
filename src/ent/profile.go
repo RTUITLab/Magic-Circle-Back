@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 )
 
@@ -17,6 +18,8 @@ type Profile struct {
 	ID int `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// DirectionID holds the value of the "direction_id" field.
+	DirectionID int `json:"direction_id,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ProfileQuery when eager-loading is set.
 	Edges ProfileEdges `json:"edges"`
@@ -24,20 +27,36 @@ type Profile struct {
 
 // ProfileEdges holds the relations/edges for other nodes in the graph.
 type ProfileEdges struct {
-	// Variants holds the value of the Variants edge.
-	Variants []*Variant `json:"Variants,omitempty"`
+	// Direction holds the value of the Direction edge.
+	Direction *Direction `json:"Direction,omitempty"`
+	// AdjacentTables holds the value of the AdjacentTables edge.
+	AdjacentTables []*AdjacentTable `json:"AdjacentTables,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
-// VariantsOrErr returns the Variants value or an error if the edge
-// was not loaded in eager-loading.
-func (e ProfileEdges) VariantsOrErr() ([]*Variant, error) {
+// DirectionOrErr returns the Direction value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ProfileEdges) DirectionOrErr() (*Direction, error) {
 	if e.loadedTypes[0] {
-		return e.Variants, nil
+		if e.Direction == nil {
+			// The edge Direction was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: direction.Label}
+		}
+		return e.Direction, nil
 	}
-	return nil, &NotLoadedError{edge: "Variants"}
+	return nil, &NotLoadedError{edge: "Direction"}
+}
+
+// AdjacentTablesOrErr returns the AdjacentTables value or an error if the edge
+// was not loaded in eager-loading.
+func (e ProfileEdges) AdjacentTablesOrErr() ([]*AdjacentTable, error) {
+	if e.loadedTypes[1] {
+		return e.AdjacentTables, nil
+	}
+	return nil, &NotLoadedError{edge: "AdjacentTables"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -45,7 +64,7 @@ func (*Profile) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case profile.FieldID:
+		case profile.FieldID, profile.FieldDirectionID:
 			values[i] = new(sql.NullInt64)
 		case profile.FieldName:
 			values[i] = new(sql.NullString)
@@ -76,14 +95,25 @@ func (pr *Profile) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				pr.Name = value.String
 			}
+		case profile.FieldDirectionID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field direction_id", values[i])
+			} else if value.Valid {
+				pr.DirectionID = int(value.Int64)
+			}
 		}
 	}
 	return nil
 }
 
-// QueryVariants queries the "Variants" edge of the Profile entity.
-func (pr *Profile) QueryVariants() *VariantQuery {
-	return (&ProfileClient{config: pr.config}).QueryVariants(pr)
+// QueryDirection queries the "Direction" edge of the Profile entity.
+func (pr *Profile) QueryDirection() *DirectionQuery {
+	return (&ProfileClient{config: pr.config}).QueryDirection(pr)
+}
+
+// QueryAdjacentTables queries the "AdjacentTables" edge of the Profile entity.
+func (pr *Profile) QueryAdjacentTables() *AdjacentTableQuery {
+	return (&ProfileClient{config: pr.config}).QueryAdjacentTables(pr)
 }
 
 // Update returns a builder for updating this Profile.
@@ -111,6 +141,8 @@ func (pr *Profile) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(pr.Name)
+	builder.WriteString(", direction_id=")
+	builder.WriteString(fmt.Sprintf("%v", pr.DirectionID))
 	builder.WriteByte(')')
 	return builder.String()
 }

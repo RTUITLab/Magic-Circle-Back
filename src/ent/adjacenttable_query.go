@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // AdjacentTableQuery is the builder for querying AdjacentTable entities.
@@ -27,7 +27,7 @@ type AdjacentTableQuery struct {
 	fields     []string
 	predicates []predicate.AdjacentTable
 	// eager-loading edges.
-	withVariant *VariantQuery
+	withProfile *ProfileQuery
 	withSector  *SectorQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -65,9 +65,9 @@ func (atq *AdjacentTableQuery) Order(o ...OrderFunc) *AdjacentTableQuery {
 	return atq
 }
 
-// QueryVariant chains the current query on the "Variant" edge.
-func (atq *AdjacentTableQuery) QueryVariant() *VariantQuery {
-	query := &VariantQuery{config: atq.config}
+// QueryProfile chains the current query on the "Profile" edge.
+func (atq *AdjacentTableQuery) QueryProfile() *ProfileQuery {
+	query := &ProfileQuery{config: atq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := atq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,8 +78,8 @@ func (atq *AdjacentTableQuery) QueryVariant() *VariantQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(adjacenttable.Table, adjacenttable.FieldID, selector),
-			sqlgraph.To(variant.Table, variant.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, adjacenttable.VariantTable, adjacenttable.VariantColumn),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, adjacenttable.ProfileTable, adjacenttable.ProfileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(atq.driver.Dialect(), step)
 		return fromU, nil
@@ -290,7 +290,7 @@ func (atq *AdjacentTableQuery) Clone() *AdjacentTableQuery {
 		offset:      atq.offset,
 		order:       append([]OrderFunc{}, atq.order...),
 		predicates:  append([]predicate.AdjacentTable{}, atq.predicates...),
-		withVariant: atq.withVariant.Clone(),
+		withProfile: atq.withProfile.Clone(),
 		withSector:  atq.withSector.Clone(),
 		// clone intermediate query.
 		sql:  atq.sql.Clone(),
@@ -298,14 +298,14 @@ func (atq *AdjacentTableQuery) Clone() *AdjacentTableQuery {
 	}
 }
 
-// WithVariant tells the query-builder to eager-load the nodes that are connected to
-// the "Variant" edge. The optional arguments are used to configure the query builder of the edge.
-func (atq *AdjacentTableQuery) WithVariant(opts ...func(*VariantQuery)) *AdjacentTableQuery {
-	query := &VariantQuery{config: atq.config}
+// WithProfile tells the query-builder to eager-load the nodes that are connected to
+// the "Profile" edge. The optional arguments are used to configure the query builder of the edge.
+func (atq *AdjacentTableQuery) WithProfile(opts ...func(*ProfileQuery)) *AdjacentTableQuery {
+	query := &ProfileQuery{config: atq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	atq.withVariant = query
+	atq.withProfile = query
 	return atq
 }
 
@@ -386,7 +386,7 @@ func (atq *AdjacentTableQuery) sqlAll(ctx context.Context) ([]*AdjacentTable, er
 		nodes       = []*AdjacentTable{}
 		_spec       = atq.querySpec()
 		loadedTypes = [2]bool{
-			atq.withVariant != nil,
+			atq.withProfile != nil,
 			atq.withSector != nil,
 		}
 	)
@@ -410,17 +410,17 @@ func (atq *AdjacentTableQuery) sqlAll(ctx context.Context) ([]*AdjacentTable, er
 		return nodes, nil
 	}
 
-	if query := atq.withVariant; query != nil {
+	if query := atq.withProfile; query != nil {
 		ids := make([]int, 0, len(nodes))
 		nodeids := make(map[int][]*AdjacentTable)
 		for i := range nodes {
-			fk := nodes[i].VariantID
+			fk := nodes[i].ProfileID
 			if _, ok := nodeids[fk]; !ok {
 				ids = append(ids, fk)
 			}
 			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.Where(variant.IDIn(ids...))
+		query.Where(profile.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -428,10 +428,10 @@ func (atq *AdjacentTableQuery) sqlAll(ctx context.Context) ([]*AdjacentTable, er
 		for _, n := range neighbors {
 			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "variant_id" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "profile_id" returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Variant = n
+				nodes[i].Edges.Profile = n
 			}
 		}
 	}

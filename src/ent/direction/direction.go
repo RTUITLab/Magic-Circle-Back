@@ -9,23 +9,35 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgeVariants holds the string denoting the variants edge name in mutations.
-	EdgeVariants = "Variants"
+	// FieldInstituteID holds the string denoting the institute_id field in the database.
+	FieldInstituteID = "institute_id"
+	// EdgeInstitute holds the string denoting the institute edge name in mutations.
+	EdgeInstitute = "Institute"
+	// EdgeProfile holds the string denoting the profile edge name in mutations.
+	EdgeProfile = "Profile"
 	// Table holds the table name of the direction in the database.
 	Table = "Direction"
-	// VariantsTable is the table that holds the Variants relation/edge.
-	VariantsTable = "Variant"
-	// VariantsInverseTable is the table name for the Variant entity.
-	// It exists in this package in order to avoid circular dependency with the "variant" package.
-	VariantsInverseTable = "Variant"
-	// VariantsColumn is the table column denoting the Variants relation/edge.
-	VariantsColumn = "direction_id"
+	// InstituteTable is the table that holds the Institute relation/edge.
+	InstituteTable = "Direction"
+	// InstituteInverseTable is the table name for the Institute entity.
+	// It exists in this package in order to avoid circular dependency with the "institute" package.
+	InstituteInverseTable = "Institute"
+	// InstituteColumn is the table column denoting the Institute relation/edge.
+	InstituteColumn = "institute_id"
+	// ProfileTable is the table that holds the Profile relation/edge.
+	ProfileTable = "Profile"
+	// ProfileInverseTable is the table name for the Profile entity.
+	// It exists in this package in order to avoid circular dependency with the "profile" package.
+	ProfileInverseTable = "Profile"
+	// ProfileColumn is the table column denoting the Profile relation/edge.
+	ProfileColumn = "direction_id"
 )
 
 // Columns holds all SQL columns for direction fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldInstituteID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -20,6 +20,3 @@ type Profile func(*sql.Selector)
 
 // Sector is the predicate function for sector builders.
 type Sector func(*sql.Selector)
-
-// Variant is the predicate function for variant builders.
-type Variant func(*sql.Selector)

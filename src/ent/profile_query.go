@@ -12,9 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // ProfileQuery is the builder for querying Profile entities.
@@ -27,7 +28,8 @@ type ProfileQuery struct {
 	fields     []string
 	predicates []predicate.Profile
 	// eager-loading edges.
-	withVariants *VariantQuery
+	withDirection      *DirectionQuery
+	withAdjacentTables *AdjacentTableQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,9 +66,9 @@ func (pq *ProfileQuery) Order(o ...OrderFunc) *ProfileQuery {
 	return pq
 }
 
-// QueryVariants chains the current query on the "Variants" edge.
-func (pq *ProfileQuery) QueryVariants() *VariantQuery {
-	query := &VariantQuery{config: pq.config}
+// QueryDirection chains the current query on the "Direction" edge.
+func (pq *ProfileQuery) QueryDirection() *DirectionQuery {
+	query := &DirectionQuery{config: pq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -77,8 +79,30 @@ func (pq *ProfileQuery) QueryVariants() *VariantQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(profile.Table, profile.FieldID, selector),
-			sqlgraph.To(variant.Table, variant.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, profile.VariantsTable, profile.VariantsColumn),
+			sqlgraph.To(direction.Table, direction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, profile.DirectionTable, profile.DirectionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAdjacentTables chains the current query on the "AdjacentTables" edge.
+func (pq *ProfileQuery) QueryAdjacentTables() *AdjacentTableQuery {
+	query := &AdjacentTableQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, selector),
+			sqlgraph.To(adjacenttable.Table, adjacenttable.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.AdjacentTablesTable, profile.AdjacentTablesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -262,26 +286,38 @@ func (pq *ProfileQuery) Clone() *ProfileQuery {
 		return nil
 	}
 	return &ProfileQuery{
-		config:       pq.config,
-		limit:        pq.limit,
-		offset:       pq.offset,
-		order:        append([]OrderFunc{}, pq.order...),
-		predicates:   append([]predicate.Profile{}, pq.predicates...),
-		withVariants: pq.withVariants.Clone(),
+		config:             pq.config,
+		limit:              pq.limit,
+		offset:             pq.offset,
+		order:              append([]OrderFunc{}, pq.order...),
+		predicates:         append([]predicate.Profile{}, pq.predicates...),
+		withDirection:      pq.withDirection.Clone(),
+		withAdjacentTables: pq.withAdjacentTables.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
 	}
 }
 
-// WithVariants tells the query-builder to eager-load the nodes that are connected to
-// the "Variants" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *ProfileQuery) WithVariants(opts ...func(*VariantQuery)) *ProfileQuery {
-	query := &VariantQuery{config: pq.config}
+// WithDirection tells the query-builder to eager-load the nodes that are connected to
+// the "Direction" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProfileQuery) WithDirection(opts ...func(*DirectionQuery)) *ProfileQuery {
+	query := &DirectionQuery{config: pq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withVariants = query
+	pq.withDirection = query
+	return pq
+}
+
+// WithAdjacentTables tells the query-builder to eager-load the nodes that are connected to
+// the "AdjacentTables" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProfileQuery) WithAdjacentTables(opts ...func(*AdjacentTableQuery)) *ProfileQuery {
+	query := &AdjacentTableQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withAdjacentTables = query
 	return pq
 }
 
@@ -350,8 +386,9 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 	var (
 		nodes       = []*Profile{}
 		_spec       = pq.querySpec()
-		loadedTypes = [1]bool{
-			pq.withVariants != nil,
+		loadedTypes = [2]bool{
+			pq.withDirection != nil,
+			pq.withAdjacentTables != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -374,16 +411,42 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 		return nodes, nil
 	}
 
-	if query := pq.withVariants; query != nil {
+	if query := pq.withDirection; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Profile)
+		for i := range nodes {
+			fk := nodes[i].DirectionID
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(direction.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "direction_id" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Direction = n
+			}
+		}
+	}
+
+	if query := pq.withAdjacentTables; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Profile)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Variants = []*Variant{}
+			nodes[i].Edges.AdjacentTables = []*AdjacentTable{}
 		}
-		query.Where(predicate.Variant(func(s *sql.Selector) {
-			s.Where(sql.InValues(profile.VariantsColumn, fks...))
+		query.Where(predicate.AdjacentTable(func(s *sql.Selector) {
+			s.Where(sql.InValues(profile.AdjacentTablesColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
@@ -395,7 +458,7 @@ func (pq *ProfileQuery) sqlAll(ctx context.Context) ([]*Profile, error) {
 			if !ok {
 				return nil, fmt.Errorf(`unexpected foreign-key "profile_id" returned %v for node %v`, fk, n.ID)
 			}
-			node.Edges.Variants = append(node.Edges.Variants, n)
+			node.Edges.AdjacentTables = append(node.Edges.AdjacentTables, n)
 		}
 	}
 

@@ -13,7 +13,6 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 
 	"entgo.io/ent"
 )
@@ -32,7 +31,6 @@ const (
 	TypeInstitute     = "Institute"
 	TypeProfile       = "Profile"
 	TypeSector        = "Sector"
-	TypeVariant       = "Variant"
 )
 
 // AdjacentTableMutation represents an operation that mutates the AdjacentTable nodes in the graph.
@@ -42,8 +40,8 @@ type AdjacentTableMutation struct {
 	typ             string
 	id              *int
 	clearedFields   map[string]struct{}
-	_Variant        *int
-	cleared_Variant bool
+	_Profile        *int
+	cleared_Profile bool
 	_Sector         *int
 	cleared_Sector  bool
 	done            bool
@@ -166,66 +164,66 @@ func (m *AdjacentTableMutation) ResetSectorID() {
 	m._Sector = nil
 }
 
-// SetVariantID sets the "variant_id" field.
-func (m *AdjacentTableMutation) SetVariantID(i int) {
-	m._Variant = &i
+// SetProfileID sets the "profile_id" field.
+func (m *AdjacentTableMutation) SetProfileID(i int) {
+	m._Profile = &i
 }
 
-// VariantID returns the value of the "variant_id" field in the mutation.
-func (m *AdjacentTableMutation) VariantID() (r int, exists bool) {
-	v := m._Variant
+// ProfileID returns the value of the "profile_id" field in the mutation.
+func (m *AdjacentTableMutation) ProfileID() (r int, exists bool) {
+	v := m._Profile
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldVariantID returns the old "variant_id" field's value of the AdjacentTable entity.
+// OldProfileID returns the old "profile_id" field's value of the AdjacentTable entity.
 // If the AdjacentTable object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AdjacentTableMutation) OldVariantID(ctx context.Context) (v int, err error) {
+func (m *AdjacentTableMutation) OldProfileID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldVariantID is only allowed on UpdateOne operations")
+		return v, fmt.Errorf("OldProfileID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldVariantID requires an ID field in the mutation")
+		return v, fmt.Errorf("OldProfileID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVariantID: %w", err)
+		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
 	}
-	return oldValue.VariantID, nil
+	return oldValue.ProfileID, nil
 }
 
-// ResetVariantID resets all changes to the "variant_id" field.
-func (m *AdjacentTableMutation) ResetVariantID() {
-	m._Variant = nil
+// ResetProfileID resets all changes to the "profile_id" field.
+func (m *AdjacentTableMutation) ResetProfileID() {
+	m._Profile = nil
 }
 
-// ClearVariant clears the "Variant" edge to the Variant entity.
-func (m *AdjacentTableMutation) ClearVariant() {
-	m.cleared_Variant = true
+// ClearProfile clears the "Profile" edge to the Profile entity.
+func (m *AdjacentTableMutation) ClearProfile() {
+	m.cleared_Profile = true
 }
 
-// VariantCleared reports if the "Variant" edge to the Variant entity was cleared.
-func (m *AdjacentTableMutation) VariantCleared() bool {
-	return m.cleared_Variant
+// ProfileCleared reports if the "Profile" edge to the Profile entity was cleared.
+func (m *AdjacentTableMutation) ProfileCleared() bool {
+	return m.cleared_Profile
 }
 
-// VariantIDs returns the "Variant" edge IDs in the mutation.
+// ProfileIDs returns the "Profile" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// VariantID instead. It exists only for internal usage by the builders.
-func (m *AdjacentTableMutation) VariantIDs() (ids []int) {
-	if id := m._Variant; id != nil {
+// ProfileID instead. It exists only for internal usage by the builders.
+func (m *AdjacentTableMutation) ProfileIDs() (ids []int) {
+	if id := m._Profile; id != nil {
 		ids = append(ids, *id)
 	}
 	return
 }
 
-// ResetVariant resets all changes to the "Variant" edge.
-func (m *AdjacentTableMutation) ResetVariant() {
-	m._Variant = nil
-	m.cleared_Variant = false
+// ResetProfile resets all changes to the "Profile" edge.
+func (m *AdjacentTableMutation) ResetProfile() {
+	m._Profile = nil
+	m.cleared_Profile = false
 }
 
 // ClearSector clears the "Sector" edge to the Sector entity.
@@ -277,8 +275,8 @@ func (m *AdjacentTableMutation) Fields() []string {
 	if m._Sector != nil {
 		fields = append(fields, adjacenttable.FieldSectorID)
 	}
-	if m._Variant != nil {
-		fields = append(fields, adjacenttable.FieldVariantID)
+	if m._Profile != nil {
+		fields = append(fields, adjacenttable.FieldProfileID)
 	}
 	return fields
 }
@@ -290,8 +288,8 @@ func (m *AdjacentTableMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case adjacenttable.FieldSectorID:
 		return m.SectorID()
-	case adjacenttable.FieldVariantID:
-		return m.VariantID()
+	case adjacenttable.FieldProfileID:
+		return m.ProfileID()
 	}
 	return nil, false
 }
@@ -303,8 +301,8 @@ func (m *AdjacentTableMutation) OldField(ctx context.Context, name string) (ent.
 	switch name {
 	case adjacenttable.FieldSectorID:
 		return m.OldSectorID(ctx)
-	case adjacenttable.FieldVariantID:
-		return m.OldVariantID(ctx)
+	case adjacenttable.FieldProfileID:
+		return m.OldProfileID(ctx)
 	}
 	return nil, fmt.Errorf("unknown AdjacentTable field %s", name)
 }
@@ -321,12 +319,12 @@ func (m *AdjacentTableMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSectorID(v)
 		return nil
-	case adjacenttable.FieldVariantID:
+	case adjacenttable.FieldProfileID:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetVariantID(v)
+		m.SetProfileID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable field %s", name)
@@ -383,8 +381,8 @@ func (m *AdjacentTableMutation) ResetField(name string) error {
 	case adjacenttable.FieldSectorID:
 		m.ResetSectorID()
 		return nil
-	case adjacenttable.FieldVariantID:
-		m.ResetVariantID()
+	case adjacenttable.FieldProfileID:
+		m.ResetProfileID()
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable field %s", name)
@@ -393,8 +391,8 @@ func (m *AdjacentTableMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AdjacentTableMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m._Variant != nil {
-		edges = append(edges, adjacenttable.EdgeVariant)
+	if m._Profile != nil {
+		edges = append(edges, adjacenttable.EdgeProfile)
 	}
 	if m._Sector != nil {
 		edges = append(edges, adjacenttable.EdgeSector)
@@ -406,8 +404,8 @@ func (m *AdjacentTableMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *AdjacentTableMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case adjacenttable.EdgeVariant:
-		if id := m._Variant; id != nil {
+	case adjacenttable.EdgeProfile:
+		if id := m._Profile; id != nil {
 			return []ent.Value{*id}
 		}
 	case adjacenttable.EdgeSector:
@@ -435,8 +433,8 @@ func (m *AdjacentTableMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AdjacentTableMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.cleared_Variant {
-		edges = append(edges, adjacenttable.EdgeVariant)
+	if m.cleared_Profile {
+		edges = append(edges, adjacenttable.EdgeProfile)
 	}
 	if m.cleared_Sector {
 		edges = append(edges, adjacenttable.EdgeSector)
@@ -448,8 +446,8 @@ func (m *AdjacentTableMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *AdjacentTableMutation) EdgeCleared(name string) bool {
 	switch name {
-	case adjacenttable.EdgeVariant:
-		return m.cleared_Variant
+	case adjacenttable.EdgeProfile:
+		return m.cleared_Profile
 	case adjacenttable.EdgeSector:
 		return m.cleared_Sector
 	}
@@ -460,8 +458,8 @@ func (m *AdjacentTableMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *AdjacentTableMutation) ClearEdge(name string) error {
 	switch name {
-	case adjacenttable.EdgeVariant:
-		m.ClearVariant()
+	case adjacenttable.EdgeProfile:
+		m.ClearProfile()
 		return nil
 	case adjacenttable.EdgeSector:
 		m.ClearSector()
@@ -474,8 +472,8 @@ func (m *AdjacentTableMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AdjacentTableMutation) ResetEdge(name string) error {
 	switch name {
-	case adjacenttable.EdgeVariant:
-		m.ResetVariant()
+	case adjacenttable.EdgeProfile:
+		m.ResetProfile()
 		return nil
 	case adjacenttable.EdgeSector:
 		m.ResetSector()
@@ -487,17 +485,19 @@ func (m *AdjacentTableMutation) ResetEdge(name string) error {
 // DirectionMutation represents an operation that mutates the Direction nodes in the graph.
 type DirectionMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	name             *string
-	clearedFields    map[string]struct{}
-	_Variants        map[int]struct{}
-	removed_Variants map[int]struct{}
-	cleared_Variants bool
-	done             bool
-	oldValue         func(context.Context) (*Direction, error)
-	predicates       []predicate.Direction
+	op                Op
+	typ               string
+	id                *int
+	name              *string
+	clearedFields     map[string]struct{}
+	_Institute        *int
+	cleared_Institute bool
+	_Profile          map[int]struct{}
+	removed_Profile   map[int]struct{}
+	cleared_Profile   bool
+	done              bool
+	oldValue          func(context.Context) (*Direction, error)
+	predicates        []predicate.Direction
 }
 
 var _ ent.Mutation = (*DirectionMutation)(nil)
@@ -615,58 +615,120 @@ func (m *DirectionMutation) ResetName() {
 	m.name = nil
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by ids.
-func (m *DirectionMutation) AddVariantIDs(ids ...int) {
-	if m._Variants == nil {
-		m._Variants = make(map[int]struct{})
+// SetInstituteID sets the "institute_id" field.
+func (m *DirectionMutation) SetInstituteID(i int) {
+	m._Institute = &i
+}
+
+// InstituteID returns the value of the "institute_id" field in the mutation.
+func (m *DirectionMutation) InstituteID() (r int, exists bool) {
+	v := m._Institute
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInstituteID returns the old "institute_id" field's value of the Direction entity.
+// If the Direction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DirectionMutation) OldInstituteID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldInstituteID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldInstituteID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInstituteID: %w", err)
+	}
+	return oldValue.InstituteID, nil
+}
+
+// ResetInstituteID resets all changes to the "institute_id" field.
+func (m *DirectionMutation) ResetInstituteID() {
+	m._Institute = nil
+}
+
+// ClearInstitute clears the "Institute" edge to the Institute entity.
+func (m *DirectionMutation) ClearInstitute() {
+	m.cleared_Institute = true
+}
+
+// InstituteCleared reports if the "Institute" edge to the Institute entity was cleared.
+func (m *DirectionMutation) InstituteCleared() bool {
+	return m.cleared_Institute
+}
+
+// InstituteIDs returns the "Institute" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// InstituteID instead. It exists only for internal usage by the builders.
+func (m *DirectionMutation) InstituteIDs() (ids []int) {
+	if id := m._Institute; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetInstitute resets all changes to the "Institute" edge.
+func (m *DirectionMutation) ResetInstitute() {
+	m._Institute = nil
+	m.cleared_Institute = false
+}
+
+// AddProfileIDs adds the "Profile" edge to the Profile entity by ids.
+func (m *DirectionMutation) AddProfileIDs(ids ...int) {
+	if m._Profile == nil {
+		m._Profile = make(map[int]struct{})
 	}
 	for i := range ids {
-		m._Variants[ids[i]] = struct{}{}
+		m._Profile[ids[i]] = struct{}{}
 	}
 }
 
-// ClearVariants clears the "Variants" edge to the Variant entity.
-func (m *DirectionMutation) ClearVariants() {
-	m.cleared_Variants = true
+// ClearProfile clears the "Profile" edge to the Profile entity.
+func (m *DirectionMutation) ClearProfile() {
+	m.cleared_Profile = true
 }
 
-// VariantsCleared reports if the "Variants" edge to the Variant entity was cleared.
-func (m *DirectionMutation) VariantsCleared() bool {
-	return m.cleared_Variants
+// ProfileCleared reports if the "Profile" edge to the Profile entity was cleared.
+func (m *DirectionMutation) ProfileCleared() bool {
+	return m.cleared_Profile
 }
 
-// RemoveVariantIDs removes the "Variants" edge to the Variant entity by IDs.
-func (m *DirectionMutation) RemoveVariantIDs(ids ...int) {
-	if m.removed_Variants == nil {
-		m.removed_Variants = make(map[int]struct{})
+// RemoveProfileIDs removes the "Profile" edge to the Profile entity by IDs.
+func (m *DirectionMutation) RemoveProfileIDs(ids ...int) {
+	if m.removed_Profile == nil {
+		m.removed_Profile = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m._Variants, ids[i])
-		m.removed_Variants[ids[i]] = struct{}{}
+		delete(m._Profile, ids[i])
+		m.removed_Profile[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedVariants returns the removed IDs of the "Variants" edge to the Variant entity.
-func (m *DirectionMutation) RemovedVariantsIDs() (ids []int) {
-	for id := range m.removed_Variants {
+// RemovedProfile returns the removed IDs of the "Profile" edge to the Profile entity.
+func (m *DirectionMutation) RemovedProfileIDs() (ids []int) {
+	for id := range m.removed_Profile {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// VariantsIDs returns the "Variants" edge IDs in the mutation.
-func (m *DirectionMutation) VariantsIDs() (ids []int) {
-	for id := range m._Variants {
+// ProfileIDs returns the "Profile" edge IDs in the mutation.
+func (m *DirectionMutation) ProfileIDs() (ids []int) {
+	for id := range m._Profile {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetVariants resets all changes to the "Variants" edge.
-func (m *DirectionMutation) ResetVariants() {
-	m._Variants = nil
-	m.cleared_Variants = false
-	m.removed_Variants = nil
+// ResetProfile resets all changes to the "Profile" edge.
+func (m *DirectionMutation) ResetProfile() {
+	m._Profile = nil
+	m.cleared_Profile = false
+	m.removed_Profile = nil
 }
 
 // Where appends a list predicates to the DirectionMutation builder.
@@ -688,9 +750,12 @@ func (m *DirectionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DirectionMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.name != nil {
 		fields = append(fields, direction.FieldName)
+	}
+	if m._Institute != nil {
+		fields = append(fields, direction.FieldInstituteID)
 	}
 	return fields
 }
@@ -702,6 +767,8 @@ func (m *DirectionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case direction.FieldName:
 		return m.Name()
+	case direction.FieldInstituteID:
+		return m.InstituteID()
 	}
 	return nil, false
 }
@@ -713,6 +780,8 @@ func (m *DirectionMutation) OldField(ctx context.Context, name string) (ent.Valu
 	switch name {
 	case direction.FieldName:
 		return m.OldName(ctx)
+	case direction.FieldInstituteID:
+		return m.OldInstituteID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Direction field %s", name)
 }
@@ -729,6 +798,13 @@ func (m *DirectionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case direction.FieldInstituteID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInstituteID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Direction field %s", name)
 }
@@ -736,13 +812,16 @@ func (m *DirectionMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *DirectionMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *DirectionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -781,15 +860,21 @@ func (m *DirectionMutation) ResetField(name string) error {
 	case direction.FieldName:
 		m.ResetName()
 		return nil
+	case direction.FieldInstituteID:
+		m.ResetInstituteID()
+		return nil
 	}
 	return fmt.Errorf("unknown Direction field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DirectionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m._Variants != nil {
-		edges = append(edges, direction.EdgeVariants)
+	edges := make([]string, 0, 2)
+	if m._Institute != nil {
+		edges = append(edges, direction.EdgeInstitute)
+	}
+	if m._Profile != nil {
+		edges = append(edges, direction.EdgeProfile)
 	}
 	return edges
 }
@@ -798,9 +883,13 @@ func (m *DirectionMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *DirectionMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case direction.EdgeVariants:
-		ids := make([]ent.Value, 0, len(m._Variants))
-		for id := range m._Variants {
+	case direction.EdgeInstitute:
+		if id := m._Institute; id != nil {
+			return []ent.Value{*id}
+		}
+	case direction.EdgeProfile:
+		ids := make([]ent.Value, 0, len(m._Profile))
+		for id := range m._Profile {
 			ids = append(ids, id)
 		}
 		return ids
@@ -810,9 +899,9 @@ func (m *DirectionMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DirectionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removed_Variants != nil {
-		edges = append(edges, direction.EdgeVariants)
+	edges := make([]string, 0, 2)
+	if m.removed_Profile != nil {
+		edges = append(edges, direction.EdgeProfile)
 	}
 	return edges
 }
@@ -821,9 +910,9 @@ func (m *DirectionMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *DirectionMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case direction.EdgeVariants:
-		ids := make([]ent.Value, 0, len(m.removed_Variants))
-		for id := range m.removed_Variants {
+	case direction.EdgeProfile:
+		ids := make([]ent.Value, 0, len(m.removed_Profile))
+		for id := range m.removed_Profile {
 			ids = append(ids, id)
 		}
 		return ids
@@ -833,9 +922,12 @@ func (m *DirectionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DirectionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.cleared_Variants {
-		edges = append(edges, direction.EdgeVariants)
+	edges := make([]string, 0, 2)
+	if m.cleared_Institute {
+		edges = append(edges, direction.EdgeInstitute)
+	}
+	if m.cleared_Profile {
+		edges = append(edges, direction.EdgeProfile)
 	}
 	return edges
 }
@@ -844,8 +936,10 @@ func (m *DirectionMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *DirectionMutation) EdgeCleared(name string) bool {
 	switch name {
-	case direction.EdgeVariants:
-		return m.cleared_Variants
+	case direction.EdgeInstitute:
+		return m.cleared_Institute
+	case direction.EdgeProfile:
+		return m.cleared_Profile
 	}
 	return false
 }
@@ -854,6 +948,9 @@ func (m *DirectionMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *DirectionMutation) ClearEdge(name string) error {
 	switch name {
+	case direction.EdgeInstitute:
+		m.ClearInstitute()
+		return nil
 	}
 	return fmt.Errorf("unknown Direction unique edge %s", name)
 }
@@ -862,8 +959,11 @@ func (m *DirectionMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *DirectionMutation) ResetEdge(name string) error {
 	switch name {
-	case direction.EdgeVariants:
-		m.ResetVariants()
+	case direction.EdgeInstitute:
+		m.ResetInstitute()
+		return nil
+	case direction.EdgeProfile:
+		m.ResetProfile()
 		return nil
 	}
 	return fmt.Errorf("unknown Direction edge %s", name)
@@ -872,17 +972,17 @@ func (m *DirectionMutation) ResetEdge(name string) error {
 // InstituteMutation represents an operation that mutates the Institute nodes in the graph.
 type InstituteMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	name             *string
-	clearedFields    map[string]struct{}
-	_Variants        map[int]struct{}
-	removed_Variants map[int]struct{}
-	cleared_Variants bool
-	done             bool
-	oldValue         func(context.Context) (*Institute, error)
-	predicates       []predicate.Institute
+	op                 Op
+	typ                string
+	id                 *int
+	name               *string
+	clearedFields      map[string]struct{}
+	_Directions        map[int]struct{}
+	removed_Directions map[int]struct{}
+	cleared_Directions bool
+	done               bool
+	oldValue           func(context.Context) (*Institute, error)
+	predicates         []predicate.Institute
 }
 
 var _ ent.Mutation = (*InstituteMutation)(nil)
@@ -1000,58 +1100,58 @@ func (m *InstituteMutation) ResetName() {
 	m.name = nil
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by ids.
-func (m *InstituteMutation) AddVariantIDs(ids ...int) {
-	if m._Variants == nil {
-		m._Variants = make(map[int]struct{})
+// AddDirectionIDs adds the "Directions" edge to the Direction entity by ids.
+func (m *InstituteMutation) AddDirectionIDs(ids ...int) {
+	if m._Directions == nil {
+		m._Directions = make(map[int]struct{})
 	}
 	for i := range ids {
-		m._Variants[ids[i]] = struct{}{}
+		m._Directions[ids[i]] = struct{}{}
 	}
 }
 
-// ClearVariants clears the "Variants" edge to the Variant entity.
-func (m *InstituteMutation) ClearVariants() {
-	m.cleared_Variants = true
+// ClearDirections clears the "Directions" edge to the Direction entity.
+func (m *InstituteMutation) ClearDirections() {
+	m.cleared_Directions = true
 }
 
-// VariantsCleared reports if the "Variants" edge to the Variant entity was cleared.
-func (m *InstituteMutation) VariantsCleared() bool {
-	return m.cleared_Variants
+// DirectionsCleared reports if the "Directions" edge to the Direction entity was cleared.
+func (m *InstituteMutation) DirectionsCleared() bool {
+	return m.cleared_Directions
 }
 
-// RemoveVariantIDs removes the "Variants" edge to the Variant entity by IDs.
-func (m *InstituteMutation) RemoveVariantIDs(ids ...int) {
-	if m.removed_Variants == nil {
-		m.removed_Variants = make(map[int]struct{})
+// RemoveDirectionIDs removes the "Directions" edge to the Direction entity by IDs.
+func (m *InstituteMutation) RemoveDirectionIDs(ids ...int) {
+	if m.removed_Directions == nil {
+		m.removed_Directions = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m._Variants, ids[i])
-		m.removed_Variants[ids[i]] = struct{}{}
+		delete(m._Directions, ids[i])
+		m.removed_Directions[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedVariants returns the removed IDs of the "Variants" edge to the Variant entity.
-func (m *InstituteMutation) RemovedVariantsIDs() (ids []int) {
-	for id := range m.removed_Variants {
+// RemovedDirections returns the removed IDs of the "Directions" edge to the Direction entity.
+func (m *InstituteMutation) RemovedDirectionsIDs() (ids []int) {
+	for id := range m.removed_Directions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// VariantsIDs returns the "Variants" edge IDs in the mutation.
-func (m *InstituteMutation) VariantsIDs() (ids []int) {
-	for id := range m._Variants {
+// DirectionsIDs returns the "Directions" edge IDs in the mutation.
+func (m *InstituteMutation) DirectionsIDs() (ids []int) {
+	for id := range m._Directions {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetVariants resets all changes to the "Variants" edge.
-func (m *InstituteMutation) ResetVariants() {
-	m._Variants = nil
-	m.cleared_Variants = false
-	m.removed_Variants = nil
+// ResetDirections resets all changes to the "Directions" edge.
+func (m *InstituteMutation) ResetDirections() {
+	m._Directions = nil
+	m.cleared_Directions = false
+	m.removed_Directions = nil
 }
 
 // Where appends a list predicates to the InstituteMutation builder.
@@ -1173,8 +1273,8 @@ func (m *InstituteMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *InstituteMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m._Variants != nil {
-		edges = append(edges, institute.EdgeVariants)
+	if m._Directions != nil {
+		edges = append(edges, institute.EdgeDirections)
 	}
 	return edges
 }
@@ -1183,9 +1283,9 @@ func (m *InstituteMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *InstituteMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case institute.EdgeVariants:
-		ids := make([]ent.Value, 0, len(m._Variants))
-		for id := range m._Variants {
+	case institute.EdgeDirections:
+		ids := make([]ent.Value, 0, len(m._Directions))
+		for id := range m._Directions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1196,8 +1296,8 @@ func (m *InstituteMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *InstituteMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removed_Variants != nil {
-		edges = append(edges, institute.EdgeVariants)
+	if m.removed_Directions != nil {
+		edges = append(edges, institute.EdgeDirections)
 	}
 	return edges
 }
@@ -1206,9 +1306,9 @@ func (m *InstituteMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *InstituteMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case institute.EdgeVariants:
-		ids := make([]ent.Value, 0, len(m.removed_Variants))
-		for id := range m.removed_Variants {
+	case institute.EdgeDirections:
+		ids := make([]ent.Value, 0, len(m.removed_Directions))
+		for id := range m.removed_Directions {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1219,8 +1319,8 @@ func (m *InstituteMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *InstituteMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.cleared_Variants {
-		edges = append(edges, institute.EdgeVariants)
+	if m.cleared_Directions {
+		edges = append(edges, institute.EdgeDirections)
 	}
 	return edges
 }
@@ -1229,8 +1329,8 @@ func (m *InstituteMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *InstituteMutation) EdgeCleared(name string) bool {
 	switch name {
-	case institute.EdgeVariants:
-		return m.cleared_Variants
+	case institute.EdgeDirections:
+		return m.cleared_Directions
 	}
 	return false
 }
@@ -1247,8 +1347,8 @@ func (m *InstituteMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *InstituteMutation) ResetEdge(name string) error {
 	switch name {
-	case institute.EdgeVariants:
-		m.ResetVariants()
+	case institute.EdgeDirections:
+		m.ResetDirections()
 		return nil
 	}
 	return fmt.Errorf("unknown Institute edge %s", name)
@@ -1257,17 +1357,19 @@ func (m *InstituteMutation) ResetEdge(name string) error {
 // ProfileMutation represents an operation that mutates the Profile nodes in the graph.
 type ProfileMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	name             *string
-	clearedFields    map[string]struct{}
-	_Variants        map[int]struct{}
-	removed_Variants map[int]struct{}
-	cleared_Variants bool
-	done             bool
-	oldValue         func(context.Context) (*Profile, error)
-	predicates       []predicate.Profile
+	op                     Op
+	typ                    string
+	id                     *int
+	name                   *string
+	clearedFields          map[string]struct{}
+	_Direction             *int
+	cleared_Direction      bool
+	_AdjacentTables        map[int]struct{}
+	removed_AdjacentTables map[int]struct{}
+	cleared_AdjacentTables bool
+	done                   bool
+	oldValue               func(context.Context) (*Profile, error)
+	predicates             []predicate.Profile
 }
 
 var _ ent.Mutation = (*ProfileMutation)(nil)
@@ -1385,58 +1487,120 @@ func (m *ProfileMutation) ResetName() {
 	m.name = nil
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by ids.
-func (m *ProfileMutation) AddVariantIDs(ids ...int) {
-	if m._Variants == nil {
-		m._Variants = make(map[int]struct{})
+// SetDirectionID sets the "direction_id" field.
+func (m *ProfileMutation) SetDirectionID(i int) {
+	m._Direction = &i
+}
+
+// DirectionID returns the value of the "direction_id" field in the mutation.
+func (m *ProfileMutation) DirectionID() (r int, exists bool) {
+	v := m._Direction
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDirectionID returns the old "direction_id" field's value of the Profile entity.
+// If the Profile object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProfileMutation) OldDirectionID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldDirectionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldDirectionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDirectionID: %w", err)
+	}
+	return oldValue.DirectionID, nil
+}
+
+// ResetDirectionID resets all changes to the "direction_id" field.
+func (m *ProfileMutation) ResetDirectionID() {
+	m._Direction = nil
+}
+
+// ClearDirection clears the "Direction" edge to the Direction entity.
+func (m *ProfileMutation) ClearDirection() {
+	m.cleared_Direction = true
+}
+
+// DirectionCleared reports if the "Direction" edge to the Direction entity was cleared.
+func (m *ProfileMutation) DirectionCleared() bool {
+	return m.cleared_Direction
+}
+
+// DirectionIDs returns the "Direction" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DirectionID instead. It exists only for internal usage by the builders.
+func (m *ProfileMutation) DirectionIDs() (ids []int) {
+	if id := m._Direction; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDirection resets all changes to the "Direction" edge.
+func (m *ProfileMutation) ResetDirection() {
+	m._Direction = nil
+	m.cleared_Direction = false
+}
+
+// AddAdjacentTableIDs adds the "AdjacentTables" edge to the AdjacentTable entity by ids.
+func (m *ProfileMutation) AddAdjacentTableIDs(ids ...int) {
+	if m._AdjacentTables == nil {
+		m._AdjacentTables = make(map[int]struct{})
 	}
 	for i := range ids {
-		m._Variants[ids[i]] = struct{}{}
+		m._AdjacentTables[ids[i]] = struct{}{}
 	}
 }
 
-// ClearVariants clears the "Variants" edge to the Variant entity.
-func (m *ProfileMutation) ClearVariants() {
-	m.cleared_Variants = true
+// ClearAdjacentTables clears the "AdjacentTables" edge to the AdjacentTable entity.
+func (m *ProfileMutation) ClearAdjacentTables() {
+	m.cleared_AdjacentTables = true
 }
 
-// VariantsCleared reports if the "Variants" edge to the Variant entity was cleared.
-func (m *ProfileMutation) VariantsCleared() bool {
-	return m.cleared_Variants
+// AdjacentTablesCleared reports if the "AdjacentTables" edge to the AdjacentTable entity was cleared.
+func (m *ProfileMutation) AdjacentTablesCleared() bool {
+	return m.cleared_AdjacentTables
 }
 
-// RemoveVariantIDs removes the "Variants" edge to the Variant entity by IDs.
-func (m *ProfileMutation) RemoveVariantIDs(ids ...int) {
-	if m.removed_Variants == nil {
-		m.removed_Variants = make(map[int]struct{})
+// RemoveAdjacentTableIDs removes the "AdjacentTables" edge to the AdjacentTable entity by IDs.
+func (m *ProfileMutation) RemoveAdjacentTableIDs(ids ...int) {
+	if m.removed_AdjacentTables == nil {
+		m.removed_AdjacentTables = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m._Variants, ids[i])
-		m.removed_Variants[ids[i]] = struct{}{}
+		delete(m._AdjacentTables, ids[i])
+		m.removed_AdjacentTables[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedVariants returns the removed IDs of the "Variants" edge to the Variant entity.
-func (m *ProfileMutation) RemovedVariantsIDs() (ids []int) {
-	for id := range m.removed_Variants {
+// RemovedAdjacentTables returns the removed IDs of the "AdjacentTables" edge to the AdjacentTable entity.
+func (m *ProfileMutation) RemovedAdjacentTablesIDs() (ids []int) {
+	for id := range m.removed_AdjacentTables {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// VariantsIDs returns the "Variants" edge IDs in the mutation.
-func (m *ProfileMutation) VariantsIDs() (ids []int) {
-	for id := range m._Variants {
+// AdjacentTablesIDs returns the "AdjacentTables" edge IDs in the mutation.
+func (m *ProfileMutation) AdjacentTablesIDs() (ids []int) {
+	for id := range m._AdjacentTables {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetVariants resets all changes to the "Variants" edge.
-func (m *ProfileMutation) ResetVariants() {
-	m._Variants = nil
-	m.cleared_Variants = false
-	m.removed_Variants = nil
+// ResetAdjacentTables resets all changes to the "AdjacentTables" edge.
+func (m *ProfileMutation) ResetAdjacentTables() {
+	m._AdjacentTables = nil
+	m.cleared_AdjacentTables = false
+	m.removed_AdjacentTables = nil
 }
 
 // Where appends a list predicates to the ProfileMutation builder.
@@ -1458,9 +1622,12 @@ func (m *ProfileMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProfileMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
 	if m.name != nil {
 		fields = append(fields, profile.FieldName)
+	}
+	if m._Direction != nil {
+		fields = append(fields, profile.FieldDirectionID)
 	}
 	return fields
 }
@@ -1472,6 +1639,8 @@ func (m *ProfileMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case profile.FieldName:
 		return m.Name()
+	case profile.FieldDirectionID:
+		return m.DirectionID()
 	}
 	return nil, false
 }
@@ -1483,6 +1652,8 @@ func (m *ProfileMutation) OldField(ctx context.Context, name string) (ent.Value,
 	switch name {
 	case profile.FieldName:
 		return m.OldName(ctx)
+	case profile.FieldDirectionID:
+		return m.OldDirectionID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Profile field %s", name)
 }
@@ -1499,6 +1670,13 @@ func (m *ProfileMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
+	case profile.FieldDirectionID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDirectionID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Profile field %s", name)
 }
@@ -1506,13 +1684,16 @@ func (m *ProfileMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *ProfileMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *ProfileMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
 	return nil, false
 }
 
@@ -1551,15 +1732,21 @@ func (m *ProfileMutation) ResetField(name string) error {
 	case profile.FieldName:
 		m.ResetName()
 		return nil
+	case profile.FieldDirectionID:
+		m.ResetDirectionID()
+		return nil
 	}
 	return fmt.Errorf("unknown Profile field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ProfileMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m._Variants != nil {
-		edges = append(edges, profile.EdgeVariants)
+	edges := make([]string, 0, 2)
+	if m._Direction != nil {
+		edges = append(edges, profile.EdgeDirection)
+	}
+	if m._AdjacentTables != nil {
+		edges = append(edges, profile.EdgeAdjacentTables)
 	}
 	return edges
 }
@@ -1568,9 +1755,13 @@ func (m *ProfileMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *ProfileMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case profile.EdgeVariants:
-		ids := make([]ent.Value, 0, len(m._Variants))
-		for id := range m._Variants {
+	case profile.EdgeDirection:
+		if id := m._Direction; id != nil {
+			return []ent.Value{*id}
+		}
+	case profile.EdgeAdjacentTables:
+		ids := make([]ent.Value, 0, len(m._AdjacentTables))
+		for id := range m._AdjacentTables {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1580,9 +1771,9 @@ func (m *ProfileMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ProfileMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removed_Variants != nil {
-		edges = append(edges, profile.EdgeVariants)
+	edges := make([]string, 0, 2)
+	if m.removed_AdjacentTables != nil {
+		edges = append(edges, profile.EdgeAdjacentTables)
 	}
 	return edges
 }
@@ -1591,9 +1782,9 @@ func (m *ProfileMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *ProfileMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case profile.EdgeVariants:
-		ids := make([]ent.Value, 0, len(m.removed_Variants))
-		for id := range m.removed_Variants {
+	case profile.EdgeAdjacentTables:
+		ids := make([]ent.Value, 0, len(m.removed_AdjacentTables))
+		for id := range m.removed_AdjacentTables {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1603,9 +1794,12 @@ func (m *ProfileMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ProfileMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.cleared_Variants {
-		edges = append(edges, profile.EdgeVariants)
+	edges := make([]string, 0, 2)
+	if m.cleared_Direction {
+		edges = append(edges, profile.EdgeDirection)
+	}
+	if m.cleared_AdjacentTables {
+		edges = append(edges, profile.EdgeAdjacentTables)
 	}
 	return edges
 }
@@ -1614,8 +1808,10 @@ func (m *ProfileMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *ProfileMutation) EdgeCleared(name string) bool {
 	switch name {
-	case profile.EdgeVariants:
-		return m.cleared_Variants
+	case profile.EdgeDirection:
+		return m.cleared_Direction
+	case profile.EdgeAdjacentTables:
+		return m.cleared_AdjacentTables
 	}
 	return false
 }
@@ -1624,6 +1820,9 @@ func (m *ProfileMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *ProfileMutation) ClearEdge(name string) error {
 	switch name {
+	case profile.EdgeDirection:
+		m.ClearDirection()
+		return nil
 	}
 	return fmt.Errorf("unknown Profile unique edge %s", name)
 }
@@ -1632,8 +1831,11 @@ func (m *ProfileMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *ProfileMutation) ResetEdge(name string) error {
 	switch name {
-	case profile.EdgeVariants:
-		m.ResetVariants()
+	case profile.EdgeDirection:
+		m.ResetDirection()
+		return nil
+	case profile.EdgeAdjacentTables:
+		m.ResetAdjacentTables()
 		return nil
 	}
 	return fmt.Errorf("unknown Profile edge %s", name)
@@ -2098,635 +2300,4 @@ func (m *SectorMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Sector edge %s", name)
-}
-
-// VariantMutation represents an operation that mutates the Variant nodes in the graph.
-type VariantMutation struct {
-	config
-	op                     Op
-	typ                    string
-	id                     *int
-	clearedFields          map[string]struct{}
-	_Insitute              *int
-	cleared_Insitute       bool
-	_Direction             *int
-	cleared_Direction      bool
-	_Profile               *int
-	cleared_Profile        bool
-	_AdjacentTables        map[int]struct{}
-	removed_AdjacentTables map[int]struct{}
-	cleared_AdjacentTables bool
-	done                   bool
-	oldValue               func(context.Context) (*Variant, error)
-	predicates             []predicate.Variant
-}
-
-var _ ent.Mutation = (*VariantMutation)(nil)
-
-// variantOption allows management of the mutation configuration using functional options.
-type variantOption func(*VariantMutation)
-
-// newVariantMutation creates new mutation for the Variant entity.
-func newVariantMutation(c config, op Op, opts ...variantOption) *VariantMutation {
-	m := &VariantMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeVariant,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withVariantID sets the ID field of the mutation.
-func withVariantID(id int) variantOption {
-	return func(m *VariantMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Variant
-		)
-		m.oldValue = func(ctx context.Context) (*Variant, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Variant.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withVariant sets the old Variant of the mutation.
-func withVariant(node *Variant) variantOption {
-	return func(m *VariantMutation) {
-		m.oldValue = func(context.Context) (*Variant, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m VariantMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m VariantMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *VariantMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetDirectionID sets the "direction_id" field.
-func (m *VariantMutation) SetDirectionID(i int) {
-	m._Direction = &i
-}
-
-// DirectionID returns the value of the "direction_id" field in the mutation.
-func (m *VariantMutation) DirectionID() (r int, exists bool) {
-	v := m._Direction
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDirectionID returns the old "direction_id" field's value of the Variant entity.
-// If the Variant object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *VariantMutation) OldDirectionID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldDirectionID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldDirectionID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDirectionID: %w", err)
-	}
-	return oldValue.DirectionID, nil
-}
-
-// ResetDirectionID resets all changes to the "direction_id" field.
-func (m *VariantMutation) ResetDirectionID() {
-	m._Direction = nil
-}
-
-// SetProfileID sets the "profile_id" field.
-func (m *VariantMutation) SetProfileID(i int) {
-	m._Profile = &i
-}
-
-// ProfileID returns the value of the "profile_id" field in the mutation.
-func (m *VariantMutation) ProfileID() (r int, exists bool) {
-	v := m._Profile
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProfileID returns the old "profile_id" field's value of the Variant entity.
-// If the Variant object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *VariantMutation) OldProfileID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldProfileID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldProfileID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProfileID: %w", err)
-	}
-	return oldValue.ProfileID, nil
-}
-
-// ResetProfileID resets all changes to the "profile_id" field.
-func (m *VariantMutation) ResetProfileID() {
-	m._Profile = nil
-}
-
-// SetInsituteID sets the "insitute_id" field.
-func (m *VariantMutation) SetInsituteID(i int) {
-	m._Insitute = &i
-}
-
-// InsituteID returns the value of the "insitute_id" field in the mutation.
-func (m *VariantMutation) InsituteID() (r int, exists bool) {
-	v := m._Insitute
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldInsituteID returns the old "insitute_id" field's value of the Variant entity.
-// If the Variant object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *VariantMutation) OldInsituteID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldInsituteID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldInsituteID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldInsituteID: %w", err)
-	}
-	return oldValue.InsituteID, nil
-}
-
-// ResetInsituteID resets all changes to the "insitute_id" field.
-func (m *VariantMutation) ResetInsituteID() {
-	m._Insitute = nil
-}
-
-// ClearInsitute clears the "Insitute" edge to the Institute entity.
-func (m *VariantMutation) ClearInsitute() {
-	m.cleared_Insitute = true
-}
-
-// InsituteCleared reports if the "Insitute" edge to the Institute entity was cleared.
-func (m *VariantMutation) InsituteCleared() bool {
-	return m.cleared_Insitute
-}
-
-// InsituteIDs returns the "Insitute" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// InsituteID instead. It exists only for internal usage by the builders.
-func (m *VariantMutation) InsituteIDs() (ids []int) {
-	if id := m._Insitute; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetInsitute resets all changes to the "Insitute" edge.
-func (m *VariantMutation) ResetInsitute() {
-	m._Insitute = nil
-	m.cleared_Insitute = false
-}
-
-// ClearDirection clears the "Direction" edge to the Direction entity.
-func (m *VariantMutation) ClearDirection() {
-	m.cleared_Direction = true
-}
-
-// DirectionCleared reports if the "Direction" edge to the Direction entity was cleared.
-func (m *VariantMutation) DirectionCleared() bool {
-	return m.cleared_Direction
-}
-
-// DirectionIDs returns the "Direction" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// DirectionID instead. It exists only for internal usage by the builders.
-func (m *VariantMutation) DirectionIDs() (ids []int) {
-	if id := m._Direction; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetDirection resets all changes to the "Direction" edge.
-func (m *VariantMutation) ResetDirection() {
-	m._Direction = nil
-	m.cleared_Direction = false
-}
-
-// ClearProfile clears the "Profile" edge to the Profile entity.
-func (m *VariantMutation) ClearProfile() {
-	m.cleared_Profile = true
-}
-
-// ProfileCleared reports if the "Profile" edge to the Profile entity was cleared.
-func (m *VariantMutation) ProfileCleared() bool {
-	return m.cleared_Profile
-}
-
-// ProfileIDs returns the "Profile" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ProfileID instead. It exists only for internal usage by the builders.
-func (m *VariantMutation) ProfileIDs() (ids []int) {
-	if id := m._Profile; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetProfile resets all changes to the "Profile" edge.
-func (m *VariantMutation) ResetProfile() {
-	m._Profile = nil
-	m.cleared_Profile = false
-}
-
-// AddAdjacentTableIDs adds the "AdjacentTables" edge to the AdjacentTable entity by ids.
-func (m *VariantMutation) AddAdjacentTableIDs(ids ...int) {
-	if m._AdjacentTables == nil {
-		m._AdjacentTables = make(map[int]struct{})
-	}
-	for i := range ids {
-		m._AdjacentTables[ids[i]] = struct{}{}
-	}
-}
-
-// ClearAdjacentTables clears the "AdjacentTables" edge to the AdjacentTable entity.
-func (m *VariantMutation) ClearAdjacentTables() {
-	m.cleared_AdjacentTables = true
-}
-
-// AdjacentTablesCleared reports if the "AdjacentTables" edge to the AdjacentTable entity was cleared.
-func (m *VariantMutation) AdjacentTablesCleared() bool {
-	return m.cleared_AdjacentTables
-}
-
-// RemoveAdjacentTableIDs removes the "AdjacentTables" edge to the AdjacentTable entity by IDs.
-func (m *VariantMutation) RemoveAdjacentTableIDs(ids ...int) {
-	if m.removed_AdjacentTables == nil {
-		m.removed_AdjacentTables = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m._AdjacentTables, ids[i])
-		m.removed_AdjacentTables[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedAdjacentTables returns the removed IDs of the "AdjacentTables" edge to the AdjacentTable entity.
-func (m *VariantMutation) RemovedAdjacentTablesIDs() (ids []int) {
-	for id := range m.removed_AdjacentTables {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// AdjacentTablesIDs returns the "AdjacentTables" edge IDs in the mutation.
-func (m *VariantMutation) AdjacentTablesIDs() (ids []int) {
-	for id := range m._AdjacentTables {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetAdjacentTables resets all changes to the "AdjacentTables" edge.
-func (m *VariantMutation) ResetAdjacentTables() {
-	m._AdjacentTables = nil
-	m.cleared_AdjacentTables = false
-	m.removed_AdjacentTables = nil
-}
-
-// Where appends a list predicates to the VariantMutation builder.
-func (m *VariantMutation) Where(ps ...predicate.Variant) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// Op returns the operation name.
-func (m *VariantMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (Variant).
-func (m *VariantMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *VariantMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m._Direction != nil {
-		fields = append(fields, variant.FieldDirectionID)
-	}
-	if m._Profile != nil {
-		fields = append(fields, variant.FieldProfileID)
-	}
-	if m._Insitute != nil {
-		fields = append(fields, variant.FieldInsituteID)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *VariantMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case variant.FieldDirectionID:
-		return m.DirectionID()
-	case variant.FieldProfileID:
-		return m.ProfileID()
-	case variant.FieldInsituteID:
-		return m.InsituteID()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *VariantMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case variant.FieldDirectionID:
-		return m.OldDirectionID(ctx)
-	case variant.FieldProfileID:
-		return m.OldProfileID(ctx)
-	case variant.FieldInsituteID:
-		return m.OldInsituteID(ctx)
-	}
-	return nil, fmt.Errorf("unknown Variant field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *VariantMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case variant.FieldDirectionID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDirectionID(v)
-		return nil
-	case variant.FieldProfileID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProfileID(v)
-		return nil
-	case variant.FieldInsituteID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetInsituteID(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Variant field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *VariantMutation) AddedFields() []string {
-	var fields []string
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *VariantMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *VariantMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Variant numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *VariantMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *VariantMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *VariantMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Variant nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *VariantMutation) ResetField(name string) error {
-	switch name {
-	case variant.FieldDirectionID:
-		m.ResetDirectionID()
-		return nil
-	case variant.FieldProfileID:
-		m.ResetProfileID()
-		return nil
-	case variant.FieldInsituteID:
-		m.ResetInsituteID()
-		return nil
-	}
-	return fmt.Errorf("unknown Variant field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *VariantMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m._Insitute != nil {
-		edges = append(edges, variant.EdgeInsitute)
-	}
-	if m._Direction != nil {
-		edges = append(edges, variant.EdgeDirection)
-	}
-	if m._Profile != nil {
-		edges = append(edges, variant.EdgeProfile)
-	}
-	if m._AdjacentTables != nil {
-		edges = append(edges, variant.EdgeAdjacentTables)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *VariantMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case variant.EdgeInsitute:
-		if id := m._Insitute; id != nil {
-			return []ent.Value{*id}
-		}
-	case variant.EdgeDirection:
-		if id := m._Direction; id != nil {
-			return []ent.Value{*id}
-		}
-	case variant.EdgeProfile:
-		if id := m._Profile; id != nil {
-			return []ent.Value{*id}
-		}
-	case variant.EdgeAdjacentTables:
-		ids := make([]ent.Value, 0, len(m._AdjacentTables))
-		for id := range m._AdjacentTables {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *VariantMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.removed_AdjacentTables != nil {
-		edges = append(edges, variant.EdgeAdjacentTables)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *VariantMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case variant.EdgeAdjacentTables:
-		ids := make([]ent.Value, 0, len(m.removed_AdjacentTables))
-		for id := range m.removed_AdjacentTables {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *VariantMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
-	if m.cleared_Insitute {
-		edges = append(edges, variant.EdgeInsitute)
-	}
-	if m.cleared_Direction {
-		edges = append(edges, variant.EdgeDirection)
-	}
-	if m.cleared_Profile {
-		edges = append(edges, variant.EdgeProfile)
-	}
-	if m.cleared_AdjacentTables {
-		edges = append(edges, variant.EdgeAdjacentTables)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *VariantMutation) EdgeCleared(name string) bool {
-	switch name {
-	case variant.EdgeInsitute:
-		return m.cleared_Insitute
-	case variant.EdgeDirection:
-		return m.cleared_Direction
-	case variant.EdgeProfile:
-		return m.cleared_Profile
-	case variant.EdgeAdjacentTables:
-		return m.cleared_AdjacentTables
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *VariantMutation) ClearEdge(name string) error {
-	switch name {
-	case variant.EdgeInsitute:
-		m.ClearInsitute()
-		return nil
-	case variant.EdgeDirection:
-		m.ClearDirection()
-		return nil
-	case variant.EdgeProfile:
-		m.ClearProfile()
-		return nil
-	}
-	return fmt.Errorf("unknown Variant unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *VariantMutation) ResetEdge(name string) error {
-	switch name {
-	case variant.EdgeInsitute:
-		m.ResetInsitute()
-		return nil
-	case variant.EdgeDirection:
-		m.ResetDirection()
-		return nil
-	case variant.EdgeProfile:
-		m.ResetProfile()
-		return nil
-	case variant.EdgeAdjacentTables:
-		m.ResetAdjacentTables()
-		return nil
-	}
-	return fmt.Errorf("unknown Variant edge %s", name)
 }

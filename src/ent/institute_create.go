@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // InstituteCreate is the builder for creating a Institute entity.
@@ -26,19 +26,19 @@ func (ic *InstituteCreate) SetName(s string) *InstituteCreate {
 	return ic
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (ic *InstituteCreate) AddVariantIDs(ids ...int) *InstituteCreate {
-	ic.mutation.AddVariantIDs(ids...)
+// AddDirectionIDs adds the "Directions" edge to the Direction entity by IDs.
+func (ic *InstituteCreate) AddDirectionIDs(ids ...int) *InstituteCreate {
+	ic.mutation.AddDirectionIDs(ids...)
 	return ic
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (ic *InstituteCreate) AddVariants(v ...*Variant) *InstituteCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// AddDirections adds the "Directions" edges to the Direction entity.
+func (ic *InstituteCreate) AddDirections(d ...*Direction) *InstituteCreate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
 	}
-	return ic.AddVariantIDs(ids...)
+	return ic.AddDirectionIDs(ids...)
 }
 
 // Mutation returns the InstituteMutation object of the builder.
@@ -149,17 +149,17 @@ func (ic *InstituteCreate) createSpec() (*Institute, *sqlgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if nodes := ic.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := ic.mutation.DirectionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   institute.VariantsTable,
-			Columns: []string{institute.VariantsColumn},
+			Table:   institute.DirectionsTable,
+			Columns: []string{institute.DirectionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
 				},
 			},
 		}

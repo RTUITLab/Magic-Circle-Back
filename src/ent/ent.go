@@ -13,7 +13,6 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -39,7 +38,6 @@ func columnChecker(table string) func(string) error {
 		institute.Table:     institute.ValidColumn,
 		profile.Table:       profile.ValidColumn,
 		sector.Table:        sector.ValidColumn,
-		variant.Table:       variant.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

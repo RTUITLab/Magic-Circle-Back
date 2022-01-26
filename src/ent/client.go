@@ -14,7 +14,6 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -36,8 +35,6 @@ type Client struct {
 	Profile *ProfileClient
 	// Sector is the client for interacting with the Sector builders.
 	Sector *SectorClient
-	// Variant is the client for interacting with the Variant builders.
-	Variant *VariantClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -56,7 +53,6 @@ func (c *Client) init() {
 	c.Institute = NewInstituteClient(c.config)
 	c.Profile = NewProfileClient(c.config)
 	c.Sector = NewSectorClient(c.config)
-	c.Variant = NewVariantClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -95,7 +91,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Institute:     NewInstituteClient(cfg),
 		Profile:       NewProfileClient(cfg),
 		Sector:        NewSectorClient(cfg),
-		Variant:       NewVariantClient(cfg),
 	}, nil
 }
 
@@ -119,7 +114,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Institute:     NewInstituteClient(cfg),
 		Profile:       NewProfileClient(cfg),
 		Sector:        NewSectorClient(cfg),
-		Variant:       NewVariantClient(cfg),
 	}, nil
 }
 
@@ -154,7 +148,6 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Institute.Use(hooks...)
 	c.Profile.Use(hooks...)
 	c.Sector.Use(hooks...)
-	c.Variant.Use(hooks...)
 }
 
 // AdjacentTableClient is a client for the AdjacentTable schema.
@@ -242,15 +235,15 @@ func (c *AdjacentTableClient) GetX(ctx context.Context, id int) *AdjacentTable {
 	return obj
 }
 
-// QueryVariant queries the Variant edge of a AdjacentTable.
-func (c *AdjacentTableClient) QueryVariant(at *AdjacentTable) *VariantQuery {
-	query := &VariantQuery{config: c.config}
+// QueryProfile queries the Profile edge of a AdjacentTable.
+func (c *AdjacentTableClient) QueryProfile(at *AdjacentTable) *ProfileQuery {
+	query := &ProfileQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := at.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(adjacenttable.Table, adjacenttable.FieldID, id),
-			sqlgraph.To(variant.Table, variant.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, adjacenttable.VariantTable, adjacenttable.VariantColumn),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, adjacenttable.ProfileTable, adjacenttable.ProfileColumn),
 		)
 		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
 		return fromV, nil
@@ -364,15 +357,31 @@ func (c *DirectionClient) GetX(ctx context.Context, id int) *Direction {
 	return obj
 }
 
-// QueryVariants queries the Variants edge of a Direction.
-func (c *DirectionClient) QueryVariants(d *Direction) *VariantQuery {
-	query := &VariantQuery{config: c.config}
+// QueryInstitute queries the Institute edge of a Direction.
+func (c *DirectionClient) QueryInstitute(d *Direction) *InstituteQuery {
+	query := &InstituteQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := d.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(direction.Table, direction.FieldID, id),
-			sqlgraph.To(variant.Table, variant.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, direction.VariantsTable, direction.VariantsColumn),
+			sqlgraph.To(institute.Table, institute.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, direction.InstituteTable, direction.InstituteColumn),
+		)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProfile queries the Profile edge of a Direction.
+func (c *DirectionClient) QueryProfile(d *Direction) *ProfileQuery {
+	query := &ProfileQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := d.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(direction.Table, direction.FieldID, id),
+			sqlgraph.To(profile.Table, profile.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, direction.ProfileTable, direction.ProfileColumn),
 		)
 		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
@@ -470,15 +479,15 @@ func (c *InstituteClient) GetX(ctx context.Context, id int) *Institute {
 	return obj
 }
 
-// QueryVariants queries the Variants edge of a Institute.
-func (c *InstituteClient) QueryVariants(i *Institute) *VariantQuery {
-	query := &VariantQuery{config: c.config}
+// QueryDirections queries the Directions edge of a Institute.
+func (c *InstituteClient) QueryDirections(i *Institute) *DirectionQuery {
+	query := &DirectionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := i.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(institute.Table, institute.FieldID, id),
-			sqlgraph.To(variant.Table, variant.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, institute.VariantsTable, institute.VariantsColumn),
+			sqlgraph.To(direction.Table, direction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, institute.DirectionsTable, institute.DirectionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
 		return fromV, nil
@@ -576,15 +585,31 @@ func (c *ProfileClient) GetX(ctx context.Context, id int) *Profile {
 	return obj
 }
 
-// QueryVariants queries the Variants edge of a Profile.
-func (c *ProfileClient) QueryVariants(pr *Profile) *VariantQuery {
-	query := &VariantQuery{config: c.config}
+// QueryDirection queries the Direction edge of a Profile.
+func (c *ProfileClient) QueryDirection(pr *Profile) *DirectionQuery {
+	query := &DirectionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := pr.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(profile.Table, profile.FieldID, id),
-			sqlgraph.To(variant.Table, variant.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, profile.VariantsTable, profile.VariantsColumn),
+			sqlgraph.To(direction.Table, direction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, profile.DirectionTable, profile.DirectionColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAdjacentTables queries the AdjacentTables edge of a Profile.
+func (c *ProfileClient) QueryAdjacentTables(pr *Profile) *AdjacentTableQuery {
+	query := &AdjacentTableQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, id),
+			sqlgraph.To(adjacenttable.Table, adjacenttable.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.AdjacentTablesTable, profile.AdjacentTablesColumn),
 		)
 		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
 		return fromV, nil
@@ -701,158 +726,4 @@ func (c *SectorClient) QueryAdjacentTables(s *Sector) *AdjacentTableQuery {
 // Hooks returns the client hooks.
 func (c *SectorClient) Hooks() []Hook {
 	return c.hooks.Sector
-}
-
-// VariantClient is a client for the Variant schema.
-type VariantClient struct {
-	config
-}
-
-// NewVariantClient returns a client for the Variant from the given config.
-func NewVariantClient(c config) *VariantClient {
-	return &VariantClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `variant.Hooks(f(g(h())))`.
-func (c *VariantClient) Use(hooks ...Hook) {
-	c.hooks.Variant = append(c.hooks.Variant, hooks...)
-}
-
-// Create returns a create builder for Variant.
-func (c *VariantClient) Create() *VariantCreate {
-	mutation := newVariantMutation(c.config, OpCreate)
-	return &VariantCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Variant entities.
-func (c *VariantClient) CreateBulk(builders ...*VariantCreate) *VariantCreateBulk {
-	return &VariantCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Variant.
-func (c *VariantClient) Update() *VariantUpdate {
-	mutation := newVariantMutation(c.config, OpUpdate)
-	return &VariantUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *VariantClient) UpdateOne(v *Variant) *VariantUpdateOne {
-	mutation := newVariantMutation(c.config, OpUpdateOne, withVariant(v))
-	return &VariantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *VariantClient) UpdateOneID(id int) *VariantUpdateOne {
-	mutation := newVariantMutation(c.config, OpUpdateOne, withVariantID(id))
-	return &VariantUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Variant.
-func (c *VariantClient) Delete() *VariantDelete {
-	mutation := newVariantMutation(c.config, OpDelete)
-	return &VariantDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *VariantClient) DeleteOne(v *Variant) *VariantDeleteOne {
-	return c.DeleteOneID(v.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *VariantClient) DeleteOneID(id int) *VariantDeleteOne {
-	builder := c.Delete().Where(variant.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &VariantDeleteOne{builder}
-}
-
-// Query returns a query builder for Variant.
-func (c *VariantClient) Query() *VariantQuery {
-	return &VariantQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a Variant entity by its id.
-func (c *VariantClient) Get(ctx context.Context, id int) (*Variant, error) {
-	return c.Query().Where(variant.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *VariantClient) GetX(ctx context.Context, id int) *Variant {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryInsitute queries the Insitute edge of a Variant.
-func (c *VariantClient) QueryInsitute(v *Variant) *InstituteQuery {
-	query := &InstituteQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := v.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(variant.Table, variant.FieldID, id),
-			sqlgraph.To(institute.Table, institute.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, variant.InsituteTable, variant.InsituteColumn),
-		)
-		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryDirection queries the Direction edge of a Variant.
-func (c *VariantClient) QueryDirection(v *Variant) *DirectionQuery {
-	query := &DirectionQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := v.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(variant.Table, variant.FieldID, id),
-			sqlgraph.To(direction.Table, direction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, variant.DirectionTable, variant.DirectionColumn),
-		)
-		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryProfile queries the Profile edge of a Variant.
-func (c *VariantClient) QueryProfile(v *Variant) *ProfileQuery {
-	query := &ProfileQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := v.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(variant.Table, variant.FieldID, id),
-			sqlgraph.To(profile.Table, profile.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, variant.ProfileTable, variant.ProfileColumn),
-		)
-		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryAdjacentTables queries the AdjacentTables edge of a Variant.
-func (c *VariantClient) QueryAdjacentTables(v *Variant) *AdjacentTableQuery {
-	query := &AdjacentTableQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := v.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(variant.Table, variant.FieldID, id),
-			sqlgraph.To(adjacenttable.Table, adjacenttable.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, variant.AdjacentTablesTable, variant.AdjacentTablesColumn),
-		)
-		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *VariantClient) Hooks() []Hook {
-	return c.hooks.Variant
 }

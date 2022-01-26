@@ -98,6 +98,13 @@ func Name(v string) predicate.Profile {
 	})
 }
 
+// DirectionID applies equality check predicate on the "direction_id" field. It's identical to DirectionIDEQ.
+func DirectionID(v int) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDirectionID), v))
+	})
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
@@ -209,25 +216,101 @@ func NameContainsFold(v string) predicate.Profile {
 	})
 }
 
-// HasVariants applies the HasEdge predicate on the "Variants" edge.
-func HasVariants() predicate.Profile {
+// DirectionIDEQ applies the EQ predicate on the "direction_id" field.
+func DirectionIDEQ(v int) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDirectionID), v))
+	})
+}
+
+// DirectionIDNEQ applies the NEQ predicate on the "direction_id" field.
+func DirectionIDNEQ(v int) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDirectionID), v))
+	})
+}
+
+// DirectionIDIn applies the In predicate on the "direction_id" field.
+func DirectionIDIn(vs ...int) predicate.Profile {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Profile(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldDirectionID), v...))
+	})
+}
+
+// DirectionIDNotIn applies the NotIn predicate on the "direction_id" field.
+func DirectionIDNotIn(vs ...int) predicate.Profile {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Profile(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldDirectionID), v...))
+	})
+}
+
+// HasDirection applies the HasEdge predicate on the "Direction" edge.
+func HasDirection() predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(VariantsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, VariantsTable, VariantsColumn),
+			sqlgraph.To(DirectionTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DirectionTable, DirectionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasVariantsWith applies the HasEdge predicate on the "Variants" edge with a given conditions (other predicates).
-func HasVariantsWith(preds ...predicate.Variant) predicate.Profile {
+// HasDirectionWith applies the HasEdge predicate on the "Direction" edge with a given conditions (other predicates).
+func HasDirectionWith(preds ...predicate.Direction) predicate.Profile {
 	return predicate.Profile(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(VariantsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, VariantsTable, VariantsColumn),
+			sqlgraph.To(DirectionInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, DirectionTable, DirectionColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAdjacentTables applies the HasEdge predicate on the "AdjacentTables" edge.
+func HasAdjacentTables() predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AdjacentTablesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AdjacentTablesTable, AdjacentTablesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAdjacentTablesWith applies the HasEdge predicate on the "AdjacentTables" edge with a given conditions (other predicates).
+func HasAdjacentTablesWith(preds ...predicate.AdjacentTable) predicate.Profile {
+	return predicate.Profile(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AdjacentTablesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AdjacentTablesTable, AdjacentTablesColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -1,5 +1,5 @@
 package adjacenttable
-
+ /*
 import (
 	"context"
 	"errors"
@@ -11,7 +11,6 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 	model "github.com/0B1t322/Magic-Circle/models/adjacenttable"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -79,27 +78,18 @@ func (a AdjacentTableController) create(
 		return nil, err
 	}
 
-	d, err := a.createOrGetDirection(ctx, req.Direction)
+	d, err := a.createOrGetDirection(ctx, req.Direction, i)
 	if err != nil {
 		return nil, err
 	}
 
-	p, err := a.createOrGetProfile(ctx, req.Profile)
+	p, err := a.createOrGetProfile(ctx, req.Profile, d)
 	if err != nil {
 		return nil, err
 	}
 
-	v, err := a.createOrGetVariant(
-		ctx,
-		i,
-		d,
-		p,
-	)
-	if err != nil {
-		return nil, err
-	}
 
-	created, err := a.createAdjacentTable(ctx, s, v)
+	created, err := a.createAdjacentTable(ctx, s, p)
 	if err != nil {
 		return nil, err
 	}
@@ -121,27 +111,18 @@ func (a AdjacentTableController) createALot(
 		return nil, err
 	}
 
-	d, err := a.createOrGetDirection(ctx, req.Direction)
+	d, err := a.createOrGetDirection(ctx, req.Direction, i)
 	if err != nil {
 		return nil, err
 	}
 
-	p, err := a.createOrGetProfile(ctx, req.Profile)
+	p, err := a.createOrGetProfile(ctx, req.Profile, d)
 	if err != nil {
 		return nil, err
 	}
 
-	v, err := a.createOrGetVariant(
-		ctx,
-		i,
-		d,
-		p,
-	)
-	if err != nil {
-		return nil, err
-	}
 
-	created, err := a.createAdjacentTables(ctx, s, v)
+	created, err := a.СreateAdjacentTables(ctx, s, p)
 	if err != nil {
 		return nil, err
 	}
@@ -167,14 +148,14 @@ func (a AdjacentTableController) getSectors(ctx context.Context, coords []string
 func (a AdjacentTableController) createAdjacentTable(
 	ctx context.Context,
 	s *ent.Sector,
-	v *ent.Variant,
+	p *ent.Profile,
 ) (*ent.AdjacentTable, error) {
 	_, err := a.Client.AdjacentTable.Query().Where(
 		adjacenttable.HasSectorWith(
 			sector.ID(s.ID),
 		),
-		adjacenttable.HasVariantWith(
-			variant.ID(v.ID),
+		adjacenttable.HasProfileWith(
+			profile.ID(p.ID),
 		),
 	).Only(ctx)
 	if ent.IsNotFound(err) {
@@ -185,14 +166,14 @@ func (a AdjacentTableController) createAdjacentTable(
 		return nil, ErrAdjacentTableExist
 	}
 
-	return a.Client.AdjacentTable.Create().SetSector(s).SetVariant(v).Save(ctx)
+	return a.Client.AdjacentTable.Create().SetSector(s).SetProfile(p).Save(ctx)
 }
 
 // if exist retturn error
-func (a AdjacentTableController) createAdjacentTables(
+func (a AdjacentTableController) СreateAdjacentTables(
 	ctx context.Context,
 	s []*ent.Sector,
-	v *ent.Variant,
+	p *ent.Profile,
 ) ([]*ent.AdjacentTable, error) {
 	ids := func(s []*ent.Sector) (ids []int) {
 		for _, sect := range s {
@@ -205,8 +186,8 @@ func (a AdjacentTableController) createAdjacentTables(
 		adjacenttable.HasSectorWith(
 			sector.IDIn(ids...),
 		),
-		adjacenttable.HasVariantWith(
-			variant.ID(v.ID),
+		adjacenttable.HasProfileWith(
+			profile.ID(p.ID),
 		),
 	).All(ctx)
 	if err != nil {
@@ -220,7 +201,7 @@ func (a AdjacentTableController) createAdjacentTables(
 	var bulk []*ent.AdjacentTableCreate
 	{
 		for _, sect := range s {
-			bulk = append(bulk, a.Client.AdjacentTable.Create().SetSector(sect).SetVariant(v))
+			bulk = append(bulk, a.Client.AdjacentTable.Create().SetSector(sect).SetProfile(p))
 		}
 	}
 
@@ -281,11 +262,13 @@ func (a AdjacentTableController) Create(c *gin.Context) {
 		adjacenttable.ID(created.ID),
 	).
 	WithSector().
-	WithVariant(
-		func(vq *ent.VariantQuery) {
-			vq.WithInsitute().
-			WithDirection().
-			WithProfile()
+	WithProfile(
+		func(vq *ent.ProfileQuery) {
+			vq.WithDirection(
+				func(dq *ent.DirectionQuery) {
+					dq.WithInstitute()
+				},
+			)
 		},
 	).Only(c)
 	if err != nil {
@@ -372,11 +355,13 @@ func (a AdjacentTableController) CreateALot(c *gin.Context) {
 		adjacenttable.IDIn(ids...),
 	).
 	WithSector().
-	WithVariant(
-		func(vq *ent.VariantQuery) {
-			vq.WithInsitute().
-			WithDirection().
-			WithProfile()
+	WithProfile(
+		func(vq *ent.ProfileQuery) {
+			vq.WithDirection(
+				func(dq *ent.DirectionQuery) {
+					dq.WithInstitute()
+				},
+			)
 		},
 	).All(c)
 	if err != nil {
@@ -386,43 +371,43 @@ func (a AdjacentTableController) CreateALot(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, CreateAdjacentTablesResp{AdjacentTables: model.AdjacentTablesFromEnt(get)})
+	c.JSON(http.StatusCreated, CreateAdjacentTablesResp{AdjacentTables: model.AdjacentTdablesFromEnt(get)})
 }
 
-func (a AdjacentTableController) createOrGetVariant(
-	ctx context.Context,
-	i *ent.Institute,
-	d *ent.Direction,
-	p *ent.Profile,
-) (*ent.Variant, error) {
-	v, err := a.Client.Variant.Query().Where(
-		variant.HasDirectionWith(
-			direction.ID(d.ID),
-		),
-		variant.HasInsituteWith(
-			institute.ID(i.ID),
-		),
-		variant.HasProfileWith(
-			profile.ID(p.ID),
-		),
-	).Only(ctx)
+// func (a AdjacentTableController) createOrGetVariant(
+// 	ctx context.Context,
+// 	i *ent.Institute,
+// 	d *ent.Direction,
+// 	p *ent.Profile,
+// ) (*ent.Variant, error) {
+// 	v, err := a.Client.Variant.Query().Where(
+// 		variant.HasDirectionWith(
+// 			direction.ID(d.ID),
+// 		),
+// 		variant.HasInsituteWith(
+// 			institute.ID(i.ID),
+// 		),
+// 		variant.HasProfileWith(
+// 			profile.ID(p.ID),
+// 		),
+// 	).Only(ctx)
 
-	if ent.IsNotFound(err) {
-		v, err := a.Client.Variant.Create().
-			SetDirection(d).
-			SetInsitute(i).
-			SetProfile(p).
-			Save(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
-	} else if err != nil {
-		return nil, err
-	}
+// 	if ent.IsNotFound(err) {
+// 		v, err := a.Client.Variant.Create().
+// 			SetDirection(d).
+// 			SetInsitute(i).
+// 			SetProfile(p).
+// 			Save(ctx)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		return v, nil
+// 	} else if err != nil {
+// 		return nil, err
+// 	}
 
-	return v, nil
-}
+// 	return v, nil
+// }
 
 func (a AdjacentTableController) createOrGetSector(
 	ctx context.Context,
@@ -527,10 +512,11 @@ func (a AdjacentTableController) createInstitute(
 func (a AdjacentTableController) createOrGetProfile(
 	ctx context.Context,
 	name string,
+	dir	*ent.Direction,
 ) (*ent.Profile, error) {
 	i, err := a.getProfile(ctx, name)
 	if err == ErrProfileNotFound {
-		i, err = a.createProfile(ctx, name)
+		i, err = a.createProfile(ctx, name, dir)
 		if err != nil {
 			return nil, err
 		}
@@ -561,9 +547,11 @@ func (a AdjacentTableController) getProfile(
 func (a AdjacentTableController) createProfile(
 	ctx context.Context,
 	name string,
+	dir	*ent.Direction,
 ) (*ent.Profile, error) {
 	i, err := a.Client.Profile.Create().
 		SetName(name).
+		SetDirection(dir).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -575,10 +563,11 @@ func (a AdjacentTableController) createProfile(
 func (a AdjacentTableController) createOrGetDirection(
 	ctx context.Context,
 	name string,
+	inst	*ent.Institute,
 ) (*ent.Direction, error) {
 	i, err := a.getDirection(ctx, name)
 	if err == ErrDirectionNotFound {
-		i, err = a.createDirection(ctx, name)
+		i, err = a.createDirection(ctx, name, inst)
 		if err != nil {
 			return nil, err
 		}
@@ -609,9 +598,11 @@ func (a AdjacentTableController) getDirection(
 func (a AdjacentTableController) createDirection(
 	ctx context.Context,
 	name string,
+	inst	*ent.Institute,
 ) (*ent.Direction, error) {
 	i, err := a.Client.Direction.Create().
 		SetName(name).
+		SetInstitute(inst).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -619,3 +610,24 @@ func (a AdjacentTableController) createDirection(
 
 	return i, nil
 }
+
+type CreateAdjecentTableReq struct {
+	SectorCoords	[]string	`json:"coords"`
+	ProfileID		int			`json:"profile_id"`
+}
+
+func (a AdjacentTableController) CreateAdjecentTable(
+	c *gin.Context,
+) {
+	var req CreateAdjacentTableReq
+	{
+		if err := c.ShouldBind(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected body")
+			c.Abort()
+			return
+		}
+	}
+
+	
+}
+*/

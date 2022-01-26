@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // InstituteQuery is the builder for querying Institute entities.
@@ -27,7 +27,7 @@ type InstituteQuery struct {
 	fields     []string
 	predicates []predicate.Institute
 	// eager-loading edges.
-	withVariants *VariantQuery
+	withDirections *DirectionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -64,9 +64,9 @@ func (iq *InstituteQuery) Order(o ...OrderFunc) *InstituteQuery {
 	return iq
 }
 
-// QueryVariants chains the current query on the "Variants" edge.
-func (iq *InstituteQuery) QueryVariants() *VariantQuery {
-	query := &VariantQuery{config: iq.config}
+// QueryDirections chains the current query on the "Directions" edge.
+func (iq *InstituteQuery) QueryDirections() *DirectionQuery {
+	query := &DirectionQuery{config: iq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := iq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -77,8 +77,8 @@ func (iq *InstituteQuery) QueryVariants() *VariantQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(institute.Table, institute.FieldID, selector),
-			sqlgraph.To(variant.Table, variant.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, institute.VariantsTable, institute.VariantsColumn),
+			sqlgraph.To(direction.Table, direction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, institute.DirectionsTable, institute.DirectionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
 		return fromU, nil
@@ -262,26 +262,26 @@ func (iq *InstituteQuery) Clone() *InstituteQuery {
 		return nil
 	}
 	return &InstituteQuery{
-		config:       iq.config,
-		limit:        iq.limit,
-		offset:       iq.offset,
-		order:        append([]OrderFunc{}, iq.order...),
-		predicates:   append([]predicate.Institute{}, iq.predicates...),
-		withVariants: iq.withVariants.Clone(),
+		config:         iq.config,
+		limit:          iq.limit,
+		offset:         iq.offset,
+		order:          append([]OrderFunc{}, iq.order...),
+		predicates:     append([]predicate.Institute{}, iq.predicates...),
+		withDirections: iq.withDirections.Clone(),
 		// clone intermediate query.
 		sql:  iq.sql.Clone(),
 		path: iq.path,
 	}
 }
 
-// WithVariants tells the query-builder to eager-load the nodes that are connected to
-// the "Variants" edge. The optional arguments are used to configure the query builder of the edge.
-func (iq *InstituteQuery) WithVariants(opts ...func(*VariantQuery)) *InstituteQuery {
-	query := &VariantQuery{config: iq.config}
+// WithDirections tells the query-builder to eager-load the nodes that are connected to
+// the "Directions" edge. The optional arguments are used to configure the query builder of the edge.
+func (iq *InstituteQuery) WithDirections(opts ...func(*DirectionQuery)) *InstituteQuery {
+	query := &DirectionQuery{config: iq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	iq.withVariants = query
+	iq.withDirections = query
 	return iq
 }
 
@@ -351,7 +351,7 @@ func (iq *InstituteQuery) sqlAll(ctx context.Context) ([]*Institute, error) {
 		nodes       = []*Institute{}
 		_spec       = iq.querySpec()
 		loadedTypes = [1]bool{
-			iq.withVariants != nil,
+			iq.withDirections != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -374,28 +374,28 @@ func (iq *InstituteQuery) sqlAll(ctx context.Context) ([]*Institute, error) {
 		return nodes, nil
 	}
 
-	if query := iq.withVariants; query != nil {
+	if query := iq.withDirections; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*Institute)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Variants = []*Variant{}
+			nodes[i].Edges.Directions = []*Direction{}
 		}
-		query.Where(predicate.Variant(func(s *sql.Selector) {
-			s.Where(sql.InValues(institute.VariantsColumn, fks...))
+		query.Where(predicate.Direction(func(s *sql.Selector) {
+			s.Where(sql.InValues(institute.DirectionsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.InsituteID
+			fk := n.InstituteID
 			node, ok := nodeids[fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "insitute_id" returned %v for node %v`, fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "institute_id" returned %v for node %v`, fk, n.ID)
 			}
-			node.Edges.Variants = append(node.Edges.Variants, n)
+			node.Edges.Directions = append(node.Edges.Directions, n)
 		}
 	}
 

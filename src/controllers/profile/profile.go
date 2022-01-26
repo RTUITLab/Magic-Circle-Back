@@ -2,15 +2,19 @@ package profile
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
-	"github.com/0B1t322/Magic-Circle/controllers/utils"
 	"github.com/0B1t322/Magic-Circle/ent"
+	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 	. "github.com/0B1t322/Magic-Circle/models/profile"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+)
+
+var (
+	ProfileNotFound = errors.New("Profile not found")
 )
 
 func newLogFields(method string, err error) log.Fields {
@@ -100,7 +104,7 @@ func (p ProfileController) DeleteByID(c *gin.Context) {
 			return
 		}
 	}
-	if err := utils.DeleteVariant(c, p.Client, variant.HasProfileWith(profile.ID(req.ID))); ent.IsNotFound(err) {
+	if _, err := p.Client.AdjacentTable.Delete().Where(adjacenttable.HasProfileWith(profile.ID(req.ID))).Exec(c); ent.IsNotFound(err) {
 		// Pass
 	} else if err != nil {
 		log.WithFields(newLogFields("Delete", err)).Error("Failed to delete profile")
@@ -121,4 +125,73 @@ func (p ProfileController) DeleteByID(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+type UpdateProfileReq struct {
+	ID   int    `json:"-" uri:"id" swaggerignore:"true"`
+	Name string `json:"name"`
+}
+
+type UpdateProfileResp struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+
+// UpdateProfile
+// 
+// @Summary Update profile
+// 
+// @Description update profile
+// 
+// @Router /v1/profile/{id} [put]
+// 
+// @Accept json
+// 
+// @Produce json
+// 
+// @Param id path int true "id of profile"
+// 
+// @Param body body profile.UpdateProfileReq true "body"
+// 
+// @Success 200 {object} profile.UpdateProfileResp
+// 
+// @Failure 400
+// @Failure 404
+// @Failure 500
+func (p ProfileController) UpdateProfile(c *gin.Context) {
+	var req UpdateProfileReq
+	{
+		if err := c.ShouldBindUri(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+	}
+
+	updated, err := p.Client.Profile.UpdateOneID(req.ID).SetName(req.Name).Save(c)
+	if ent.IsNotFound(err) {
+		c.String(http.StatusNotFound, ProfileNotFound.Error())
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("Update", err)).Error("Failed to update Profile")
+		c.String(http.StatusInternalServerError, "Failed to update Profile")
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		UpdateProfileResp{
+			ID: updated.ID,
+			Name: updated.Name,
+		},
+	)
 }

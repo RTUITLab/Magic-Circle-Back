@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // AdjacentTableUpdate is the builder for updating AdjacentTable entities.
@@ -35,15 +35,15 @@ func (atu *AdjacentTableUpdate) SetSectorID(i int) *AdjacentTableUpdate {
 	return atu
 }
 
-// SetVariantID sets the "variant_id" field.
-func (atu *AdjacentTableUpdate) SetVariantID(i int) *AdjacentTableUpdate {
-	atu.mutation.SetVariantID(i)
+// SetProfileID sets the "profile_id" field.
+func (atu *AdjacentTableUpdate) SetProfileID(i int) *AdjacentTableUpdate {
+	atu.mutation.SetProfileID(i)
 	return atu
 }
 
-// SetVariant sets the "Variant" edge to the Variant entity.
-func (atu *AdjacentTableUpdate) SetVariant(v *Variant) *AdjacentTableUpdate {
-	return atu.SetVariantID(v.ID)
+// SetProfile sets the "Profile" edge to the Profile entity.
+func (atu *AdjacentTableUpdate) SetProfile(p *Profile) *AdjacentTableUpdate {
+	return atu.SetProfileID(p.ID)
 }
 
 // SetSector sets the "Sector" edge to the Sector entity.
@@ -56,9 +56,9 @@ func (atu *AdjacentTableUpdate) Mutation() *AdjacentTableMutation {
 	return atu.mutation
 }
 
-// ClearVariant clears the "Variant" edge to the Variant entity.
-func (atu *AdjacentTableUpdate) ClearVariant() *AdjacentTableUpdate {
-	atu.mutation.ClearVariant()
+// ClearProfile clears the "Profile" edge to the Profile entity.
+func (atu *AdjacentTableUpdate) ClearProfile() *AdjacentTableUpdate {
+	atu.mutation.ClearProfile()
 	return atu
 }
 
@@ -130,8 +130,8 @@ func (atu *AdjacentTableUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (atu *AdjacentTableUpdate) check() error {
-	if _, ok := atu.mutation.VariantID(); atu.mutation.VariantCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"Variant\"")
+	if _, ok := atu.mutation.ProfileID(); atu.mutation.ProfileCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"Profile\"")
 	}
 	if _, ok := atu.mutation.SectorID(); atu.mutation.SectorCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"Sector\"")
@@ -157,33 +157,33 @@ func (atu *AdjacentTableUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			}
 		}
 	}
-	if atu.mutation.VariantCleared() {
+	if atu.mutation.ProfileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   adjacenttable.VariantTable,
-			Columns: []string{adjacenttable.VariantColumn},
+			Table:   adjacenttable.ProfileTable,
+			Columns: []string{adjacenttable.ProfileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: profile.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := atu.mutation.VariantIDs(); len(nodes) > 0 {
+	if nodes := atu.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   adjacenttable.VariantTable,
-			Columns: []string{adjacenttable.VariantColumn},
+			Table:   adjacenttable.ProfileTable,
+			Columns: []string{adjacenttable.ProfileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: profile.FieldID,
 				},
 			},
 		}
@@ -252,15 +252,15 @@ func (atuo *AdjacentTableUpdateOne) SetSectorID(i int) *AdjacentTableUpdateOne {
 	return atuo
 }
 
-// SetVariantID sets the "variant_id" field.
-func (atuo *AdjacentTableUpdateOne) SetVariantID(i int) *AdjacentTableUpdateOne {
-	atuo.mutation.SetVariantID(i)
+// SetProfileID sets the "profile_id" field.
+func (atuo *AdjacentTableUpdateOne) SetProfileID(i int) *AdjacentTableUpdateOne {
+	atuo.mutation.SetProfileID(i)
 	return atuo
 }
 
-// SetVariant sets the "Variant" edge to the Variant entity.
-func (atuo *AdjacentTableUpdateOne) SetVariant(v *Variant) *AdjacentTableUpdateOne {
-	return atuo.SetVariantID(v.ID)
+// SetProfile sets the "Profile" edge to the Profile entity.
+func (atuo *AdjacentTableUpdateOne) SetProfile(p *Profile) *AdjacentTableUpdateOne {
+	return atuo.SetProfileID(p.ID)
 }
 
 // SetSector sets the "Sector" edge to the Sector entity.
@@ -273,9 +273,9 @@ func (atuo *AdjacentTableUpdateOne) Mutation() *AdjacentTableMutation {
 	return atuo.mutation
 }
 
-// ClearVariant clears the "Variant" edge to the Variant entity.
-func (atuo *AdjacentTableUpdateOne) ClearVariant() *AdjacentTableUpdateOne {
-	atuo.mutation.ClearVariant()
+// ClearProfile clears the "Profile" edge to the Profile entity.
+func (atuo *AdjacentTableUpdateOne) ClearProfile() *AdjacentTableUpdateOne {
+	atuo.mutation.ClearProfile()
 	return atuo
 }
 
@@ -354,8 +354,8 @@ func (atuo *AdjacentTableUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (atuo *AdjacentTableUpdateOne) check() error {
-	if _, ok := atuo.mutation.VariantID(); atuo.mutation.VariantCleared() && !ok {
-		return errors.New("ent: clearing a required unique edge \"Variant\"")
+	if _, ok := atuo.mutation.ProfileID(); atuo.mutation.ProfileCleared() && !ok {
+		return errors.New("ent: clearing a required unique edge \"Profile\"")
 	}
 	if _, ok := atuo.mutation.SectorID(); atuo.mutation.SectorCleared() && !ok {
 		return errors.New("ent: clearing a required unique edge \"Sector\"")
@@ -398,33 +398,33 @@ func (atuo *AdjacentTableUpdateOne) sqlSave(ctx context.Context) (_node *Adjacen
 			}
 		}
 	}
-	if atuo.mutation.VariantCleared() {
+	if atuo.mutation.ProfileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   adjacenttable.VariantTable,
-			Columns: []string{adjacenttable.VariantColumn},
+			Table:   adjacenttable.ProfileTable,
+			Columns: []string{adjacenttable.ProfileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: profile.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := atuo.mutation.VariantIDs(); len(nodes) > 0 {
+	if nodes := atuo.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   adjacenttable.VariantTable,
-			Columns: []string{adjacenttable.VariantColumn},
+			Table:   adjacenttable.ProfileTable,
+			Columns: []string{adjacenttable.ProfileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: profile.FieldID,
 				},
 			},
 		}

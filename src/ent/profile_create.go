@@ -9,8 +9,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
 )
 
 // ProfileCreate is the builder for creating a Profile entity.
@@ -26,19 +27,30 @@ func (pc *ProfileCreate) SetName(s string) *ProfileCreate {
 	return pc
 }
 
-// AddVariantIDs adds the "Variants" edge to the Variant entity by IDs.
-func (pc *ProfileCreate) AddVariantIDs(ids ...int) *ProfileCreate {
-	pc.mutation.AddVariantIDs(ids...)
+// SetDirectionID sets the "direction_id" field.
+func (pc *ProfileCreate) SetDirectionID(i int) *ProfileCreate {
+	pc.mutation.SetDirectionID(i)
 	return pc
 }
 
-// AddVariants adds the "Variants" edges to the Variant entity.
-func (pc *ProfileCreate) AddVariants(v ...*Variant) *ProfileCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetDirection sets the "Direction" edge to the Direction entity.
+func (pc *ProfileCreate) SetDirection(d *Direction) *ProfileCreate {
+	return pc.SetDirectionID(d.ID)
+}
+
+// AddAdjacentTableIDs adds the "AdjacentTables" edge to the AdjacentTable entity by IDs.
+func (pc *ProfileCreate) AddAdjacentTableIDs(ids ...int) *ProfileCreate {
+	pc.mutation.AddAdjacentTableIDs(ids...)
+	return pc
+}
+
+// AddAdjacentTables adds the "AdjacentTables" edges to the AdjacentTable entity.
+func (pc *ProfileCreate) AddAdjacentTables(a ...*AdjacentTable) *ProfileCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return pc.AddVariantIDs(ids...)
+	return pc.AddAdjacentTableIDs(ids...)
 }
 
 // Mutation returns the ProfileMutation object of the builder.
@@ -114,6 +126,12 @@ func (pc *ProfileCreate) check() error {
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "name"`)}
 	}
+	if _, ok := pc.mutation.DirectionID(); !ok {
+		return &ValidationError{Name: "direction_id", err: errors.New(`ent: missing required field "direction_id"`)}
+	}
+	if _, ok := pc.mutation.DirectionID(); !ok {
+		return &ValidationError{Name: "Direction", err: errors.New("ent: missing required edge \"Direction\"")}
+	}
 	return nil
 }
 
@@ -149,17 +167,37 @@ func (pc *ProfileCreate) createSpec() (*Profile, *sqlgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if nodes := pc.mutation.VariantsIDs(); len(nodes) > 0 {
+	if nodes := pc.mutation.DirectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   profile.VariantsTable,
-			Columns: []string{profile.VariantsColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   profile.DirectionTable,
+			Columns: []string{profile.DirectionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: variant.FieldID,
+					Column: direction.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.DirectionID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.AdjacentTablesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   profile.AdjacentTablesTable,
+			Columns: []string{profile.AdjacentTablesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: adjacenttable.FieldID,
 				},
 			},
 		}

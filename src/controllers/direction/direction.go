@@ -2,15 +2,19 @@ package direction
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
-	"github.com/0B1t322/Magic-Circle/controllers/utils"
 	"github.com/0B1t322/Magic-Circle/ent"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
-	"github.com/0B1t322/Magic-Circle/ent/variant"
+	"github.com/0B1t322/Magic-Circle/ent/profile"
 	. "github.com/0B1t322/Magic-Circle/models/direction"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+)
+
+var (
+	DirectionNotFound = errors.New("Direction not found")
 )
 
 func newLogFields(method string, err error) log.Fields {
@@ -32,7 +36,7 @@ func New(client *ent.Client) *DirectionController {
 }
 
 func (d DirectionController) getAll(ctx context.Context) ([]*ent.Direction, error) {
-	return d.Client.Direction.Query().All(ctx)
+	return d.Client.Direction.Query().WithInstitute().WithProfile().All(ctx)
 }
 
 type GetDirectionsReq struct {
@@ -102,8 +106,19 @@ func (p DirectionController) DeleteByID(c *gin.Context) {
 			return
 		}
 	}
-	if err := utils.DeleteVariant(c, p.Client, variant.HasDirectionWith(direction.ID(req.ID))); ent.IsNotFound(err) {
+
+	// Если у направления есть профиль то нельзя удалить
+	if _, err := p.Client.Profile.Query().Where(
+		profile.HasDirectionWith(
+			direction.ID(req.ID),
+		),
+	).All(c); ent.IsNotFound(err) {
 		// Pass
+		// Можно удалять мы не нашли профилей
+	} else if !ent.IsNotFound(err) {
+		c.String(http.StatusBadRequest, "Direction has profiles")
+		c.Abort()
+		return
 	} else if err != nil {
 		log.WithFields(newLogFields("Delete", err)).Error("Failed to delete Direction")
 		c.String(http.StatusInternalServerError, "Failed to delete Direction")
@@ -123,4 +138,73 @@ func (p DirectionController) DeleteByID(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+type UpdateDirectionReq struct {
+	ID   int    `json:"-" uri:"id" swaggerignore:"true"`
+	Name string `json:"name"`
+}
+
+type UpdateDirectionResp struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+
+// UpdateDirection
+// 
+// @Summary Update dirction
+// 
+// @Description update direction
+// 
+// @Router /v1/direction/{id} [put]
+// 
+// @Accept json
+// 
+// @Produce json
+// 
+// @Param id path int true "id of direction"
+// 
+// @Param body body direction.UpdateDirectionReq true "body"
+// 
+// @Success 200 {object} direction.UpdateDirectionResp
+// 
+// @Failure 400
+// @Failure 404
+// @Failure 500
+func (d DirectionController) UpdateDirection(c *gin.Context) {
+	var req UpdateDirectionReq
+	{
+		if err := c.ShouldBindUri(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+	}
+
+	updated, err := d.Client.Direction.UpdateOneID(req.ID).SetName(req.Name).Save(c)
+	if ent.IsNotFound(err) {
+		c.String(http.StatusNotFound, DirectionNotFound.Error())
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("Update", err)).Error("Failed to update Direction")
+		c.String(http.StatusInternalServerError, "Failed to update Direction")
+		c.Abort()
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		UpdateDirectionResp{
+			ID: updated.ID,
+			Name: updated.Name,
+		},
+	)
 }

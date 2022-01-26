@@ -209,25 +209,25 @@ func NameContainsFold(v string) predicate.Institute {
 	})
 }
 
-// HasVariants applies the HasEdge predicate on the "Variants" edge.
-func HasVariants() predicate.Institute {
+// HasDirections applies the HasEdge predicate on the "Directions" edge.
+func HasDirections() predicate.Institute {
 	return predicate.Institute(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(VariantsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, VariantsTable, VariantsColumn),
+			sqlgraph.To(DirectionsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DirectionsTable, DirectionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasVariantsWith applies the HasEdge predicate on the "Variants" edge with a given conditions (other predicates).
-func HasVariantsWith(preds ...predicate.Variant) predicate.Institute {
+// HasDirectionsWith applies the HasEdge predicate on the "Directions" edge with a given conditions (other predicates).
+func HasDirectionsWith(preds ...predicate.Direction) predicate.Institute {
 	return predicate.Institute(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(VariantsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, VariantsTable, VariantsColumn),
+			sqlgraph.To(DirectionsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DirectionsTable, DirectionsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
