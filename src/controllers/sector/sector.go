@@ -404,3 +404,72 @@ func (s SectorController) DeleteSector(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 }
+
+type CreateSectorsReq struct {
+
+}
+
+func (s SectorController) createALot(ctx context.Context, reqs []CreateSectorReq) ([]*ent.Sector, error) {
+	var builders []*ent.SectorCreate
+
+	for _, req := range reqs {
+		builders = append(
+			builders, 
+			s.Client.Sector.Create().SetCoords(req.Coords).SetDescription(req.Description),
+		)	
+	}
+
+	created, err := s.Client.Sector.CreateBulk(builders...).Save(ctx)
+	if ent.IsConstraintError(err) {
+		return nil, ErrSectorExist
+	} else if err != nil {
+		return nil, err
+	}
+
+	return created, nil
+}
+
+
+// CreateSectors
+//
+// @Summary Create Sectors
+//
+// @Description create sectors
+//
+// @Router /v1/sectors [post]
+//
+// @Accept json
+// 
+// @Produce json
+// 
+// @Param body body []sector.CreateSectorReq true "body"
+//
+// @Success 201 {array} sector.Sector
+//
+// @Failure 500 {string} srting
+// 
+// @Failure 400 {string} srting
+func (s SectorController) CreateSectors(c *gin.Context) {
+	var reqs []CreateSectorReq
+	{
+		if err := c.ShouldBindJSON(&reqs); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected body")
+			c.Abort()
+			return
+		}
+	}
+
+	created, err := s.createALot(c, reqs)
+	if err == ErrSectorExist {
+		c.String(http.StatusBadRequest, err.Error())
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("CreateALot", err)).Error("Failed to create sectors")
+		c.String(http.StatusInternalServerError, "Failed to create sectors")
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusCreated, NewSectors(created))
+}
