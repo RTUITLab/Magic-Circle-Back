@@ -405,14 +405,71 @@ func (s SectorController) DeleteSector(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-type CreateSectorsReq struct {
+type CreateSectorsReq []CreateSectorReq
 
+func (c CreateSectorsReq) getUnique(slice []CreateSectorReq) (sliceOfUnique CreateSectorsReq) {
+	var twoSlices []CreateSectorReq
+	{
+		twoSlices = append(twoSlices, slice...)
+		twoSlices = append(twoSlices, c...)
+	}
+
+	mapByCoords := map[string]CreateSectorReq{}
+	{
+		for _, req := range twoSlices {
+			if _, find := mapByCoords[req.Coords]; !find {
+				mapByCoords[req.Coords] = req
+			} else if find {
+				delete(mapByCoords, req.Coords)
+			}
+		}
+	}
+
+	for _, req := range mapByCoords {
+		sliceOfUnique = append(sliceOfUnique, req)
+	}
+
+	return sliceOfUnique
 }
+
+func (s SectorController) deleteSectorsThatExist(ctx context.Context, reqs []CreateSectorReq) ([]CreateSectorReq, error) {
+	coords := func(reqs []CreateSectorReq) (slice []string) {
+		for _, req := range reqs {
+			slice = append(slice, req.Coords)
+		}
+		return slice
+	}(reqs)
+
+	sectorThatExist, err := s.Client.Sector.Query().Where(
+		sector.CoordsIn(coords...),
+	).All(ctx)
+	if ent.IsNotFound(err) {
+		return reqs, nil
+	} else if err != nil {
+		return nil, err
+	}
+	
+	findedSectors := func(finded []*ent.Sector) (slice []CreateSectorReq) {
+		for _, find := range finded {
+			slice = append(slice, CreateSectorReq{Coords: find.Coords, Description: find.Description})
+		}
+		return slice
+	}(sectorThatExist)
+
+	return CreateSectorsReq(reqs).getUnique(findedSectors), nil
+}
+
+
 
 func (s SectorController) createALot(ctx context.Context, reqs []CreateSectorReq) ([]*ent.Sector, error) {
 	var builders []*ent.SectorCreate
-
-	for _, req := range reqs {
+	
+	filteredReqs, err := s.deleteSectorsThatExist(ctx, reqs)
+	if err != nil {
+		return nil, err
+	}
+	
+	for _, req := range filteredReqs {
 		builders = append(
 			builders, 
 			s.Client.Sector.Create().SetCoords(req.Coords).SetDescription(req.Description),
