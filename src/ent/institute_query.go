@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/admin"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
@@ -28,6 +29,7 @@ type InstituteQuery struct {
 	predicates []predicate.Institute
 	// eager-loading edges.
 	withDirections *DirectionQuery
+	withAdmins     *AdminQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +81,28 @@ func (iq *InstituteQuery) QueryDirections() *DirectionQuery {
 			sqlgraph.From(institute.Table, institute.FieldID, selector),
 			sqlgraph.To(direction.Table, direction.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, institute.DirectionsTable, institute.DirectionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAdmins chains the current query on the "Admins" edge.
+func (iq *InstituteQuery) QueryAdmins() *AdminQuery {
+	query := &AdminQuery{config: iq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := iq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := iq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(institute.Table, institute.FieldID, selector),
+			sqlgraph.To(admin.Table, admin.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, institute.AdminsTable, institute.AdminsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(iq.driver.Dialect(), step)
 		return fromU, nil
@@ -268,6 +292,7 @@ func (iq *InstituteQuery) Clone() *InstituteQuery {
 		order:          append([]OrderFunc{}, iq.order...),
 		predicates:     append([]predicate.Institute{}, iq.predicates...),
 		withDirections: iq.withDirections.Clone(),
+		withAdmins:     iq.withAdmins.Clone(),
 		// clone intermediate query.
 		sql:  iq.sql.Clone(),
 		path: iq.path,
@@ -282,6 +307,17 @@ func (iq *InstituteQuery) WithDirections(opts ...func(*DirectionQuery)) *Institu
 		opt(query)
 	}
 	iq.withDirections = query
+	return iq
+}
+
+// WithAdmins tells the query-builder to eager-load the nodes that are connected to
+// the "Admins" edge. The optional arguments are used to configure the query builder of the edge.
+func (iq *InstituteQuery) WithAdmins(opts ...func(*AdminQuery)) *InstituteQuery {
+	query := &AdminQuery{config: iq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	iq.withAdmins = query
 	return iq
 }
 
@@ -350,8 +386,9 @@ func (iq *InstituteQuery) sqlAll(ctx context.Context) ([]*Institute, error) {
 	var (
 		nodes       = []*Institute{}
 		_spec       = iq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			iq.withDirections != nil,
+			iq.withAdmins != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -396,6 +433,31 @@ func (iq *InstituteQuery) sqlAll(ctx context.Context) ([]*Institute, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "institute_id" returned %v for node %v`, fk, n.ID)
 			}
 			node.Edges.Directions = append(node.Edges.Directions, n)
+		}
+	}
+
+	if query := iq.withAdmins; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*Institute)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Admins = []*Admin{}
+		}
+		query.Where(predicate.Admin(func(s *sql.Selector) {
+			s.Where(sql.InValues(institute.AdminsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.InstituteID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "institute_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.Admins = append(node.Edges.Admins, n)
 		}
 	}
 

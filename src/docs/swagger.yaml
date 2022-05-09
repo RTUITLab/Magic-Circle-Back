@@ -1,5 +1,41 @@
 basePath: /api/magic-circle
 definitions:
+  auth.CreateAdminReq:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  auth.CreateAdminResp:
+    properties:
+      id:
+        type: integer
+      intstituteId:
+        type: integer
+      login:
+        type: string
+    type: object
+  auth.LoginReq:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  auth.LoginResp:
+    properties:
+      expire:
+        type: string
+      token:
+        type: string
+    type: object
   direction.Direction:
     properties:
       id:
@@ -210,6 +246,8 @@ paths:
             type: string
         "500":
           description: ""
+      security:
+      - ApiKeyAuth: []
       summary: delete relate between profile and sectors
     post:
       consumes:
@@ -241,7 +279,72 @@ paths:
             type: string
         "500":
           description: ""
+      security:
+      - ApiKeyAuth: []
       summary: create institute or direction or profile
+  /v1/auth/admin/{intstitute_id}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.CreateAdminReq'
+      - description: id of institute
+        in: path
+        name: intstitute_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/auth.CreateAdminResp'
+      security:
+      - ApiKeyAuth: []
+      summary: create admin
+      tags:
+      - auth
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResp'
+      summary: login admin or super admin
+      tags:
+      - auth
+  /v1/auth/refreshToken:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResp'
+      security:
+      - ApiKeyAuth: []
+      summary: login admin or super admin
+      tags:
+      - auth
   /v1/direction:
     get:
       description: return all directions
@@ -257,6 +360,8 @@ paths:
           schema:
             type: string
       summary: Get all directions
+      tags:
+      - direction
   /v1/direction/{id}:
     delete:
       description: Delete Direction by id
@@ -283,7 +388,11 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Delete Direction by id
+      tags:
+      - direction
     put:
       consumes:
       - application/json
@@ -313,7 +422,11 @@ paths:
           description: ""
         "500":
           description: ""
+      security:
+      - ApiKeyAuth: []
       summary: Update dirction
+      tags:
+      - direction
   /v1/institute:
     get:
       description: return all institutes
@@ -329,6 +442,8 @@ paths:
           schema:
             type: string
       summary: Get all institutes
+      tags:
+      - institute
   /v1/institute/{id}:
     delete:
       description: Delete Institute by id
@@ -355,7 +470,11 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Delete Institute by id
+      tags:
+      - institute
     put:
       consumes:
       - application/json
@@ -385,7 +504,11 @@ paths:
           description: ""
         "500":
           description: ""
+      security:
+      - ApiKeyAuth: []
       summary: Update institute
+      tags:
+      - institute
   /v1/profile:
     get:
       description: return all profiles
@@ -401,6 +524,8 @@ paths:
           schema:
             type: string
       summary: Get all profiles
+      tags:
+      - profile
   /v1/profile/{id}:
     delete:
       description: Delete profile by id
@@ -427,7 +552,11 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Delete profile by id
+      tags:
+      - profile
     put:
       consumes:
       - application/json
@@ -457,7 +586,11 @@ paths:
           description: ""
         "500":
           description: ""
+      security:
+      - ApiKeyAuth: []
       summary: Update profile
+      tags:
+      - profile
   /v1/sector:
     get:
       description: |-
@@ -489,6 +622,8 @@ paths:
           schema:
             type: string
       summary: Get Sectors
+      tags:
+      - sector
     post:
       consumes:
       - application/json
@@ -513,7 +648,11 @@ paths:
           description: Bad Request
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Create Sector
+      tags:
+      - sector
   /v1/sector/{id}:
     delete:
       description: delete sector and all adjacenttables that relate with this sector
@@ -536,7 +675,11 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Delete Sector
+      tags:
+      - sector
     put:
       consumes:
       - application/json
@@ -564,7 +707,11 @@ paths:
           description: Bad Request
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Update Sector
+      tags:
+      - sector
   /v1/sectors:
     post:
       consumes:
@@ -596,7 +743,11 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Create Sectors
+      tags:
+      - sector
 securityDefinitions:
   ApiKeyAuth:
     in: header

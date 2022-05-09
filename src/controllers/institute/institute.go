@@ -8,6 +8,8 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	. "github.com/0B1t322/Magic-Circle/models/institute"
+	"github.com/0B1t322/Magic-Circle/models/role"
+	"github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -60,6 +62,8 @@ type GetInstitutesResp struct {
 // GetAll
 //
 // @Summary Get all institutes
+// 
+// @Tags institute
 //
 // @Description return all institutes
 //
@@ -92,6 +96,10 @@ type DeleteInstituteByID struct {
 //
 // @Description Delete Institute by id
 //
+// @Tags institute
+// 
+// @Security ApiKeyAuth
+// 
 // @Router /v1/institute/{id} [delete]
 //
 // @Param id path int true "id of institute"
@@ -115,6 +123,18 @@ func (p InstituteController) DeleteByID(c *gin.Context) {
 			return
 		}
 	}
+
+	claims := jwt.ExtractClaims(c)
+	// Check that user is admin and if its admin and they try to create intitite or pass not their institute
+	// Pass error
+	if claims["role"].(string) == string(role.ADMIN) {
+		if float64(req.ID) != claims["intstituteId"].(float64){
+			c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
+			c.Abort()
+			return
+		}
+	}
+
 	// Если у направления есть профиль то нельзя удалить
 	if insts, err := p.Client.Institute.Query().Where(
 		institute.And(
@@ -168,6 +188,10 @@ type UpdateInstituteResp struct {
 // 
 // @Router /v1/institute/{id} [put]
 // 
+// @Tags institute
+// 
+// @Security ApiKeyAuth
+// 
 // @Accept json
 // 
 // @Produce json
@@ -194,6 +218,17 @@ func (i InstituteController) UpdateInstitute(
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+	}
+
+	claims := jwt.ExtractClaims(c)
+	// Check that user is admin and if its admin and they try to create intitite or pass not their institute
+	// Pass error
+	if claims["role"].(string) == string(role.ADMIN) {
+		if float64(req.ID) != claims["intstituteId"].(float64){
+			c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
 			c.Abort()
 			return
 		}

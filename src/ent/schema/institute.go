@@ -30,5 +30,6 @@ func (Institute) Annotations() []schema.Annotation {
 func (Institute) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("Directions", Direction.Type),
+		edge.To("Admins", Admin.Type),
 	}
 }

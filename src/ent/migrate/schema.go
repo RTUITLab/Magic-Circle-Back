@@ -35,6 +35,27 @@ var (
 			},
 		},
 	}
+	// AdminColumns holds the columns for the "Admin" table.
+	AdminColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "login", Type: field.TypeString, Unique: true},
+		{Name: "password", Type: field.TypeString},
+		{Name: "institute_id", Type: field.TypeInt, Nullable: true},
+	}
+	// AdminTable holds the schema information for the "Admin" table.
+	AdminTable = &schema.Table{
+		Name:       "Admin",
+		Columns:    AdminColumns,
+		PrimaryKey: []*schema.Column{AdminColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "Admin_Institute_Admins",
+				Columns:    []*schema.Column{AdminColumns[3]},
+				RefColumns: []*schema.Column{InstituteColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// DirectionColumns holds the columns for the "Direction" table.
 	DirectionColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -98,13 +119,28 @@ var (
 		Columns:    SectorColumns,
 		PrimaryKey: []*schema.Column{SectorColumns[0]},
 	}
+	// SuperAdminColumns holds the columns for the "SuperAdmin" table.
+	SuperAdminColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "login", Type: field.TypeString, Unique: true},
+		{Name: "password", Type: field.TypeString},
+		{Name: "email", Type: field.TypeString, Nullable: true},
+	}
+	// SuperAdminTable holds the schema information for the "SuperAdmin" table.
+	SuperAdminTable = &schema.Table{
+		Name:       "SuperAdmin",
+		Columns:    SuperAdminColumns,
+		PrimaryKey: []*schema.Column{SuperAdminColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AdjacentTableTable,
+		AdminTable,
 		DirectionTable,
 		InstituteTable,
 		ProfileTable,
 		SectorTable,
+		SuperAdminTable,
 	}
 )
 
@@ -113,6 +149,10 @@ func init() {
 	AdjacentTableTable.ForeignKeys[1].RefTable = SectorTable
 	AdjacentTableTable.Annotation = &entsql.Annotation{
 		Table: "AdjacentTable",
+	}
+	AdminTable.ForeignKeys[0].RefTable = InstituteTable
+	AdminTable.Annotation = &entsql.Annotation{
+		Table: "Admin",
 	}
 	DirectionTable.ForeignKeys[0].RefTable = InstituteTable
 	DirectionTable.Annotation = &entsql.Annotation{
@@ -127,5 +167,8 @@ func init() {
 	}
 	SectorTable.Annotation = &entsql.Annotation{
 		Table: "Sector",
+	}
+	SuperAdminTable.Annotation = &entsql.Annotation{
+		Table: "SuperAdmin",
 	}
 }

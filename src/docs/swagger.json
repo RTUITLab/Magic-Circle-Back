@@ -10,6 +10,11 @@
     "paths": {
         "/v1/": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "to create only institute you need to put into body only name of institute according to schema\nto create some relation you need to put to institute id and put into direction name",
                 "consumes": [
                     "application/json"
@@ -54,6 +59,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -94,11 +104,116 @@
                 }
             }
         },
+        "/v1/auth/admin/{intstitute_id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "create admin",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.CreateAdminReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "id of institute",
+                        "name": "intstitute_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/auth.CreateAdminResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/login": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "login admin or super admin",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/refreshToken": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "login admin or super admin",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/auth.LoginResp"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/direction": {
             "get": {
                 "description": "return all directions",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "direction"
                 ],
                 "summary": "Get all directions",
                 "responses": {
@@ -119,12 +234,20 @@
         },
         "/v1/direction/{id}": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "update direction",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "direction"
                 ],
                 "summary": "Update dirction",
                 "parameters": [
@@ -164,9 +287,17 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete Direction by id",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "direction"
                 ],
                 "summary": "Delete Direction by id",
                 "parameters": [
@@ -209,6 +340,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "institute"
+                ],
                 "summary": "Get all institutes",
                 "responses": {
                     "200": {
@@ -228,12 +362,20 @@
         },
         "/v1/institute/{id}": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "update institute",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "institute"
                 ],
                 "summary": "Update institute",
                 "parameters": [
@@ -273,9 +415,17 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete Institute by id",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "institute"
                 ],
                 "summary": "Delete Institute by id",
                 "parameters": [
@@ -318,6 +468,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "profile"
+                ],
                 "summary": "Get all profiles",
                 "responses": {
                     "200": {
@@ -337,12 +490,20 @@
         },
         "/v1/profile/{id}": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "update profile",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "profile"
                 ],
                 "summary": "Update profile",
                 "parameters": [
@@ -382,9 +543,17 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete profile by id",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "profile"
                 ],
                 "summary": "Delete profile by id",
                 "parameters": [
@@ -427,6 +596,9 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "sector"
+                ],
                 "summary": "Get Sectors",
                 "parameters": [
                     {
@@ -464,12 +636,20 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "create sector according to giving coords\ncoords is unique string",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "sector"
                 ],
                 "summary": "Create Sector",
                 "parameters": [
@@ -501,12 +681,20 @@
         },
         "/v1/sector/{id}": {
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "update sector",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "sector"
                 ],
                 "summary": "Update Sector",
                 "parameters": [
@@ -543,9 +731,17 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "delete sector and all adjacenttables that relate with this sector",
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "sector"
                 ],
                 "summary": "Delete Sector",
                 "parameters": [
@@ -578,12 +774,20 @@
         },
         "/v1/sectors": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "create sectors",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "sector"
                 ],
                 "summary": "Create Sectors",
                 "parameters": [
@@ -627,6 +831,61 @@
         }
     },
     "definitions": {
+        "auth.CreateAdminReq": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.CreateAdminResp": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "intstituteId": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.LoginReq": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.LoginResp": {
+            "type": "object",
+            "properties": {
+                "expire": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "direction.Direction": {
             "type": "object",
             "properties": {

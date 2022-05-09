@@ -3,9 +3,10 @@ package sector
 import "github.com/0B1t322/Magic-Circle/ent"
 
 type Sector struct {
-	ID          int    `json:"id"`
-	Coords      string `json:"coords"`
-	Description string `json:"description"`
+	ID                    int    `json:"id"`
+	Coords                string `json:"coords"`
+	Description           string `json:"description"`
+	// AdditionalDescription string `json:"additionalDescription"`
 }
 
 func NewSector(s *ent.Sector) Sector {
@@ -13,6 +14,7 @@ func NewSector(s *ent.Sector) Sector {
 		ID:          s.ID,
 		Coords:      s.Coords,
 		Description: s.Description,
+		// AdditionalDescription: s.AdditionalDescription,
 	}
 }
 

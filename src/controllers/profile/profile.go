@@ -9,6 +9,8 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	. "github.com/0B1t322/Magic-Circle/models/profile"
+	"github.com/0B1t322/Magic-Circle/models/role"
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -55,6 +57,8 @@ type GetAllProfilesResp struct {
 // @Router /v1/profile [get]
 //
 // @Produce json
+// 
+// @Tags profile
 //
 // @Success 200 {object} profile.GetAllProfilesResp
 //
@@ -83,6 +87,10 @@ type DeleteProfileByID struct {
 //
 // @Router /v1/profile/{id} [delete]
 //
+// @Security ApiKeyAuth
+// 
+// @Tags profile
+// 
 // @Param id path int true "id of profile"
 // 
 // @Produce json
@@ -104,6 +112,31 @@ func (p ProfileController) DeleteByID(c *gin.Context) {
 			return
 		}
 	}
+
+	claims := jwt.ExtractClaims(c)
+	if claims["role"].(string) == string(role.ADMIN) {
+		getProf, err := p.Client.Profile.Query().
+			WithDirection().
+			Where(
+				profile.ID(req.ID),
+			).
+			Only(c)
+		if ent.IsNotFound(err) {
+			// Pass
+		} else if err != nil {
+			log.WithFields(newLogFields("DeleteByID", err)).Error()
+			c.Status(http.StatusInternalServerError)
+			c.Abort()
+			return
+		}
+
+		if float64(getProf.Edges.Direction.InstituteID) != claims["intstituteId"].(float64) {
+			c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
+			c.Abort()
+			return
+		}
+	}
+
 	if _, err := p.Client.AdjacentTable.Delete().Where(adjacenttable.HasProfileWith(profile.ID(req.ID))).Exec(c); ent.IsNotFound(err) {
 		// Pass
 	} else if err != nil {
@@ -146,6 +179,10 @@ type UpdateProfileResp struct {
 // 
 // @Router /v1/profile/{id} [put]
 // 
+// @Security ApiKeyAuth
+// 
+// @Tags profile
+// 
 // @Accept json
 // 
 // @Produce json
@@ -170,6 +207,29 @@ func (p ProfileController) UpdateProfile(c *gin.Context) {
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+	}
+	claims := jwt.ExtractClaims(c)
+	if claims["role"].(string) == string(role.ADMIN) {
+		getProf, err := p.Client.Profile.Query().
+			WithDirection().
+			Where(
+				profile.ID(req.ID),
+			).
+			Only(c)
+		if ent.IsNotFound(err) {
+			// Pass
+		} else if err != nil {
+			log.WithFields(newLogFields("UpdateProfile", err)).Error()
+			c.Status(http.StatusInternalServerError)
+			c.Abort()
+			return
+		}
+
+		if float64(getProf.Edges.Direction.InstituteID) != claims["intstituteId"].(float64) {
+			c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
 			c.Abort()
 			return
 		}

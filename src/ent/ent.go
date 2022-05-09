@@ -9,10 +9,12 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/admin"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
+	"github.com/0B1t322/Magic-Circle/ent/superadmin"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -34,10 +36,12 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		adjacenttable.Table: adjacenttable.ValidColumn,
+		admin.Table:         admin.ValidColumn,
 		direction.Table:     direction.ValidColumn,
 		institute.Table:     institute.ValidColumn,
 		profile.Table:       profile.ValidColumn,
 		sector.Table:        sector.ValidColumn,
+		superadmin.Table:    superadmin.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

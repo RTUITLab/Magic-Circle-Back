@@ -10,10 +10,12 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/migrate"
 
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/admin"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
+	"github.com/0B1t322/Magic-Circle/ent/superadmin"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -27,6 +29,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// AdjacentTable is the client for interacting with the AdjacentTable builders.
 	AdjacentTable *AdjacentTableClient
+	// Admin is the client for interacting with the Admin builders.
+	Admin *AdminClient
 	// Direction is the client for interacting with the Direction builders.
 	Direction *DirectionClient
 	// Institute is the client for interacting with the Institute builders.
@@ -35,6 +39,8 @@ type Client struct {
 	Profile *ProfileClient
 	// Sector is the client for interacting with the Sector builders.
 	Sector *SectorClient
+	// SuperAdmin is the client for interacting with the SuperAdmin builders.
+	SuperAdmin *SuperAdminClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -49,10 +55,12 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.AdjacentTable = NewAdjacentTableClient(c.config)
+	c.Admin = NewAdminClient(c.config)
 	c.Direction = NewDirectionClient(c.config)
 	c.Institute = NewInstituteClient(c.config)
 	c.Profile = NewProfileClient(c.config)
 	c.Sector = NewSectorClient(c.config)
+	c.SuperAdmin = NewSuperAdminClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -87,10 +95,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:           ctx,
 		config:        cfg,
 		AdjacentTable: NewAdjacentTableClient(cfg),
+		Admin:         NewAdminClient(cfg),
 		Direction:     NewDirectionClient(cfg),
 		Institute:     NewInstituteClient(cfg),
 		Profile:       NewProfileClient(cfg),
 		Sector:        NewSectorClient(cfg),
+		SuperAdmin:    NewSuperAdminClient(cfg),
 	}, nil
 }
 
@@ -110,10 +120,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		config:        cfg,
 		AdjacentTable: NewAdjacentTableClient(cfg),
+		Admin:         NewAdminClient(cfg),
 		Direction:     NewDirectionClient(cfg),
 		Institute:     NewInstituteClient(cfg),
 		Profile:       NewProfileClient(cfg),
 		Sector:        NewSectorClient(cfg),
+		SuperAdmin:    NewSuperAdminClient(cfg),
 	}, nil
 }
 
@@ -144,10 +156,12 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.AdjacentTable.Use(hooks...)
+	c.Admin.Use(hooks...)
 	c.Direction.Use(hooks...)
 	c.Institute.Use(hooks...)
 	c.Profile.Use(hooks...)
 	c.Sector.Use(hooks...)
+	c.SuperAdmin.Use(hooks...)
 }
 
 // AdjacentTableClient is a client for the AdjacentTable schema.
@@ -270,6 +284,112 @@ func (c *AdjacentTableClient) QuerySector(at *AdjacentTable) *SectorQuery {
 // Hooks returns the client hooks.
 func (c *AdjacentTableClient) Hooks() []Hook {
 	return c.hooks.AdjacentTable
+}
+
+// AdminClient is a client for the Admin schema.
+type AdminClient struct {
+	config
+}
+
+// NewAdminClient returns a client for the Admin from the given config.
+func NewAdminClient(c config) *AdminClient {
+	return &AdminClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `admin.Hooks(f(g(h())))`.
+func (c *AdminClient) Use(hooks ...Hook) {
+	c.hooks.Admin = append(c.hooks.Admin, hooks...)
+}
+
+// Create returns a create builder for Admin.
+func (c *AdminClient) Create() *AdminCreate {
+	mutation := newAdminMutation(c.config, OpCreate)
+	return &AdminCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Admin entities.
+func (c *AdminClient) CreateBulk(builders ...*AdminCreate) *AdminCreateBulk {
+	return &AdminCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Admin.
+func (c *AdminClient) Update() *AdminUpdate {
+	mutation := newAdminMutation(c.config, OpUpdate)
+	return &AdminUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AdminClient) UpdateOne(a *Admin) *AdminUpdateOne {
+	mutation := newAdminMutation(c.config, OpUpdateOne, withAdmin(a))
+	return &AdminUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AdminClient) UpdateOneID(id int) *AdminUpdateOne {
+	mutation := newAdminMutation(c.config, OpUpdateOne, withAdminID(id))
+	return &AdminUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Admin.
+func (c *AdminClient) Delete() *AdminDelete {
+	mutation := newAdminMutation(c.config, OpDelete)
+	return &AdminDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *AdminClient) DeleteOne(a *Admin) *AdminDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *AdminClient) DeleteOneID(id int) *AdminDeleteOne {
+	builder := c.Delete().Where(admin.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AdminDeleteOne{builder}
+}
+
+// Query returns a query builder for Admin.
+func (c *AdminClient) Query() *AdminQuery {
+	return &AdminQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Admin entity by its id.
+func (c *AdminClient) Get(ctx context.Context, id int) (*Admin, error) {
+	return c.Query().Where(admin.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AdminClient) GetX(ctx context.Context, id int) *Admin {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryInstitute queries the Institute edge of a Admin.
+func (c *AdminClient) QueryInstitute(a *Admin) *InstituteQuery {
+	query := &InstituteQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(admin.Table, admin.FieldID, id),
+			sqlgraph.To(institute.Table, institute.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, admin.InstituteTable, admin.InstituteColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AdminClient) Hooks() []Hook {
+	return c.hooks.Admin
 }
 
 // DirectionClient is a client for the Direction schema.
@@ -488,6 +608,22 @@ func (c *InstituteClient) QueryDirections(i *Institute) *DirectionQuery {
 			sqlgraph.From(institute.Table, institute.FieldID, id),
 			sqlgraph.To(direction.Table, direction.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, institute.DirectionsTable, institute.DirectionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAdmins queries the Admins edge of a Institute.
+func (c *InstituteClient) QueryAdmins(i *Institute) *AdminQuery {
+	query := &AdminQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(institute.Table, institute.FieldID, id),
+			sqlgraph.To(admin.Table, admin.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, institute.AdminsTable, institute.AdminsColumn),
 		)
 		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
 		return fromV, nil
@@ -726,4 +862,94 @@ func (c *SectorClient) QueryAdjacentTables(s *Sector) *AdjacentTableQuery {
 // Hooks returns the client hooks.
 func (c *SectorClient) Hooks() []Hook {
 	return c.hooks.Sector
+}
+
+// SuperAdminClient is a client for the SuperAdmin schema.
+type SuperAdminClient struct {
+	config
+}
+
+// NewSuperAdminClient returns a client for the SuperAdmin from the given config.
+func NewSuperAdminClient(c config) *SuperAdminClient {
+	return &SuperAdminClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `superadmin.Hooks(f(g(h())))`.
+func (c *SuperAdminClient) Use(hooks ...Hook) {
+	c.hooks.SuperAdmin = append(c.hooks.SuperAdmin, hooks...)
+}
+
+// Create returns a create builder for SuperAdmin.
+func (c *SuperAdminClient) Create() *SuperAdminCreate {
+	mutation := newSuperAdminMutation(c.config, OpCreate)
+	return &SuperAdminCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SuperAdmin entities.
+func (c *SuperAdminClient) CreateBulk(builders ...*SuperAdminCreate) *SuperAdminCreateBulk {
+	return &SuperAdminCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SuperAdmin.
+func (c *SuperAdminClient) Update() *SuperAdminUpdate {
+	mutation := newSuperAdminMutation(c.config, OpUpdate)
+	return &SuperAdminUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SuperAdminClient) UpdateOne(sa *SuperAdmin) *SuperAdminUpdateOne {
+	mutation := newSuperAdminMutation(c.config, OpUpdateOne, withSuperAdmin(sa))
+	return &SuperAdminUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SuperAdminClient) UpdateOneID(id int) *SuperAdminUpdateOne {
+	mutation := newSuperAdminMutation(c.config, OpUpdateOne, withSuperAdminID(id))
+	return &SuperAdminUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SuperAdmin.
+func (c *SuperAdminClient) Delete() *SuperAdminDelete {
+	mutation := newSuperAdminMutation(c.config, OpDelete)
+	return &SuperAdminDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *SuperAdminClient) DeleteOne(sa *SuperAdmin) *SuperAdminDeleteOne {
+	return c.DeleteOneID(sa.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *SuperAdminClient) DeleteOneID(id int) *SuperAdminDeleteOne {
+	builder := c.Delete().Where(superadmin.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SuperAdminDeleteOne{builder}
+}
+
+// Query returns a query builder for SuperAdmin.
+func (c *SuperAdminClient) Query() *SuperAdminQuery {
+	return &SuperAdminQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a SuperAdmin entity by its id.
+func (c *SuperAdminClient) Get(ctx context.Context, id int) (*SuperAdmin, error) {
+	return c.Query().Where(superadmin.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SuperAdminClient) GetX(ctx context.Context, id int) *SuperAdmin {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *SuperAdminClient) Hooks() []Hook {
+	return c.hooks.SuperAdmin
 }

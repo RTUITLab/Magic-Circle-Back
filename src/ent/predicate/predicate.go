@@ -9,6 +9,9 @@ import (
 // AdjacentTable is the predicate function for adjacenttable builders.
 type AdjacentTable func(*sql.Selector)
 
+// Admin is the predicate function for admin builders.
+type Admin func(*sql.Selector)
+
 // Direction is the predicate function for direction builders.
 type Direction func(*sql.Selector)
 
@@ -20,3 +23,6 @@ type Profile func(*sql.Selector)
 
 // Sector is the predicate function for sector builders.
 type Sector func(*sql.Selector)
+
+// SuperAdmin is the predicate function for superadmin builders.
+type SuperAdmin func(*sql.Selector)

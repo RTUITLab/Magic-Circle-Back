@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// AdjacentTable is the client for interacting with the AdjacentTable builders.
 	AdjacentTable *AdjacentTableClient
+	// Admin is the client for interacting with the Admin builders.
+	Admin *AdminClient
 	// Direction is the client for interacting with the Direction builders.
 	Direction *DirectionClient
 	// Institute is the client for interacting with the Institute builders.
@@ -22,6 +24,8 @@ type Tx struct {
 	Profile *ProfileClient
 	// Sector is the client for interacting with the Sector builders.
 	Sector *SectorClient
+	// SuperAdmin is the client for interacting with the SuperAdmin builders.
+	SuperAdmin *SuperAdminClient
 
 	// lazily loaded.
 	client     *Client
@@ -158,10 +162,12 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.AdjacentTable = NewAdjacentTableClient(tx.config)
+	tx.Admin = NewAdminClient(tx.config)
 	tx.Direction = NewDirectionClient(tx.config)
 	tx.Institute = NewInstituteClient(tx.config)
 	tx.Profile = NewProfileClient(tx.config)
 	tx.Sector = NewSectorClient(tx.config)
+	tx.SuperAdmin = NewSuperAdminClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

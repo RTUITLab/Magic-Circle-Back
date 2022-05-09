@@ -20,6 +20,8 @@ func (Sector) Fields() []ent.Field {
 			Unique(),
 		field.Text("description").
 			Optional(),
+		// field.Text("additionalDescription").
+		// 	Optional(),
 	}
 }
 

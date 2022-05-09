@@ -34,10 +34,15 @@ func New(client *ent.Client) *SectorController {
 	}
 }
 
-func (s SectorController) create(ctx context.Context, coords, description string) (*ent.Sector, error) {
+func (s SectorController) create(
+	ctx context.Context, coords, 
+	description string, 
+	// additionalDescription string,
+	) (*ent.Sector, error) {
 	created, err := s.Client.Sector.Create().
 		SetCoords(coords).
 		SetDescription(description).
+		// SetAdditionalDescription(additionalDescription).
 		Save(ctx)
 
 	if ent.IsConstraintError(err) { // Sector with this coords exist
@@ -50,8 +55,9 @@ func (s SectorController) create(ctx context.Context, coords, description string
 }
 
 type CreateSectorReq struct {
-	Coords      string `json:"coords"`
-	Description string `json:"description"`
+	Coords                string `json:"coords"`
+	Description           string `json:"description"`
+	// AdditionalDescription string `json:"additionalDescription"`
 }
 
 func newLogFields(method string, err error) log.Fields {
@@ -71,6 +77,10 @@ func newLogFields(method string, err error) log.Fields {
 // @Description coords is unique string
 //
 // @Router /v1/sector [post]
+//
+// @Security ApiKeyAuth
+//
+// @Tags sector
 //
 // @Accept json
 //
@@ -110,6 +120,7 @@ type UpdateSectorReq struct {
 	ID          int     `json:"-" uri:"id"`
 	Coords      *string `json:"coords,omitempty"`
 	Description *string `json:"description,omitempty"`
+	// AdditionalDescription *string `json:"additionalDescription,omitempty"`
 }
 
 func (s SectorController) update(
@@ -125,6 +136,10 @@ func (s SectorController) update(
 	if req.Description != nil {
 		builder.SetDescription(*req.Description)
 	}
+
+	// if req.AdditionalDescription != nil {
+	// 	builder.SetAdditionalDescription(*req.AdditionalDescription)
+	// }
 
 	updated, err := builder.Save(ctx)
 	if ent.IsConstraintError(err) {
@@ -145,6 +160,10 @@ func (s SectorController) update(
 // @Description update sector
 //
 // @Router /v1/sector/{id} [put]
+//
+// @Security ApiKeyAuth
+//
+// @Tags sector
 //
 // @Param id path string true "id of sector"
 //
@@ -303,6 +322,8 @@ type GetAllSectorsResp struct {
 // @Description quey params can make a logical predicates for example
 // @Description request: "/sectors?instutute=1+2&profile=1" equal "WHERE (institute_id=1 and profile_id=1) or institute_id=2"
 //
+// @Tags sector
+//
 // @Router /v1/sector [get]
 //
 // @Param institute query string false "institute name"
@@ -342,12 +363,12 @@ type DeleteSectorReq struct {
 func (s SectorController) deleteSector(ctx context.Context, id int) error {
 	// delete all adjecent tables that relate with sector
 	_, err := s.Client.AdjacentTable.Delete().
-			Where(
-				adjacenttable.HasSectorWith(
-					sector.ID(id),
-				),
-			).Exec(ctx)
-	
+		Where(
+			adjacenttable.HasSectorWith(
+				sector.ID(id),
+			),
+		).Exec(ctx)
+
 	if ent.IsNotFound(err) {
 		// Pass
 	} else if err != nil {
@@ -372,6 +393,10 @@ func (s SectorController) deleteSector(ctx context.Context, id int) error {
 //
 // @Router /v1/sector/{id} [delete]
 //
+// @Security ApiKeyAuth
+//
+// @Tags sector
+//
 // @Param id path string true "id of sector"
 //
 // @Produce json
@@ -379,7 +404,7 @@ func (s SectorController) deleteSector(ctx context.Context, id int) error {
 // @Success 200
 //
 // @Failure 500 {string} srting
-// 
+//
 // @Failure 404 {string} srting
 func (s SectorController) DeleteSector(c *gin.Context) {
 	var req DeleteSectorReq
@@ -448,7 +473,7 @@ func (s SectorController) deleteSectorsThatExist(ctx context.Context, reqs []Cre
 	} else if err != nil {
 		return nil, err
 	}
-	
+
 	findedSectors := func(finded []*ent.Sector) (slice []CreateSectorReq) {
 		for _, find := range finded {
 			slice = append(slice, CreateSectorReq{Coords: find.Coords, Description: find.Description})
@@ -459,21 +484,19 @@ func (s SectorController) deleteSectorsThatExist(ctx context.Context, reqs []Cre
 	return CreateSectorsReq(reqs).getUnique(findedSectors), nil
 }
 
-
-
 func (s SectorController) createALot(ctx context.Context, reqs []CreateSectorReq) ([]*ent.Sector, error) {
 	var builders []*ent.SectorCreate
-	
+
 	filteredReqs, err := s.deleteSectorsThatExist(ctx, reqs)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	for _, req := range filteredReqs {
 		builders = append(
-			builders, 
+			builders,
 			s.Client.Sector.Create().SetCoords(req.Coords).SetDescription(req.Description),
-		)	
+		)
 	}
 
 	created, err := s.Client.Sector.CreateBulk(builders...).Save(ctx)
@@ -486,7 +509,6 @@ func (s SectorController) createALot(ctx context.Context, reqs []CreateSectorReq
 	return created, nil
 }
 
-
 // CreateSectors
 //
 // @Summary Create Sectors
@@ -495,16 +517,20 @@ func (s SectorController) createALot(ctx context.Context, reqs []CreateSectorReq
 //
 // @Router /v1/sectors [post]
 //
+// @Security ApiKeyAuth
+//
+// @Tags sector
+//
 // @Accept json
-// 
+//
 // @Produce json
-// 
+//
 // @Param body body []sector.CreateSectorReq true "body"
 //
 // @Success 201 {array} sector.Sector
 //
 // @Failure 500 {string} srting
-// 
+//
 // @Failure 400 {string} srting
 func (s SectorController) CreateSectors(c *gin.Context) {
 	var reqs []CreateSectorReq
@@ -530,3 +556,74 @@ func (s SectorController) CreateSectors(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, NewSectors(created))
 }
+
+type UpdateAdditionalDescriptionReq struct {
+	ID          int     `json:"-" uri:"id"`
+	AdditionalDescription *string `json:"additionalDescription,omitempty"`
+}
+
+
+
+// UpdateAdditionalDescription
+//
+// @Summary Update additionalDescription in sector
+//
+// @Router /v1/sector/{id}/additionalDescription [put]
+//
+// @Security ApiKeyAuth
+//
+// @Tags sector
+//
+// @Accept json
+//
+// @Produce json
+//
+// @Param body body sector.UpdateAdditionalDescriptionReq true "body"
+// 
+// @Param id path string true "id of sector"
+//
+// @Success 200 {object} sector.Sector
+//
+// @Failure 500 {string} srting
+//
+// @Failure 400 {string} srting
+// func (s SectorController) UpdateAdditionalDescription(c *gin.Context) {
+// 	var req UpdateAdditionalDescriptionReq
+// 	{
+// 		if err := c.ShouldBindJSON(&req); err != nil {
+// 			c.String(http.StatusBadRequest, "Unexpected body")
+// 			c.Abort()
+// 			return
+// 		}
+
+// 		if err := c.ShouldBindUri(&req); err != nil {
+// 			c.String(http.StatusBadRequest, "Unexpected body")
+// 			c.Abort()
+// 			return
+// 		}
+// 	}
+
+// 	sector, err := s.Client.Sector.Get(c, req.ID)
+// 	if ent.IsNotFound(err) {
+// 		c.String(http.StatusNotFound, ErrSectorNotFound.Error())
+// 		c.Abort()
+// 		return
+// 	} else if err != nil {
+// 		log.WithFields(newLogFields("UpdateAdditionalDescription", err)).Error("Failed to update sector")
+// 		c.String(http.StatusInternalServerError, "Failed to update")
+// 		c.Abort()
+// 		return
+// 	}
+
+// 	if req.AdditionalDescription != nil {
+// 		sector, err = sector.Update().SetAdditionalDescription(*req.AdditionalDescription).Save(c)
+// 		if err != nil {
+// 			log.WithFields(newLogFields("UpdateAdditionalDescription", err)).Error("Failed to update sector")
+// 			c.String(http.StatusInternalServerError, "Failed to update")
+// 			c.Abort()
+// 			return
+// 		}
+// 	}
+
+// 	c.JSON(http.StatusOK, NewSector(sector))
+// }
