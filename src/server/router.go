@@ -128,6 +128,53 @@ func NewRouter(c *Controllers) *gin.Engine {
 					c.Auth.IsSuperAdminMiddleware,
 					c.Auth.CreateAdmin,
 				)
+
+			auth.
+				GET(
+					"/admin",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.GetAdmins,
+				)
+			
+			auth.
+				PUT(
+					"/admin/:id",
+					c.Auth.AuthMiddleare(),
+					c.Auth.ChangeAdminPassword,
+				)
+			
+			auth.
+				POST(
+					"/superadmin",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.CreateSuperAdmin,
+				)
+
+			auth.
+				GET(
+					"/superadmin",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.GetSuperAdmins,
+				)
+			
+			auth.
+				DELETE(
+					"/admin/:id",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.DeleteAdmin,
+				)
+			
+			auth.
+				DELETE(
+					"/superadmin/:id",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.DeleteSuperAdmin,
+				)
 		}
 		
 

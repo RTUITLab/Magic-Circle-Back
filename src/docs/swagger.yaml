@@ -1,5 +1,12 @@
 basePath: /api/magic-circle
 definitions:
+  auth.ChangePasswordReq:
+    properties:
+      newPassword:
+        type: string
+      oldPassword:
+        type: string
+    type: object
   auth.CreateAdminReq:
     properties:
       login:
@@ -18,6 +25,20 @@ definitions:
         type: integer
       login:
         type: string
+    type: object
+  auth.GetAdminResp:
+    properties:
+      id:
+        type: integer
+      login:
+        type: string
+    type: object
+  auth.GetAdminsResp:
+    properties:
+      admins:
+        items:
+          $ref: '#/definitions/auth.GetAdminResp'
+        type: array
     type: object
   auth.LoginReq:
     properties:
@@ -282,6 +303,60 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: create institute or direction or profile
+  /v1/auth/admin:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.GetAdminsResp'
+      security:
+      - ApiKeyAuth: []
+      summary: get admins
+      tags:
+      - auth
+  /v1/auth/admin/{id}:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - ApiKeyAuth: []
+      summary: delete admin
+      tags:
+      - auth
+    put:
+      consumes:
+      - application/json
+      description: |-
+        superadmin can pass only new password
+        admin change only their password and should pass their old password
+      parameters:
+      - description: admin id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ChangePasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - ApiKeyAuth: []
+      summary: change admin password
+      tags:
+      - auth
   /v1/auth/admin/{intstitute_id}:
     post:
       consumes:
@@ -343,6 +418,54 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: login admin or super admin
+      tags:
+      - auth
+  /v1/auth/superadmin:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.GetAdminsResp'
+      security:
+      - ApiKeyAuth: []
+      summary: get admins
+      tags:
+      - auth
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/auth.CreateAdminReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.CreateAdminResp'
+      security:
+      - ApiKeyAuth: []
+      summary: create super admin
+      tags:
+      - auth
+  /v1/auth/superadmin/{id}:
+    delete:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - ApiKeyAuth: []
+      summary: delete super admin
       tags:
       - auth
   /v1/direction:
