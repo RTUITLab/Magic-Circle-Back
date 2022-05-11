@@ -96,13 +96,21 @@ func (a *AuthController) initJwt() {
 					}
 				}
 
-				super, err := a.Client.SuperAdmin.Query().Only(c)
-				if err != nil {
+				super, err := a.Client.SuperAdmin.Query().
+					Where(
+						superadmin.And(
+							superadmin.Login(req.Login),
+							superadmin.Password(req.Password),
+						),
+					).Only(c)
+				if ent.IsNotFound(err) {
+					// Pass
+				}else if err != nil {
 					log.WithFields(newLogFields("Authenticator", err)).Error("Failed to get super admin")
 					return "", err
 				}
 
-				if super.Login == req.Login && super.Password == req.Password {
+				if super != nil && super.Login == req.Login && super.Password == req.Password {
 					return &paylaod.Payload{
 						ID:   super.ID,
 						Role: role.SUPERADMIN,

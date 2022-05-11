@@ -8,7 +8,7 @@ import (
 type Institute struct {
 	ID         int                   `json:"id"`
 	Name       string                `json:"name"`
-	Directions []direction.Direction `json:"directions"`
+	Directions []direction.Direction `json:"directions,omitempty"`
 }
 
 func InstituteFromEnt(i *ent.Institute) Institute {

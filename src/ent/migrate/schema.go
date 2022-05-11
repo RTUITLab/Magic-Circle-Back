@@ -12,6 +12,7 @@ var (
 	// AdjacentTableColumns holds the columns for the "AdjacentTable" table.
 	AdjacentTableColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "additional_description", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "profile_id", Type: field.TypeInt, Nullable: true},
 		{Name: "sector_id", Type: field.TypeInt, Nullable: true},
 	}
@@ -23,13 +24,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "AdjacentTable_Profile_AdjacentTables",
-				Columns:    []*schema.Column{AdjacentTableColumns[1]},
+				Columns:    []*schema.Column{AdjacentTableColumns[2]},
 				RefColumns: []*schema.Column{ProfileColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "AdjacentTable_Sector_AdjacentTables",
-				Columns:    []*schema.Column{AdjacentTableColumns[2]},
+				Columns:    []*schema.Column{AdjacentTableColumns[3]},
 				RefColumns: []*schema.Column{SectorColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

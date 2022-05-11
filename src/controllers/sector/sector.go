@@ -13,8 +13,10 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
+	"github.com/0B1t322/Magic-Circle/models/role"
 	. "github.com/0B1t322/Magic-Circle/models/sector"
 	"github.com/0B1t322/Magic-Circle/pkg/queue"
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -35,10 +37,10 @@ func New(client *ent.Client) *SectorController {
 }
 
 func (s SectorController) create(
-	ctx context.Context, coords, 
-	description string, 
+	ctx context.Context, coords,
+	description string,
 	// additionalDescription string,
-	) (*ent.Sector, error) {
+) (*ent.Sector, error) {
 	created, err := s.Client.Sector.Create().
 		SetCoords(coords).
 		SetDescription(description).
@@ -55,8 +57,8 @@ func (s SectorController) create(
 }
 
 type CreateSectorReq struct {
-	Coords                string `json:"coords"`
-	Description           string `json:"description"`
+	Coords      string `json:"coords"`
+	Description string `json:"description"`
 	// AdditionalDescription string `json:"additionalDescription"`
 }
 
@@ -300,7 +302,21 @@ func (s SectorController) getAll(
 		)
 	}
 
-	return builder.All(ctx)
+	return builder.
+		WithAdjacentTables(
+			func(atq *ent.AdjacentTableQuery) {
+				atq.WithProfile(
+					func(pq *ent.ProfileQuery) {
+						pq.WithDirection(
+							func(dq *ent.DirectionQuery) {
+								dq.WithInstitute()
+							},
+						)
+					},
+				)
+			},
+		).
+		All(ctx)
 }
 
 type GetAllSectorsReq struct {
@@ -558,19 +574,28 @@ func (s SectorController) CreateSectors(c *gin.Context) {
 }
 
 type UpdateAdditionalDescriptionReq struct {
-	ID          int     `json:"-" uri:"id"`
+	ID                    int     `json:"-" uri:"id"`
 	AdditionalDescription *string `json:"additionalDescription,omitempty"`
 }
 
+type AddAdditionalDescriptionReq struct {
+	SectorID              int    `uri:"id" swaggerignore:"true" json:"-"`
+	ProfileID             int    `uri:"profile_id" swaggerignore:"true" json:"-"`
+	AdditionalDescription string `json:"additionalDescription"`
+}
 
 
-// UpdateAdditionalDescription
+// AddAdditionalDescription
 //
-// @Summary Update additionalDescription in sector
+// @Summary Update additional description
 //
-// @Router /v1/sector/{id}/additionalDescription [put]
+// @Router /v1/sector/{sector_id}/profile/{profile_id} [put]
 //
 // @Security ApiKeyAuth
+// 
+// @Param sector_id path integer true "id of sector"
+// 
+// @Param profile_id path integer true "id of propfile"
 //
 // @Tags sector
 //
@@ -578,52 +603,72 @@ type UpdateAdditionalDescriptionReq struct {
 //
 // @Produce json
 //
-// @Param body body sector.UpdateAdditionalDescriptionReq true "body"
-// 
-// @Param id path string true "id of sector"
+// @Param body body sector.AddAdditionalDescriptionReq true "body"
 //
-// @Success 200 {object} sector.Sector
-//
-// @Failure 500 {string} srting
-//
-// @Failure 400 {string} srting
-// func (s SectorController) UpdateAdditionalDescription(c *gin.Context) {
-// 	var req UpdateAdditionalDescriptionReq
-// 	{
-// 		if err := c.ShouldBindJSON(&req); err != nil {
-// 			c.String(http.StatusBadRequest, "Unexpected body")
-// 			c.Abort()
-// 			return
-// 		}
+// @Success 200 {object} sector.AdditionalDescription
+func (s SectorController) AddAdditionalDescription(c *gin.Context) {
+	var req AddAdditionalDescriptionReq
+	{
+		if err  := c.ShouldBindUri(&req); err != nil {
+			c.String(http.StatusBadRequest, "Bad id's")
+			c.Abort()
+			return
+		}
 
-// 		if err := c.ShouldBindUri(&req); err != nil {
-// 			c.String(http.StatusBadRequest, "Unexpected body")
-// 			c.Abort()
-// 			return
-// 		}
-// 	}
+		if err  := c.ShouldBindJSON(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected body")
+			c.Abort()
+			return
+		}
+	}
 
-// 	sector, err := s.Client.Sector.Get(c, req.ID)
-// 	if ent.IsNotFound(err) {
-// 		c.String(http.StatusNotFound, ErrSectorNotFound.Error())
-// 		c.Abort()
-// 		return
-// 	} else if err != nil {
-// 		log.WithFields(newLogFields("UpdateAdditionalDescription", err)).Error("Failed to update sector")
-// 		c.String(http.StatusInternalServerError, "Failed to update")
-// 		c.Abort()
-// 		return
-// 	}
+	adj, err := s.Client.AdjacentTable.
+					Query().
+					Where(
+						adjacenttable.SectorID(req.SectorID),
+						adjacenttable.ProfileID(req.ProfileID),
+					).
+					WithProfile(
+						func(pq *ent.ProfileQuery) {
+							pq.WithDirection(
+								func(dq *ent.DirectionQuery) {
+									dq.WithInstitute(
 
-// 	if req.AdditionalDescription != nil {
-// 		sector, err = sector.Update().SetAdditionalDescription(*req.AdditionalDescription).Save(c)
-// 		if err != nil {
-// 			log.WithFields(newLogFields("UpdateAdditionalDescription", err)).Error("Failed to update sector")
-// 			c.String(http.StatusInternalServerError, "Failed to update")
-// 			c.Abort()
-// 			return
-// 		}
-// 	}
+									)
+								},
+							)
+						},
+					).
+					Only(c)
+	if ent.IsNotFound(err) {
+		c.String(http.StatusNotFound, "Not found additional description with this sector id and profile id")
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("AddAdditionalDescription", err)).Error("Failed to create sectors")
+		c.String(http.StatusInternalServerError, "Failed to create sectors")
+		c.Abort()
+		return
+	}
 
-// 	c.JSON(http.StatusOK, NewSector(sector))
-// }
+	claims := jwt.ExtractClaims(c)
+	if claims["role"].(string) == string(role.ADMIN) {
+		if float64(adj.Edges.Profile.Edges.Direction.InstituteID) != claims["intstituteId"].(float64) {
+			c.String(http.StatusForbidden, "You are not admin of this institute")
+			c.Abort()
+			return
+		}
+	}
+
+	upd, err := adj.Update().SetAdditionalDescription(req.AdditionalDescription).Save(c)
+	if err != nil {
+		log.WithFields(newLogFields("AddAdditionalDescription", err)).Error("Failed to create sectors")
+		c.String(http.StatusInternalServerError, "Failed to create sectors")
+		c.Abort()
+		return	
+	}
+
+	upd.Edges = adj.Edges
+
+	c.JSON(http.StatusOK, NewAdditionalDescription(upd))
+}

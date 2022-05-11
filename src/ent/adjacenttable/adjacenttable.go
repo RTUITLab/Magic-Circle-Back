@@ -11,6 +11,8 @@ const (
 	FieldSectorID = "sector_id"
 	// FieldProfileID holds the string denoting the profile_id field in the database.
 	FieldProfileID = "profile_id"
+	// FieldAdditionalDescription holds the string denoting the additionaldescription field in the database.
+	FieldAdditionalDescription = "additional_description"
 	// EdgeProfile holds the string denoting the profile edge name in mutations.
 	EdgeProfile = "Profile"
 	// EdgeSector holds the string denoting the sector edge name in mutations.
@@ -38,6 +40,7 @@ var Columns = []string{
 	FieldID,
 	FieldSectorID,
 	FieldProfileID,
+	FieldAdditionalDescription,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -21,6 +21,8 @@ type AdjacentTable struct {
 	SectorID int `json:"sector_id,omitempty"`
 	// ProfileID holds the value of the "profile_id" field.
 	ProfileID int `json:"profile_id,omitempty"`
+	// AdditionalDescription holds the value of the "additionalDescription" field.
+	AdditionalDescription string `json:"additionalDescription,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AdjacentTableQuery when eager-loading is set.
 	Edges AdjacentTableEdges `json:"edges"`
@@ -72,6 +74,8 @@ func (*AdjacentTable) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case adjacenttable.FieldID, adjacenttable.FieldSectorID, adjacenttable.FieldProfileID:
 			values[i] = new(sql.NullInt64)
+		case adjacenttable.FieldAdditionalDescription:
+			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type AdjacentTable", columns[i])
 		}
@@ -104,6 +108,12 @@ func (at *AdjacentTable) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field profile_id", values[i])
 			} else if value.Valid {
 				at.ProfileID = int(value.Int64)
+			}
+		case adjacenttable.FieldAdditionalDescription:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field additionalDescription", values[i])
+			} else if value.Valid {
+				at.AdditionalDescription = value.String
 			}
 		}
 	}
@@ -147,6 +157,8 @@ func (at *AdjacentTable) String() string {
 	builder.WriteString(fmt.Sprintf("%v", at.SectorID))
 	builder.WriteString(", profile_id=")
 	builder.WriteString(fmt.Sprintf("%v", at.ProfileID))
+	builder.WriteString(", additionalDescription=")
+	builder.WriteString(at.AdditionalDescription)
 	builder.WriteByte(')')
 	return builder.String()
 }

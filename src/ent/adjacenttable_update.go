@@ -41,6 +41,26 @@ func (atu *AdjacentTableUpdate) SetProfileID(i int) *AdjacentTableUpdate {
 	return atu
 }
 
+// SetAdditionalDescription sets the "additionalDescription" field.
+func (atu *AdjacentTableUpdate) SetAdditionalDescription(s string) *AdjacentTableUpdate {
+	atu.mutation.SetAdditionalDescription(s)
+	return atu
+}
+
+// SetNillableAdditionalDescription sets the "additionalDescription" field if the given value is not nil.
+func (atu *AdjacentTableUpdate) SetNillableAdditionalDescription(s *string) *AdjacentTableUpdate {
+	if s != nil {
+		atu.SetAdditionalDescription(*s)
+	}
+	return atu
+}
+
+// ClearAdditionalDescription clears the value of the "additionalDescription" field.
+func (atu *AdjacentTableUpdate) ClearAdditionalDescription() *AdjacentTableUpdate {
+	atu.mutation.ClearAdditionalDescription()
+	return atu
+}
+
 // SetProfile sets the "Profile" edge to the Profile entity.
 func (atu *AdjacentTableUpdate) SetProfile(p *Profile) *AdjacentTableUpdate {
 	return atu.SetProfileID(p.ID)
@@ -157,6 +177,19 @@ func (atu *AdjacentTableUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			}
 		}
 	}
+	if value, ok := atu.mutation.AdditionalDescription(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: adjacenttable.FieldAdditionalDescription,
+		})
+	}
+	if atu.mutation.AdditionalDescriptionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: adjacenttable.FieldAdditionalDescription,
+		})
+	}
 	if atu.mutation.ProfileCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -255,6 +288,26 @@ func (atuo *AdjacentTableUpdateOne) SetSectorID(i int) *AdjacentTableUpdateOne {
 // SetProfileID sets the "profile_id" field.
 func (atuo *AdjacentTableUpdateOne) SetProfileID(i int) *AdjacentTableUpdateOne {
 	atuo.mutation.SetProfileID(i)
+	return atuo
+}
+
+// SetAdditionalDescription sets the "additionalDescription" field.
+func (atuo *AdjacentTableUpdateOne) SetAdditionalDescription(s string) *AdjacentTableUpdateOne {
+	atuo.mutation.SetAdditionalDescription(s)
+	return atuo
+}
+
+// SetNillableAdditionalDescription sets the "additionalDescription" field if the given value is not nil.
+func (atuo *AdjacentTableUpdateOne) SetNillableAdditionalDescription(s *string) *AdjacentTableUpdateOne {
+	if s != nil {
+		atuo.SetAdditionalDescription(*s)
+	}
+	return atuo
+}
+
+// ClearAdditionalDescription clears the value of the "additionalDescription" field.
+func (atuo *AdjacentTableUpdateOne) ClearAdditionalDescription() *AdjacentTableUpdateOne {
+	atuo.mutation.ClearAdditionalDescription()
 	return atuo
 }
 
@@ -397,6 +450,19 @@ func (atuo *AdjacentTableUpdateOne) sqlSave(ctx context.Context) (_node *Adjacen
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := atuo.mutation.AdditionalDescription(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: adjacenttable.FieldAdditionalDescription,
+		})
+	}
+	if atuo.mutation.AdditionalDescriptionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: adjacenttable.FieldAdditionalDescription,
+		})
 	}
 	if atuo.mutation.ProfileCleared() {
 		edge := &sqlgraph.EdgeSpec{

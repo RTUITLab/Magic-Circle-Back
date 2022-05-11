@@ -20,10 +20,6 @@ func (Sector) Fields() []ent.Field {
 			Unique(),
 		field.Text("description").
 			Optional(),
-		// Админ может создать удалить изменить
-		// Суперадмин может только удалить
-		// field.Text("additionalDescription").
-		// 	Optional(),
 	}
 }
 

@@ -33,6 +33,20 @@ func (atc *AdjacentTableCreate) SetProfileID(i int) *AdjacentTableCreate {
 	return atc
 }
 
+// SetAdditionalDescription sets the "additionalDescription" field.
+func (atc *AdjacentTableCreate) SetAdditionalDescription(s string) *AdjacentTableCreate {
+	atc.mutation.SetAdditionalDescription(s)
+	return atc
+}
+
+// SetNillableAdditionalDescription sets the "additionalDescription" field if the given value is not nil.
+func (atc *AdjacentTableCreate) SetNillableAdditionalDescription(s *string) *AdjacentTableCreate {
+	if s != nil {
+		atc.SetAdditionalDescription(*s)
+	}
+	return atc
+}
+
 // SetProfile sets the "Profile" edge to the Profile entity.
 func (atc *AdjacentTableCreate) SetProfile(p *Profile) *AdjacentTableCreate {
 	return atc.SetProfileID(p.ID)
@@ -152,6 +166,14 @@ func (atc *AdjacentTableCreate) createSpec() (*AdjacentTable, *sqlgraph.CreateSp
 			},
 		}
 	)
+	if value, ok := atc.mutation.AdditionalDescription(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: adjacenttable.FieldAdditionalDescription,
+		})
+		_node.AdditionalDescription = value
+	}
 	if nodes := atc.mutation.ProfileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,

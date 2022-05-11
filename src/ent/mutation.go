@@ -40,17 +40,18 @@ const (
 // AdjacentTableMutation represents an operation that mutates the AdjacentTable nodes in the graph.
 type AdjacentTableMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	clearedFields   map[string]struct{}
-	_Profile        *int
-	cleared_Profile bool
-	_Sector         *int
-	cleared_Sector  bool
-	done            bool
-	oldValue        func(context.Context) (*AdjacentTable, error)
-	predicates      []predicate.AdjacentTable
+	op                    Op
+	typ                   string
+	id                    *int
+	additionalDescription *string
+	clearedFields         map[string]struct{}
+	_Profile              *int
+	cleared_Profile       bool
+	_Sector               *int
+	cleared_Sector        bool
+	done                  bool
+	oldValue              func(context.Context) (*AdjacentTable, error)
+	predicates            []predicate.AdjacentTable
 }
 
 var _ ent.Mutation = (*AdjacentTableMutation)(nil)
@@ -204,6 +205,55 @@ func (m *AdjacentTableMutation) ResetProfileID() {
 	m._Profile = nil
 }
 
+// SetAdditionalDescription sets the "additionalDescription" field.
+func (m *AdjacentTableMutation) SetAdditionalDescription(s string) {
+	m.additionalDescription = &s
+}
+
+// AdditionalDescription returns the value of the "additionalDescription" field in the mutation.
+func (m *AdjacentTableMutation) AdditionalDescription() (r string, exists bool) {
+	v := m.additionalDescription
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdditionalDescription returns the old "additionalDescription" field's value of the AdjacentTable entity.
+// If the AdjacentTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdjacentTableMutation) OldAdditionalDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldAdditionalDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldAdditionalDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdditionalDescription: %w", err)
+	}
+	return oldValue.AdditionalDescription, nil
+}
+
+// ClearAdditionalDescription clears the value of the "additionalDescription" field.
+func (m *AdjacentTableMutation) ClearAdditionalDescription() {
+	m.additionalDescription = nil
+	m.clearedFields[adjacenttable.FieldAdditionalDescription] = struct{}{}
+}
+
+// AdditionalDescriptionCleared returns if the "additionalDescription" field was cleared in this mutation.
+func (m *AdjacentTableMutation) AdditionalDescriptionCleared() bool {
+	_, ok := m.clearedFields[adjacenttable.FieldAdditionalDescription]
+	return ok
+}
+
+// ResetAdditionalDescription resets all changes to the "additionalDescription" field.
+func (m *AdjacentTableMutation) ResetAdditionalDescription() {
+	m.additionalDescription = nil
+	delete(m.clearedFields, adjacenttable.FieldAdditionalDescription)
+}
+
 // ClearProfile clears the "Profile" edge to the Profile entity.
 func (m *AdjacentTableMutation) ClearProfile() {
 	m.cleared_Profile = true
@@ -275,12 +325,15 @@ func (m *AdjacentTableMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdjacentTableMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m._Sector != nil {
 		fields = append(fields, adjacenttable.FieldSectorID)
 	}
 	if m._Profile != nil {
 		fields = append(fields, adjacenttable.FieldProfileID)
+	}
+	if m.additionalDescription != nil {
+		fields = append(fields, adjacenttable.FieldAdditionalDescription)
 	}
 	return fields
 }
@@ -294,6 +347,8 @@ func (m *AdjacentTableMutation) Field(name string) (ent.Value, bool) {
 		return m.SectorID()
 	case adjacenttable.FieldProfileID:
 		return m.ProfileID()
+	case adjacenttable.FieldAdditionalDescription:
+		return m.AdditionalDescription()
 	}
 	return nil, false
 }
@@ -307,6 +362,8 @@ func (m *AdjacentTableMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldSectorID(ctx)
 	case adjacenttable.FieldProfileID:
 		return m.OldProfileID(ctx)
+	case adjacenttable.FieldAdditionalDescription:
+		return m.OldAdditionalDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown AdjacentTable field %s", name)
 }
@@ -329,6 +386,13 @@ func (m *AdjacentTableMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProfileID(v)
+		return nil
+	case adjacenttable.FieldAdditionalDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdditionalDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable field %s", name)
@@ -362,7 +426,11 @@ func (m *AdjacentTableMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AdjacentTableMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(adjacenttable.FieldAdditionalDescription) {
+		fields = append(fields, adjacenttable.FieldAdditionalDescription)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -375,6 +443,11 @@ func (m *AdjacentTableMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AdjacentTableMutation) ClearField(name string) error {
+	switch name {
+	case adjacenttable.FieldAdditionalDescription:
+		m.ClearAdditionalDescription()
+		return nil
+	}
 	return fmt.Errorf("unknown AdjacentTable nullable field %s", name)
 }
 
@@ -387,6 +460,9 @@ func (m *AdjacentTableMutation) ResetField(name string) error {
 		return nil
 	case adjacenttable.FieldProfileID:
 		m.ResetProfileID()
+		return nil
+	case adjacenttable.FieldAdditionalDescription:
+		m.ResetAdditionalDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable field %s", name)

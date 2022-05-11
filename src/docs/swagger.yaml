@@ -205,11 +205,34 @@ definitions:
           type: string
         type: array
     type: object
+  sector.AddAdditionalDescriptionReq:
+    properties:
+      additionalDescription:
+        type: string
+    type: object
+  sector.AdditionalDescription:
+    properties:
+      additionalDescription:
+        type: string
+      direction:
+        $ref: '#/definitions/sector.Direction'
+      institute:
+        $ref: '#/definitions/sector.Institute'
+      profile:
+        $ref: '#/definitions/sector.Profile'
+    type: object
   sector.CreateSectorReq:
     properties:
       coords:
         type: string
       description:
+        type: string
+    type: object
+  sector.Direction:
+    properties:
+      id:
+        type: integer
+      name:
         type: string
     type: object
   sector.GetAllSectorsResp:
@@ -219,8 +242,26 @@ definitions:
           $ref: '#/definitions/sector.Sector'
         type: array
     type: object
+  sector.Institute:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  sector.Profile:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   sector.Sector:
     properties:
+      additionalDescriptions:
+        items:
+          $ref: '#/definitions/sector.AdditionalDescription'
+        type: array
       coords:
         type: string
       description:
@@ -833,6 +874,39 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update Sector
+      tags:
+      - sector
+  /v1/sector/{sector_id}/profile/{profile_id}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: id of sector
+        in: path
+        name: sector_id
+        required: true
+        type: integer
+      - description: id of propfile
+        in: path
+        name: profile_id
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/sector.AddAdditionalDescriptionReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sector.AdditionalDescription'
+      security:
+      - ApiKeyAuth: []
+      summary: Update additional description
       tags:
       - sector
   /v1/sectors:

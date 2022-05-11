@@ -8,7 +8,7 @@ import (
 type Direction struct {
 	ID       int               `json:"id"`
 	Name     string            `json:"name"`
-	Profiles []profile.Profile `json:"profiles"`
+	Profiles []profile.Profile `json:"profiles,omitempty"`
 }
 
 func DirectionFromEnt(d *ent.Direction) Direction {

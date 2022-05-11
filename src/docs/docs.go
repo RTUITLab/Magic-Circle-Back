@@ -947,6 +947,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/sector/{sector_id}/profile/{profile_id}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sector"
+                ],
+                "summary": "Update additional description",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of sector",
+                        "name": "sector_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "id of propfile",
+                        "name": "profile_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/sector.AddAdditionalDescriptionReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sector.AdditionalDescription"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/sectors": {
             "post": {
                 "security": [
@@ -1326,6 +1378,31 @@ const docTemplate = `{
                 }
             }
         },
+        "sector.AddAdditionalDescriptionReq": {
+            "type": "object",
+            "properties": {
+                "additionalDescription": {
+                    "type": "string"
+                }
+            }
+        },
+        "sector.AdditionalDescription": {
+            "type": "object",
+            "properties": {
+                "additionalDescription": {
+                    "type": "string"
+                },
+                "direction": {
+                    "$ref": "#/definitions/sector.Direction"
+                },
+                "institute": {
+                    "$ref": "#/definitions/sector.Institute"
+                },
+                "profile": {
+                    "$ref": "#/definitions/sector.Profile"
+                }
+            }
+        },
         "sector.CreateSectorReq": {
             "type": "object",
             "properties": {
@@ -1333,6 +1410,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "description": {
+                    "type": "string"
+                }
+            }
+        },
+        "sector.Direction": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -1348,9 +1436,37 @@ const docTemplate = `{
                 }
             }
         },
+        "sector.Institute": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "sector.Profile": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "sector.Sector": {
             "type": "object",
             "properties": {
+                "additionalDescriptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sector.AdditionalDescription"
+                    }
+                },
                 "coords": {
                     "type": "string"
                 },

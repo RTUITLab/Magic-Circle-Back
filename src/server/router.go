@@ -44,6 +44,13 @@ func NewRouter(c *Controllers) *gin.Engine {
 					c.Auth.IsSuperAdminMiddleware,
 					c.Sector.DeleteSector,
 				)
+
+			sector.
+				PUT(
+					"/:id/profile/:profile_id",
+					c.Auth.AuthMiddleare(),
+					c.Sector.AddAdditionalDescription,
+				)
 		}
 
 		sectors := v1.Group("/sectors")
