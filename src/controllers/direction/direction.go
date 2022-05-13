@@ -9,6 +9,8 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	. "github.com/0B1t322/Magic-Circle/models/direction"
+	"github.com/0B1t322/Magic-Circle/models/role"
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -55,6 +57,8 @@ type GetDirectionsResp struct {
 // 
 // @Router /v1/direction [get]
 // 
+// @Tags direction
+// 
 // @Produce json
 // 
 // @Success 200 {object} direction.GetDirectionsResp
@@ -85,6 +89,10 @@ type DeleteDirectionByID struct {
 //
 // @Router /v1/direction/{id} [delete]
 //
+// @Tags direction
+// 
+// @Security ApiKeyAuth
+// 
 // @Param id path int true "id of institute"
 // 
 // @Produce json
@@ -102,6 +110,26 @@ func (p DirectionController) DeleteByID(c *gin.Context) {
 		if err := c.ShouldBindUri(&req); err != nil {
 			log.WithFields(newLogFields("Delete", err)).Error("Failed to delete Direction")
 			c.String(http.StatusInternalServerError, "Failed to delete Direction")
+			c.Abort()
+			return
+		}
+	}
+
+	claims := jwt.ExtractClaims(c)
+
+	if claims["role"].(string) == string(role.ADMIN) {
+		getDir, err := p.Client.Direction.Get(c, req.ID)
+		if ent.IsNotFound(err) {
+			// Pass because error would be in create method
+		} else if err != nil {
+			log.WithFields(newLogFields("DeleteByID", err)).Error()
+			c.Status(http.StatusInternalServerError)
+			c.Abort()
+			return
+		}
+
+		if float64(getDir.InstituteID) != claims["intstituteId"].(float64) {
+			c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
 			c.Abort()
 			return
 		}
@@ -159,6 +187,10 @@ type UpdateDirectionResp struct {
 // 
 // @Router /v1/direction/{id} [put]
 // 
+// @Tags direction
+// 
+// @Security ApiKeyAuth
+// 
 // @Accept json
 // 
 // @Produce json
@@ -183,6 +215,24 @@ func (d DirectionController) UpdateDirection(c *gin.Context) {
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+	}
+	claims := jwt.ExtractClaims(c)
+	if claims["role"].(string) == string(role.ADMIN) {
+		getDir, err := d.Client.Direction.Get(c, req.ID)
+		if ent.IsNotFound(err) {
+			// Pass because error would be in create method
+		} else if err != nil {
+			log.WithFields(newLogFields("UpdateDirection", err)).Error()
+			c.Status(http.StatusInternalServerError)
+			c.Abort()
+			return
+		}
+
+		if float64(getDir.InstituteID) != claims["intstituteId"].(float64) {
+			c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
 			c.Abort()
 			return
 		}

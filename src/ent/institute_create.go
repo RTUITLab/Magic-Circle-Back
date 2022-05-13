@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/admin"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 )
@@ -39,6 +40,21 @@ func (ic *InstituteCreate) AddDirections(d ...*Direction) *InstituteCreate {
 		ids[i] = d[i].ID
 	}
 	return ic.AddDirectionIDs(ids...)
+}
+
+// AddAdminIDs adds the "Admins" edge to the Admin entity by IDs.
+func (ic *InstituteCreate) AddAdminIDs(ids ...int) *InstituteCreate {
+	ic.mutation.AddAdminIDs(ids...)
+	return ic
+}
+
+// AddAdmins adds the "Admins" edges to the Admin entity.
+func (ic *InstituteCreate) AddAdmins(a ...*Admin) *InstituteCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return ic.AddAdminIDs(ids...)
 }
 
 // Mutation returns the InstituteMutation object of the builder.
@@ -160,6 +176,25 @@ func (ic *InstituteCreate) createSpec() (*Institute, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: direction.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ic.mutation.AdminsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   institute.AdminsTable,
+			Columns: []string{institute.AdminsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: admin.FieldID,
 				},
 			},
 		}

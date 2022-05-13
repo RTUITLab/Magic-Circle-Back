@@ -12,7 +12,11 @@ type Config struct {
 }
 
 type App struct {
-	Port string `envconfig:"MAGICCIRCLE_APP_PORT" default:"8080"`
+	Port             string `envconfig:"MAGICCIRCLE_APP_PORT" default:"8080"`
+	SuperAdminLogin  string `envconfig:"MAGICCIRCLE_APP_SUPERADMIN_LOGIN" default:"root"`
+	SuperAdminPasswd string `envconfig:"MAGICCIRCLE_APP_SUPERADMIN_PASSWORD" default:"root"`
+	AccessSecret     string `envconfig:"MAGICCIRCLE_APP_ACCESS_SECRET" default:"access_secret"`
+	RefreshSecret    string `envconfig:"MAGICCIRCLE_APP_REFRESH_SECRET" default:"refresh_secret"`
 }
 
 type DB struct {

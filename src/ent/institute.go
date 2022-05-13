@@ -26,9 +26,11 @@ type Institute struct {
 type InstituteEdges struct {
 	// Directions holds the value of the Directions edge.
 	Directions []*Direction `json:"Directions,omitempty"`
+	// Admins holds the value of the Admins edge.
+	Admins []*Admin `json:"Admins,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // DirectionsOrErr returns the Directions value or an error if the edge
@@ -38,6 +40,15 @@ func (e InstituteEdges) DirectionsOrErr() ([]*Direction, error) {
 		return e.Directions, nil
 	}
 	return nil, &NotLoadedError{edge: "Directions"}
+}
+
+// AdminsOrErr returns the Admins value or an error if the edge
+// was not loaded in eager-loading.
+func (e InstituteEdges) AdminsOrErr() ([]*Admin, error) {
+	if e.loadedTypes[1] {
+		return e.Admins, nil
+	}
+	return nil, &NotLoadedError{edge: "Admins"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -84,6 +95,11 @@ func (i *Institute) assignValues(columns []string, values []interface{}) error {
 // QueryDirections queries the "Directions" edge of the Institute entity.
 func (i *Institute) QueryDirections() *DirectionQuery {
 	return (&InstituteClient{config: i.config}).QueryDirections(i)
+}
+
+// QueryAdmins queries the "Admins" edge of the Institute entity.
+func (i *Institute) QueryAdmins() *AdminQuery {
+	return (&InstituteClient{config: i.config}).QueryAdmins(i)
 }
 
 // Update returns a builder for updating this Institute.

@@ -105,6 +105,13 @@ func ProfileID(v int) predicate.AdjacentTable {
 	})
 }
 
+// AdditionalDescription applies equality check predicate on the "additionalDescription" field. It's identical to AdditionalDescriptionEQ.
+func AdditionalDescription(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAdditionalDescription), v))
+	})
+}
+
 // SectorIDEQ applies the EQ predicate on the "sector_id" field.
 func SectorIDEQ(v int) predicate.AdjacentTable {
 	return predicate.AdjacentTable(func(s *sql.Selector) {
@@ -198,6 +205,131 @@ func ProfileIDNotIn(vs ...int) predicate.AdjacentTable {
 			return
 		}
 		s.Where(sql.NotIn(s.C(FieldProfileID), v...))
+	})
+}
+
+// AdditionalDescriptionEQ applies the EQ predicate on the "additionalDescription" field.
+func AdditionalDescriptionEQ(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionNEQ applies the NEQ predicate on the "additionalDescription" field.
+func AdditionalDescriptionNEQ(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionIn applies the In predicate on the "additionalDescription" field.
+func AdditionalDescriptionIn(vs ...string) predicate.AdjacentTable {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAdditionalDescription), v...))
+	})
+}
+
+// AdditionalDescriptionNotIn applies the NotIn predicate on the "additionalDescription" field.
+func AdditionalDescriptionNotIn(vs ...string) predicate.AdjacentTable {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAdditionalDescription), v...))
+	})
+}
+
+// AdditionalDescriptionGT applies the GT predicate on the "additionalDescription" field.
+func AdditionalDescriptionGT(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionGTE applies the GTE predicate on the "additionalDescription" field.
+func AdditionalDescriptionGTE(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionLT applies the LT predicate on the "additionalDescription" field.
+func AdditionalDescriptionLT(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionLTE applies the LTE predicate on the "additionalDescription" field.
+func AdditionalDescriptionLTE(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionContains applies the Contains predicate on the "additionalDescription" field.
+func AdditionalDescriptionContains(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionHasPrefix applies the HasPrefix predicate on the "additionalDescription" field.
+func AdditionalDescriptionHasPrefix(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionHasSuffix applies the HasSuffix predicate on the "additionalDescription" field.
+func AdditionalDescriptionHasSuffix(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionIsNil applies the IsNil predicate on the "additionalDescription" field.
+func AdditionalDescriptionIsNil() predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAdditionalDescription)))
+	})
+}
+
+// AdditionalDescriptionNotNil applies the NotNil predicate on the "additionalDescription" field.
+func AdditionalDescriptionNotNil() predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAdditionalDescription)))
+	})
+}
+
+// AdditionalDescriptionEqualFold applies the EqualFold predicate on the "additionalDescription" field.
+func AdditionalDescriptionEqualFold(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldAdditionalDescription), v))
+	})
+}
+
+// AdditionalDescriptionContainsFold applies the ContainsFold predicate on the "additionalDescription" field.
+func AdditionalDescriptionContainsFold(v string) predicate.AdjacentTable {
+	return predicate.AdjacentTable(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldAdditionalDescription), v))
 	})
 }
 

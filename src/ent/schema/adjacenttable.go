@@ -19,6 +19,7 @@ func (AdjacentTable) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("sector_id"),
 		field.Int("profile_id"),
+		field.Text("additionalDescription").Optional(),
 	}
 }
 

@@ -237,6 +237,34 @@ func HasDirectionsWith(preds ...predicate.Direction) predicate.Institute {
 	})
 }
 
+// HasAdmins applies the HasEdge predicate on the "Admins" edge.
+func HasAdmins() predicate.Institute {
+	return predicate.Institute(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AdminsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AdminsTable, AdminsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAdminsWith applies the HasEdge predicate on the "Admins" edge with a given conditions (other predicates).
+func HasAdminsWith(preds ...predicate.Admin) predicate.Institute {
+	return predicate.Institute(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AdminsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AdminsTable, AdminsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Institute) predicate.Institute {
 	return predicate.Institute(func(s *sql.Selector) {

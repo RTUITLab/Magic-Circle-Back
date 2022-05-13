@@ -8,11 +8,13 @@ import (
 	"sync"
 
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
+	"github.com/0B1t322/Magic-Circle/ent/admin"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
+	"github.com/0B1t322/Magic-Circle/ent/superadmin"
 
 	"entgo.io/ent"
 )
@@ -27,26 +29,29 @@ const (
 
 	// Node types.
 	TypeAdjacentTable = "AdjacentTable"
+	TypeAdmin         = "Admin"
 	TypeDirection     = "Direction"
 	TypeInstitute     = "Institute"
 	TypeProfile       = "Profile"
 	TypeSector        = "Sector"
+	TypeSuperAdmin    = "SuperAdmin"
 )
 
 // AdjacentTableMutation represents an operation that mutates the AdjacentTable nodes in the graph.
 type AdjacentTableMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	clearedFields   map[string]struct{}
-	_Profile        *int
-	cleared_Profile bool
-	_Sector         *int
-	cleared_Sector  bool
-	done            bool
-	oldValue        func(context.Context) (*AdjacentTable, error)
-	predicates      []predicate.AdjacentTable
+	op                    Op
+	typ                   string
+	id                    *int
+	additionalDescription *string
+	clearedFields         map[string]struct{}
+	_Profile              *int
+	cleared_Profile       bool
+	_Sector               *int
+	cleared_Sector        bool
+	done                  bool
+	oldValue              func(context.Context) (*AdjacentTable, error)
+	predicates            []predicate.AdjacentTable
 }
 
 var _ ent.Mutation = (*AdjacentTableMutation)(nil)
@@ -200,6 +205,55 @@ func (m *AdjacentTableMutation) ResetProfileID() {
 	m._Profile = nil
 }
 
+// SetAdditionalDescription sets the "additionalDescription" field.
+func (m *AdjacentTableMutation) SetAdditionalDescription(s string) {
+	m.additionalDescription = &s
+}
+
+// AdditionalDescription returns the value of the "additionalDescription" field in the mutation.
+func (m *AdjacentTableMutation) AdditionalDescription() (r string, exists bool) {
+	v := m.additionalDescription
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAdditionalDescription returns the old "additionalDescription" field's value of the AdjacentTable entity.
+// If the AdjacentTable object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdjacentTableMutation) OldAdditionalDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldAdditionalDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldAdditionalDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAdditionalDescription: %w", err)
+	}
+	return oldValue.AdditionalDescription, nil
+}
+
+// ClearAdditionalDescription clears the value of the "additionalDescription" field.
+func (m *AdjacentTableMutation) ClearAdditionalDescription() {
+	m.additionalDescription = nil
+	m.clearedFields[adjacenttable.FieldAdditionalDescription] = struct{}{}
+}
+
+// AdditionalDescriptionCleared returns if the "additionalDescription" field was cleared in this mutation.
+func (m *AdjacentTableMutation) AdditionalDescriptionCleared() bool {
+	_, ok := m.clearedFields[adjacenttable.FieldAdditionalDescription]
+	return ok
+}
+
+// ResetAdditionalDescription resets all changes to the "additionalDescription" field.
+func (m *AdjacentTableMutation) ResetAdditionalDescription() {
+	m.additionalDescription = nil
+	delete(m.clearedFields, adjacenttable.FieldAdditionalDescription)
+}
+
 // ClearProfile clears the "Profile" edge to the Profile entity.
 func (m *AdjacentTableMutation) ClearProfile() {
 	m.cleared_Profile = true
@@ -271,12 +325,15 @@ func (m *AdjacentTableMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AdjacentTableMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m._Sector != nil {
 		fields = append(fields, adjacenttable.FieldSectorID)
 	}
 	if m._Profile != nil {
 		fields = append(fields, adjacenttable.FieldProfileID)
+	}
+	if m.additionalDescription != nil {
+		fields = append(fields, adjacenttable.FieldAdditionalDescription)
 	}
 	return fields
 }
@@ -290,6 +347,8 @@ func (m *AdjacentTableMutation) Field(name string) (ent.Value, bool) {
 		return m.SectorID()
 	case adjacenttable.FieldProfileID:
 		return m.ProfileID()
+	case adjacenttable.FieldAdditionalDescription:
+		return m.AdditionalDescription()
 	}
 	return nil, false
 }
@@ -303,6 +362,8 @@ func (m *AdjacentTableMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldSectorID(ctx)
 	case adjacenttable.FieldProfileID:
 		return m.OldProfileID(ctx)
+	case adjacenttable.FieldAdditionalDescription:
+		return m.OldAdditionalDescription(ctx)
 	}
 	return nil, fmt.Errorf("unknown AdjacentTable field %s", name)
 }
@@ -325,6 +386,13 @@ func (m *AdjacentTableMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProfileID(v)
+		return nil
+	case adjacenttable.FieldAdditionalDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAdditionalDescription(v)
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable field %s", name)
@@ -358,7 +426,11 @@ func (m *AdjacentTableMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AdjacentTableMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(adjacenttable.FieldAdditionalDescription) {
+		fields = append(fields, adjacenttable.FieldAdditionalDescription)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -371,6 +443,11 @@ func (m *AdjacentTableMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AdjacentTableMutation) ClearField(name string) error {
+	switch name {
+	case adjacenttable.FieldAdditionalDescription:
+		m.ClearAdditionalDescription()
+		return nil
+	}
 	return fmt.Errorf("unknown AdjacentTable nullable field %s", name)
 }
 
@@ -383,6 +460,9 @@ func (m *AdjacentTableMutation) ResetField(name string) error {
 		return nil
 	case adjacenttable.FieldProfileID:
 		m.ResetProfileID()
+		return nil
+	case adjacenttable.FieldAdditionalDescription:
+		m.ResetAdditionalDescription()
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable field %s", name)
@@ -480,6 +560,464 @@ func (m *AdjacentTableMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown AdjacentTable edge %s", name)
+}
+
+// AdminMutation represents an operation that mutates the Admin nodes in the graph.
+type AdminMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	login             *string
+	password          *string
+	clearedFields     map[string]struct{}
+	_Institute        *int
+	cleared_Institute bool
+	done              bool
+	oldValue          func(context.Context) (*Admin, error)
+	predicates        []predicate.Admin
+}
+
+var _ ent.Mutation = (*AdminMutation)(nil)
+
+// adminOption allows management of the mutation configuration using functional options.
+type adminOption func(*AdminMutation)
+
+// newAdminMutation creates new mutation for the Admin entity.
+func newAdminMutation(c config, op Op, opts ...adminOption) *AdminMutation {
+	m := &AdminMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAdmin,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAdminID sets the ID field of the mutation.
+func withAdminID(id int) adminOption {
+	return func(m *AdminMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Admin
+		)
+		m.oldValue = func(ctx context.Context) (*Admin, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Admin.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAdmin sets the old Admin of the mutation.
+func withAdmin(node *Admin) adminOption {
+	return func(m *AdminMutation) {
+		m.oldValue = func(context.Context) (*Admin, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AdminMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AdminMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AdminMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetLogin sets the "login" field.
+func (m *AdminMutation) SetLogin(s string) {
+	m.login = &s
+}
+
+// Login returns the value of the "login" field in the mutation.
+func (m *AdminMutation) Login() (r string, exists bool) {
+	v := m.login
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogin returns the old "login" field's value of the Admin entity.
+// If the Admin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminMutation) OldLogin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldLogin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldLogin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogin: %w", err)
+	}
+	return oldValue.Login, nil
+}
+
+// ResetLogin resets all changes to the "login" field.
+func (m *AdminMutation) ResetLogin() {
+	m.login = nil
+}
+
+// SetPassword sets the "password" field.
+func (m *AdminMutation) SetPassword(s string) {
+	m.password = &s
+}
+
+// Password returns the value of the "password" field in the mutation.
+func (m *AdminMutation) Password() (r string, exists bool) {
+	v := m.password
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPassword returns the old "password" field's value of the Admin entity.
+// If the Admin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminMutation) OldPassword(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPassword is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPassword requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPassword: %w", err)
+	}
+	return oldValue.Password, nil
+}
+
+// ResetPassword resets all changes to the "password" field.
+func (m *AdminMutation) ResetPassword() {
+	m.password = nil
+}
+
+// SetInstituteID sets the "institute_id" field.
+func (m *AdminMutation) SetInstituteID(i int) {
+	m._Institute = &i
+}
+
+// InstituteID returns the value of the "institute_id" field in the mutation.
+func (m *AdminMutation) InstituteID() (r int, exists bool) {
+	v := m._Institute
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldInstituteID returns the old "institute_id" field's value of the Admin entity.
+// If the Admin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AdminMutation) OldInstituteID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldInstituteID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldInstituteID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldInstituteID: %w", err)
+	}
+	return oldValue.InstituteID, nil
+}
+
+// ResetInstituteID resets all changes to the "institute_id" field.
+func (m *AdminMutation) ResetInstituteID() {
+	m._Institute = nil
+}
+
+// ClearInstitute clears the "Institute" edge to the Institute entity.
+func (m *AdminMutation) ClearInstitute() {
+	m.cleared_Institute = true
+}
+
+// InstituteCleared reports if the "Institute" edge to the Institute entity was cleared.
+func (m *AdminMutation) InstituteCleared() bool {
+	return m.cleared_Institute
+}
+
+// InstituteIDs returns the "Institute" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// InstituteID instead. It exists only for internal usage by the builders.
+func (m *AdminMutation) InstituteIDs() (ids []int) {
+	if id := m._Institute; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetInstitute resets all changes to the "Institute" edge.
+func (m *AdminMutation) ResetInstitute() {
+	m._Institute = nil
+	m.cleared_Institute = false
+}
+
+// Where appends a list predicates to the AdminMutation builder.
+func (m *AdminMutation) Where(ps ...predicate.Admin) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *AdminMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Admin).
+func (m *AdminMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AdminMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.login != nil {
+		fields = append(fields, admin.FieldLogin)
+	}
+	if m.password != nil {
+		fields = append(fields, admin.FieldPassword)
+	}
+	if m._Institute != nil {
+		fields = append(fields, admin.FieldInstituteID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AdminMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case admin.FieldLogin:
+		return m.Login()
+	case admin.FieldPassword:
+		return m.Password()
+	case admin.FieldInstituteID:
+		return m.InstituteID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AdminMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case admin.FieldLogin:
+		return m.OldLogin(ctx)
+	case admin.FieldPassword:
+		return m.OldPassword(ctx)
+	case admin.FieldInstituteID:
+		return m.OldInstituteID(ctx)
+	}
+	return nil, fmt.Errorf("unknown Admin field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdminMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case admin.FieldLogin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogin(v)
+		return nil
+	case admin.FieldPassword:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPassword(v)
+		return nil
+	case admin.FieldInstituteID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetInstituteID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Admin field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AdminMutation) AddedFields() []string {
+	var fields []string
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AdminMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AdminMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Admin numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AdminMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AdminMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AdminMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Admin nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AdminMutation) ResetField(name string) error {
+	switch name {
+	case admin.FieldLogin:
+		m.ResetLogin()
+		return nil
+	case admin.FieldPassword:
+		m.ResetPassword()
+		return nil
+	case admin.FieldInstituteID:
+		m.ResetInstituteID()
+		return nil
+	}
+	return fmt.Errorf("unknown Admin field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AdminMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m._Institute != nil {
+		edges = append(edges, admin.EdgeInstitute)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AdminMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case admin.EdgeInstitute:
+		if id := m._Institute; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AdminMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AdminMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AdminMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.cleared_Institute {
+		edges = append(edges, admin.EdgeInstitute)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AdminMutation) EdgeCleared(name string) bool {
+	switch name {
+	case admin.EdgeInstitute:
+		return m.cleared_Institute
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AdminMutation) ClearEdge(name string) error {
+	switch name {
+	case admin.EdgeInstitute:
+		m.ClearInstitute()
+		return nil
+	}
+	return fmt.Errorf("unknown Admin unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AdminMutation) ResetEdge(name string) error {
+	switch name {
+	case admin.EdgeInstitute:
+		m.ResetInstitute()
+		return nil
+	}
+	return fmt.Errorf("unknown Admin edge %s", name)
 }
 
 // DirectionMutation represents an operation that mutates the Direction nodes in the graph.
@@ -980,6 +1518,9 @@ type InstituteMutation struct {
 	_Directions        map[int]struct{}
 	removed_Directions map[int]struct{}
 	cleared_Directions bool
+	_Admins            map[int]struct{}
+	removed_Admins     map[int]struct{}
+	cleared_Admins     bool
 	done               bool
 	oldValue           func(context.Context) (*Institute, error)
 	predicates         []predicate.Institute
@@ -1154,6 +1695,60 @@ func (m *InstituteMutation) ResetDirections() {
 	m.removed_Directions = nil
 }
 
+// AddAdminIDs adds the "Admins" edge to the Admin entity by ids.
+func (m *InstituteMutation) AddAdminIDs(ids ...int) {
+	if m._Admins == nil {
+		m._Admins = make(map[int]struct{})
+	}
+	for i := range ids {
+		m._Admins[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAdmins clears the "Admins" edge to the Admin entity.
+func (m *InstituteMutation) ClearAdmins() {
+	m.cleared_Admins = true
+}
+
+// AdminsCleared reports if the "Admins" edge to the Admin entity was cleared.
+func (m *InstituteMutation) AdminsCleared() bool {
+	return m.cleared_Admins
+}
+
+// RemoveAdminIDs removes the "Admins" edge to the Admin entity by IDs.
+func (m *InstituteMutation) RemoveAdminIDs(ids ...int) {
+	if m.removed_Admins == nil {
+		m.removed_Admins = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m._Admins, ids[i])
+		m.removed_Admins[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAdmins returns the removed IDs of the "Admins" edge to the Admin entity.
+func (m *InstituteMutation) RemovedAdminsIDs() (ids []int) {
+	for id := range m.removed_Admins {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AdminsIDs returns the "Admins" edge IDs in the mutation.
+func (m *InstituteMutation) AdminsIDs() (ids []int) {
+	for id := range m._Admins {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAdmins resets all changes to the "Admins" edge.
+func (m *InstituteMutation) ResetAdmins() {
+	m._Admins = nil
+	m.cleared_Admins = false
+	m.removed_Admins = nil
+}
+
 // Where appends a list predicates to the InstituteMutation builder.
 func (m *InstituteMutation) Where(ps ...predicate.Institute) {
 	m.predicates = append(m.predicates, ps...)
@@ -1272,9 +1867,12 @@ func (m *InstituteMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *InstituteMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m._Directions != nil {
 		edges = append(edges, institute.EdgeDirections)
+	}
+	if m._Admins != nil {
+		edges = append(edges, institute.EdgeAdmins)
 	}
 	return edges
 }
@@ -1289,15 +1887,24 @@ func (m *InstituteMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case institute.EdgeAdmins:
+		ids := make([]ent.Value, 0, len(m._Admins))
+		for id := range m._Admins {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *InstituteMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removed_Directions != nil {
 		edges = append(edges, institute.EdgeDirections)
+	}
+	if m.removed_Admins != nil {
+		edges = append(edges, institute.EdgeAdmins)
 	}
 	return edges
 }
@@ -1312,15 +1919,24 @@ func (m *InstituteMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case institute.EdgeAdmins:
+		ids := make([]ent.Value, 0, len(m.removed_Admins))
+		for id := range m.removed_Admins {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *InstituteMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.cleared_Directions {
 		edges = append(edges, institute.EdgeDirections)
+	}
+	if m.cleared_Admins {
+		edges = append(edges, institute.EdgeAdmins)
 	}
 	return edges
 }
@@ -1331,6 +1947,8 @@ func (m *InstituteMutation) EdgeCleared(name string) bool {
 	switch name {
 	case institute.EdgeDirections:
 		return m.cleared_Directions
+	case institute.EdgeAdmins:
+		return m.cleared_Admins
 	}
 	return false
 }
@@ -1349,6 +1967,9 @@ func (m *InstituteMutation) ResetEdge(name string) error {
 	switch name {
 	case institute.EdgeDirections:
 		m.ResetDirections()
+		return nil
+	case institute.EdgeAdmins:
+		m.ResetAdmins()
 		return nil
 	}
 	return fmt.Errorf("unknown Institute edge %s", name)
@@ -2300,4 +2921,426 @@ func (m *SectorMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Sector edge %s", name)
+}
+
+// SuperAdminMutation represents an operation that mutates the SuperAdmin nodes in the graph.
+type SuperAdminMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	login         *string
+	password      *string
+	email         *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*SuperAdmin, error)
+	predicates    []predicate.SuperAdmin
+}
+
+var _ ent.Mutation = (*SuperAdminMutation)(nil)
+
+// superadminOption allows management of the mutation configuration using functional options.
+type superadminOption func(*SuperAdminMutation)
+
+// newSuperAdminMutation creates new mutation for the SuperAdmin entity.
+func newSuperAdminMutation(c config, op Op, opts ...superadminOption) *SuperAdminMutation {
+	m := &SuperAdminMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSuperAdmin,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSuperAdminID sets the ID field of the mutation.
+func withSuperAdminID(id int) superadminOption {
+	return func(m *SuperAdminMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *SuperAdmin
+		)
+		m.oldValue = func(ctx context.Context) (*SuperAdmin, error) {
+			once.Do(func() {
+				if m.done {
+					err = fmt.Errorf("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().SuperAdmin.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSuperAdmin sets the old SuperAdmin of the mutation.
+func withSuperAdmin(node *SuperAdmin) superadminOption {
+	return func(m *SuperAdminMutation) {
+		m.oldValue = func(context.Context) (*SuperAdmin, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SuperAdminMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SuperAdminMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SuperAdminMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// SetLogin sets the "login" field.
+func (m *SuperAdminMutation) SetLogin(s string) {
+	m.login = &s
+}
+
+// Login returns the value of the "login" field in the mutation.
+func (m *SuperAdminMutation) Login() (r string, exists bool) {
+	v := m.login
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogin returns the old "login" field's value of the SuperAdmin entity.
+// If the SuperAdmin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SuperAdminMutation) OldLogin(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldLogin is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldLogin requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogin: %w", err)
+	}
+	return oldValue.Login, nil
+}
+
+// ResetLogin resets all changes to the "login" field.
+func (m *SuperAdminMutation) ResetLogin() {
+	m.login = nil
+}
+
+// SetPassword sets the "password" field.
+func (m *SuperAdminMutation) SetPassword(s string) {
+	m.password = &s
+}
+
+// Password returns the value of the "password" field in the mutation.
+func (m *SuperAdminMutation) Password() (r string, exists bool) {
+	v := m.password
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPassword returns the old "password" field's value of the SuperAdmin entity.
+// If the SuperAdmin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SuperAdminMutation) OldPassword(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldPassword is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldPassword requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPassword: %w", err)
+	}
+	return oldValue.Password, nil
+}
+
+// ResetPassword resets all changes to the "password" field.
+func (m *SuperAdminMutation) ResetPassword() {
+	m.password = nil
+}
+
+// SetEmail sets the "email" field.
+func (m *SuperAdminMutation) SetEmail(s string) {
+	m.email = &s
+}
+
+// Email returns the value of the "email" field in the mutation.
+func (m *SuperAdminMutation) Email() (r string, exists bool) {
+	v := m.email
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEmail returns the old "email" field's value of the SuperAdmin entity.
+// If the SuperAdmin object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SuperAdminMutation) OldEmail(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldEmail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldEmail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEmail: %w", err)
+	}
+	return oldValue.Email, nil
+}
+
+// ClearEmail clears the value of the "email" field.
+func (m *SuperAdminMutation) ClearEmail() {
+	m.email = nil
+	m.clearedFields[superadmin.FieldEmail] = struct{}{}
+}
+
+// EmailCleared returns if the "email" field was cleared in this mutation.
+func (m *SuperAdminMutation) EmailCleared() bool {
+	_, ok := m.clearedFields[superadmin.FieldEmail]
+	return ok
+}
+
+// ResetEmail resets all changes to the "email" field.
+func (m *SuperAdminMutation) ResetEmail() {
+	m.email = nil
+	delete(m.clearedFields, superadmin.FieldEmail)
+}
+
+// Where appends a list predicates to the SuperAdminMutation builder.
+func (m *SuperAdminMutation) Where(ps ...predicate.SuperAdmin) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *SuperAdminMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (SuperAdmin).
+func (m *SuperAdminMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SuperAdminMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.login != nil {
+		fields = append(fields, superadmin.FieldLogin)
+	}
+	if m.password != nil {
+		fields = append(fields, superadmin.FieldPassword)
+	}
+	if m.email != nil {
+		fields = append(fields, superadmin.FieldEmail)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SuperAdminMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case superadmin.FieldLogin:
+		return m.Login()
+	case superadmin.FieldPassword:
+		return m.Password()
+	case superadmin.FieldEmail:
+		return m.Email()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SuperAdminMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case superadmin.FieldLogin:
+		return m.OldLogin(ctx)
+	case superadmin.FieldPassword:
+		return m.OldPassword(ctx)
+	case superadmin.FieldEmail:
+		return m.OldEmail(ctx)
+	}
+	return nil, fmt.Errorf("unknown SuperAdmin field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SuperAdminMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case superadmin.FieldLogin:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogin(v)
+		return nil
+	case superadmin.FieldPassword:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPassword(v)
+		return nil
+	case superadmin.FieldEmail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEmail(v)
+		return nil
+	}
+	return fmt.Errorf("unknown SuperAdmin field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SuperAdminMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SuperAdminMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SuperAdminMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown SuperAdmin numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SuperAdminMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(superadmin.FieldEmail) {
+		fields = append(fields, superadmin.FieldEmail)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SuperAdminMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SuperAdminMutation) ClearField(name string) error {
+	switch name {
+	case superadmin.FieldEmail:
+		m.ClearEmail()
+		return nil
+	}
+	return fmt.Errorf("unknown SuperAdmin nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SuperAdminMutation) ResetField(name string) error {
+	switch name {
+	case superadmin.FieldLogin:
+		m.ResetLogin()
+		return nil
+	case superadmin.FieldPassword:
+		m.ResetPassword()
+		return nil
+	case superadmin.FieldEmail:
+		m.ResetEmail()
+		return nil
+	}
+	return fmt.Errorf("unknown SuperAdmin field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SuperAdminMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SuperAdminMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SuperAdminMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SuperAdminMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SuperAdminMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SuperAdminMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SuperAdminMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown SuperAdmin unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SuperAdminMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown SuperAdmin edge %s", name)
 }

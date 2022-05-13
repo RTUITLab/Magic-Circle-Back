@@ -30,6 +30,7 @@ func (Profile) Edges() []ent.Edge {
 			Field("direction_id").
 			Required(),
 		edge.To("AdjacentTables", AdjacentTable.Type),
+		// edge.To("AdditonalDescriptions", AdditonalDescription.Type),
 	}
 }
 

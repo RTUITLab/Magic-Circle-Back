@@ -11,6 +11,8 @@ const (
 	FieldName = "name"
 	// EdgeDirections holds the string denoting the directions edge name in mutations.
 	EdgeDirections = "Directions"
+	// EdgeAdmins holds the string denoting the admins edge name in mutations.
+	EdgeAdmins = "Admins"
 	// Table holds the table name of the institute in the database.
 	Table = "Institute"
 	// DirectionsTable is the table that holds the Directions relation/edge.
@@ -20,6 +22,13 @@ const (
 	DirectionsInverseTable = "Direction"
 	// DirectionsColumn is the table column denoting the Directions relation/edge.
 	DirectionsColumn = "institute_id"
+	// AdminsTable is the table that holds the Admins relation/edge.
+	AdminsTable = "Admin"
+	// AdminsInverseTable is the table name for the Admin entity.
+	// It exists in this package in order to avoid circular dependency with the "admin" package.
+	AdminsInverseTable = "Admin"
+	// AdminsColumn is the table column denoting the Admins relation/edge.
+	AdminsColumn = "institute_id"
 )
 
 // Columns holds all SQL columns for institute fields.

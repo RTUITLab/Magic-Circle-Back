@@ -22,6 +22,19 @@ func (f AdjacentTableFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return f(ctx, mv)
 }
 
+// The AdminFunc type is an adapter to allow the use of ordinary
+// function as Admin mutator.
+type AdminFunc func(context.Context, *ent.AdminMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AdminFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AdminMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdminMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The DirectionFunc type is an adapter to allow the use of ordinary
 // function as Direction mutator.
 type DirectionFunc func(context.Context, *ent.DirectionMutation) (ent.Value, error)
@@ -70,6 +83,19 @@ func (f SectorFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	mv, ok := m.(*ent.SectorMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SectorMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SuperAdminFunc type is an adapter to allow the use of ordinary
+// function as SuperAdmin mutator.
+type SuperAdminFunc func(context.Context, *ent.SuperAdminMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SuperAdminFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SuperAdminMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SuperAdminMutation", m)
 	}
 	return f(ctx, mv)
 }

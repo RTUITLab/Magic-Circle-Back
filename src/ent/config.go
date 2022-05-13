@@ -25,10 +25,12 @@ type config struct {
 // hooks per client, for fast access.
 type hooks struct {
 	AdjacentTable []ent.Hook
+	Admin         []ent.Hook
 	Direction     []ent.Hook
 	Institute     []ent.Hook
 	Profile       []ent.Hook
 	Sector        []ent.Hook
+	SuperAdmin    []ent.Hook
 }
 
 // Options applies the options on the config object.

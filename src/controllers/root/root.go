@@ -9,6 +9,8 @@ import (
 	"github.com/0B1t322/Magic-Circle/ent/adjacenttable"
 	"github.com/0B1t322/Magic-Circle/ent/profile"
 	"github.com/0B1t322/Magic-Circle/ent/sector"
+	"github.com/0B1t322/Magic-Circle/models/role"
+	"github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -186,6 +188,8 @@ func (r RootController) getOrCreateProfile(
 //
 // @Router /v1/ [post]
 //
+// @Security ApiKeyAuth
+// 
 // @Produce json
 //
 // @Success 201 {object} root.CreateInstDirProfResp
@@ -213,6 +217,17 @@ func (r RootController) CreateInstDirProf(c *gin.Context) {
 		resp CreateInstDirProfResp
 		err  error
 	)
+
+	claims := jwt.ExtractClaims(c)
+	// Check that user is admin and if its admin and they try to create intitite or pass not their institute
+	// Pass error
+	if claims["role"].(string) == string(role.ADMIN) && req.Inst != nil {
+		if req.Inst.ID == nil || float64(*req.Inst.ID) != claims["intstituteId"].(float64){
+			c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
+			c.Abort()
+			return
+		}
+	}
 
 	// Если создание института будет достаточно указания этого в реквесте
 	inst, err = r.getOrCreateInst(c, req.Inst)
@@ -242,6 +257,28 @@ func (r RootController) CreateInstDirProf(c *gin.Context) {
 		}
 	}
 
+	// Check that if user is admin and try pass direction this dir is in this inst
+	if claims["role"].(string) == string(role.ADMIN) && req.Dir != nil {
+		if req.Dir.ID != nil {
+			dirId := *req.Dir.ID
+			getDir, err := r.Client.Direction.Get(c, dirId)
+			if ent.IsNotFound(err) {
+				// Pass because error would be in create method
+			} else if err != nil {
+				log.WithFields(newLogFields("CreateInstDirProf", err)).Error()
+				c.Status(http.StatusInternalServerError)
+				c.Abort()
+				return
+			}
+
+			if float64(getDir.InstituteID) != claims["intstituteId"].(float64) {
+				c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
+				c.Abort()
+				return
+			}
+		}
+	}
+
 	dir, err = r.getOrCreateDir(
 		c,
 		req.Dir,
@@ -266,6 +303,33 @@ func (r RootController) CreateInstDirProf(c *gin.Context) {
 		resp.Direction = &CreatedDirection{
 			ID:   dir.ID,
 			Name: dir.Name,
+		}
+	}
+
+	// Check that if user is admin and try pass profile and this profile not in this inst
+	if claims["role"].(string) == string(role.ADMIN) && req.Prof != nil {
+		if req.Prof.ID != nil {
+			profId := *req.Prof.ID
+			getProf, err := r.Client.Profile.Query().
+				WithDirection().
+				Where(
+					profile.ID(profId),
+				).
+				Only(c)
+			if ent.IsNotFound(err) {
+				// Pass
+			} else if err != nil {
+				log.WithFields(newLogFields("CreateInstDirProf", err)).Error()
+				c.Status(http.StatusInternalServerError)
+				c.Abort()
+				return
+			}
+
+			if float64(getProf.Edges.Direction.InstituteID) != claims["intstituteId"].(float64) {
+				c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
+				c.Abort()
+				return
+			}
 		}
 	}
 
@@ -434,6 +498,8 @@ type DeleteRelateReq struct {
 //
 // @Router /v1/ [delete]
 //
+// @Security ApiKeyAuth
+// 
 // @Produce json
 //
 // @Success 200
@@ -448,6 +514,31 @@ func (r RootController) DeleteRelate(c *gin.Context) {
 	{
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.String(http.StatusBadRequest, "Unexpected body")
+			c.Abort()
+			return
+		}
+	}
+
+	claims := jwt.ExtractClaims(c)
+
+	if claims["role"].(string) == string(role.ADMIN) {
+		getProf, err := r.Client.Profile.Query().
+				WithDirection().
+				Where(
+					profile.ID(req.ProfileID),
+				).
+				Only(c)
+		if ent.IsNotFound(err) {
+			// Pass
+		} else if err != nil {
+			log.WithFields(newLogFields("DeleteRelate", err)).Error()
+			c.Status(http.StatusInternalServerError)
+			c.Abort()
+			return
+		}
+
+		if float64(getProf.Edges.Direction.InstituteID) != claims["intstituteId"].(float64) {
+			c.String(http.StatusForbidden, "You are not superadmin or admin of this institute")
 			c.Abort()
 			return
 		}

@@ -18,49 +18,186 @@ func NewRouter(c *Controllers) *gin.Engine {
 	{
 		sector := v1.Group("/sector")
 		{
-			sector.POST("", c.Sector.Create)
-			sector.PUT("/:id", c.Sector.Update)
-			sector.GET("", c.Sector.GetAll)
+			sector.
+				GET("", c.Sector.GetAll)
+
+			sector.
+				POST(
+				"", 
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Sector.Create,
+				)
+
+			sector.
+				PUT(
+					"/:id", 
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Sector.Update,
+				)
+
+			sector.
+				DELETE(
+					"/:id", 
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Sector.DeleteSector,
+				)
+
+			sector.
+				PUT(
+					"/:id/profile/:profile_id",
+					c.Auth.AuthMiddleare(),
+					c.Sector.AddAdditionalDescription,
+				)
 		}
 
 		sectors := v1.Group("/sectors")
 		{
-			sectors.POST("", c.Sector.CreateSectors)
+			sectors.
+				POST(
+					"",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Sector.CreateSectors,
+				)
 		}
 
 		profile := v1.Group("/profile")
 		{
 			profile.GET("", c.Profile.GetAll)
-			profile.DELETE("/:id", c.Profile.DeleteByID)
-			profile.PUT("/:id", c.Profile.UpdateProfile)
+
+			profile.
+				DELETE(
+					"/:id",
+					c.Auth.AuthMiddleare(),
+					c.Profile.DeleteByID,
+				)
+
+			profile.
+				PUT(
+					"/:id",
+					c.Auth.AuthMiddleare(),
+					c.Profile.UpdateProfile,
+				)
 		}
 
 		institute := v1.Group("/institute")
 		{
 			institute.GET("", c.Institute.GetAll)
-			institute.DELETE("/:id", c.Institute.DeleteByID)
-			institute.PUT("/:id", c.Institute.UpdateInstitute)
+			institute.
+				DELETE(
+					"/:id", 
+					c.Auth.AuthMiddleare(),
+					c.Institute.DeleteByID,
+				)
+
+			institute.
+				PUT(
+					"/:id", 
+					c.Auth.AuthMiddleare(),
+					c.Institute.UpdateInstitute,
+				)
 		}
 
 		direction := v1.Group("/direction")
 		{
 			direction.GET("", c.Direction.GetAll)
-			direction.DELETE("/:id", c.Direction.DeleteByID)
-			direction.PUT("/:id", c.Direction.UpdateDirection)
+
+			direction.
+				DELETE(
+					"/:id", 
+					c.Auth.AuthMiddleare(),
+					c.Direction.DeleteByID,
+				)
+
+			direction.
+				PUT(
+					"/:id",
+					c.Auth.AuthMiddleare(),
+					c.Direction.UpdateDirection,
+				)
 		}
 
-		// adjacenttable := v1.Group("/adjacenttable")
-		// {
-		// 	adjacenttable.POST("", c.AdjacentTable.Create)
-		// }
 
-		// adjacenttables := v1.Group("/adjacenttables")
-		// {
-		// 	adjacenttables.POST("", c.AdjacentTable.CreateALot)
-		// }
+		auth := v1.Group("/auth")
+		{
+			auth.
+				POST("/login", c.Auth.LoginHandler)
 
-		v1.POST("/", c.Root.CreateInstDirProf)
-		v1.DELETE("/", c.Root.DeleteRelate)
+			auth.
+				GET("/refreshToken", c.Auth.RefreshHandler)
+			auth.
+				POST(
+					"/admin/:intstitute_id", 
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.CreateAdmin,
+				)
+
+			auth.
+				GET(
+					"/admin",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.GetAdmins,
+				)
+			
+			auth.
+				PUT(
+					"/admin/:id",
+					c.Auth.AuthMiddleare(),
+					c.Auth.ChangeAdminPassword,
+				)
+			
+			auth.
+				POST(
+					"/superadmin",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.CreateSuperAdmin,
+				)
+
+			auth.
+				GET(
+					"/superadmin",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.GetSuperAdmins,
+				)
+			
+			auth.
+				DELETE(
+					"/admin/:id",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.DeleteAdmin,
+				)
+			
+			auth.
+				DELETE(
+					"/superadmin/:id",
+					c.Auth.AuthMiddleare(),
+					c.Auth.IsSuperAdminMiddleware,
+					c.Auth.DeleteSuperAdmin,
+				)
+		}
+		
+
+		v1.
+			POST(
+				"/", 
+				c.Auth.AuthMiddleare(),
+				c.Root.CreateInstDirProf,
+			)
+
+		v1.
+			DELETE(
+				"/",
+				c.Auth.AuthMiddleare(),
+				c.Root.DeleteRelate,
+			)
 	}
 
 	return router

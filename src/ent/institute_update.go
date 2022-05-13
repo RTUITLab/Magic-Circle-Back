@@ -9,6 +9,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/0B1t322/Magic-Circle/ent/admin"
 	"github.com/0B1t322/Magic-Circle/ent/direction"
 	"github.com/0B1t322/Magic-Circle/ent/institute"
 	"github.com/0B1t322/Magic-Circle/ent/predicate"
@@ -48,6 +49,21 @@ func (iu *InstituteUpdate) AddDirections(d ...*Direction) *InstituteUpdate {
 	return iu.AddDirectionIDs(ids...)
 }
 
+// AddAdminIDs adds the "Admins" edge to the Admin entity by IDs.
+func (iu *InstituteUpdate) AddAdminIDs(ids ...int) *InstituteUpdate {
+	iu.mutation.AddAdminIDs(ids...)
+	return iu
+}
+
+// AddAdmins adds the "Admins" edges to the Admin entity.
+func (iu *InstituteUpdate) AddAdmins(a ...*Admin) *InstituteUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return iu.AddAdminIDs(ids...)
+}
+
 // Mutation returns the InstituteMutation object of the builder.
 func (iu *InstituteUpdate) Mutation() *InstituteMutation {
 	return iu.mutation
@@ -72,6 +88,27 @@ func (iu *InstituteUpdate) RemoveDirections(d ...*Direction) *InstituteUpdate {
 		ids[i] = d[i].ID
 	}
 	return iu.RemoveDirectionIDs(ids...)
+}
+
+// ClearAdmins clears all "Admins" edges to the Admin entity.
+func (iu *InstituteUpdate) ClearAdmins() *InstituteUpdate {
+	iu.mutation.ClearAdmins()
+	return iu
+}
+
+// RemoveAdminIDs removes the "Admins" edge to Admin entities by IDs.
+func (iu *InstituteUpdate) RemoveAdminIDs(ids ...int) *InstituteUpdate {
+	iu.mutation.RemoveAdminIDs(ids...)
+	return iu
+}
+
+// RemoveAdmins removes "Admins" edges to Admin entities.
+func (iu *InstituteUpdate) RemoveAdmins(a ...*Admin) *InstituteUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return iu.RemoveAdminIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -207,6 +244,60 @@ func (iu *InstituteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if iu.mutation.AdminsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   institute.AdminsTable,
+			Columns: []string{institute.AdminsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: admin.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.RemovedAdminsIDs(); len(nodes) > 0 && !iu.mutation.AdminsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   institute.AdminsTable,
+			Columns: []string{institute.AdminsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: admin.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iu.mutation.AdminsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   institute.AdminsTable,
+			Columns: []string{institute.AdminsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: admin.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, iu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{institute.Label}
@@ -247,6 +338,21 @@ func (iuo *InstituteUpdateOne) AddDirections(d ...*Direction) *InstituteUpdateOn
 	return iuo.AddDirectionIDs(ids...)
 }
 
+// AddAdminIDs adds the "Admins" edge to the Admin entity by IDs.
+func (iuo *InstituteUpdateOne) AddAdminIDs(ids ...int) *InstituteUpdateOne {
+	iuo.mutation.AddAdminIDs(ids...)
+	return iuo
+}
+
+// AddAdmins adds the "Admins" edges to the Admin entity.
+func (iuo *InstituteUpdateOne) AddAdmins(a ...*Admin) *InstituteUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return iuo.AddAdminIDs(ids...)
+}
+
 // Mutation returns the InstituteMutation object of the builder.
 func (iuo *InstituteUpdateOne) Mutation() *InstituteMutation {
 	return iuo.mutation
@@ -271,6 +377,27 @@ func (iuo *InstituteUpdateOne) RemoveDirections(d ...*Direction) *InstituteUpdat
 		ids[i] = d[i].ID
 	}
 	return iuo.RemoveDirectionIDs(ids...)
+}
+
+// ClearAdmins clears all "Admins" edges to the Admin entity.
+func (iuo *InstituteUpdateOne) ClearAdmins() *InstituteUpdateOne {
+	iuo.mutation.ClearAdmins()
+	return iuo
+}
+
+// RemoveAdminIDs removes the "Admins" edge to Admin entities by IDs.
+func (iuo *InstituteUpdateOne) RemoveAdminIDs(ids ...int) *InstituteUpdateOne {
+	iuo.mutation.RemoveAdminIDs(ids...)
+	return iuo
+}
+
+// RemoveAdmins removes "Admins" edges to Admin entities.
+func (iuo *InstituteUpdateOne) RemoveAdmins(a ...*Admin) *InstituteUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return iuo.RemoveAdminIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -422,6 +549,60 @@ func (iuo *InstituteUpdateOne) sqlSave(ctx context.Context) (_node *Institute, e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: direction.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if iuo.mutation.AdminsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   institute.AdminsTable,
+			Columns: []string{institute.AdminsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: admin.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.RemovedAdminsIDs(); len(nodes) > 0 && !iuo.mutation.AdminsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   institute.AdminsTable,
+			Columns: []string{institute.AdminsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: admin.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := iuo.mutation.AdminsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   institute.AdminsTable,
+			Columns: []string{institute.AdminsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: admin.FieldID,
 				},
 			},
 		}
