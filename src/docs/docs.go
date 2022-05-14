@@ -1104,6 +1104,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "institute_id": {
+                    "type": "integer"
+                },
                 "login": {
                     "type": "string"
                 }

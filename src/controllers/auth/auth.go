@@ -105,7 +105,7 @@ func (a *AuthController) initJwt() {
 					).Only(c)
 				if ent.IsNotFound(err) {
 					// Pass
-				}else if err != nil {
+				} else if err != nil {
 					log.WithFields(newLogFields("Authenticator", err)).Error("Failed to get super admin")
 					return "", err
 				}
@@ -336,8 +336,9 @@ func (a AuthController) AuthMiddleare() gin.HandlerFunc {
 }
 
 type GetAdminResp struct {
-	ID    int    `json:"id"`
-	Login string `json:"login"`
+	ID          int    `json:"id"`
+	Login       string `json:"login"`
+	InstituteID int    `json:"institute_id"`
 }
 
 type GetAdminsResp struct {
@@ -368,7 +369,7 @@ func (a AuthController) GetAdmins(c *gin.Context) {
 
 	var adminsResp GetAdminsResp
 	for _, admin := range admins {
-		adminsResp.Admins = append(adminsResp.Admins, GetAdminResp{ID: admin.ID, Login: admin.Login})
+		adminsResp.Admins = append(adminsResp.Admins, GetAdminResp{ID: admin.ID, Login: admin.Login, InstituteID: admin.InstituteID})
 	}
 
 	c.JSON(
@@ -464,7 +465,6 @@ type CreateSuperAdminResp struct {
 	Login string `json:"login"`
 }
 
-
 // CreateSuperAdmin
 //
 // @Summary create super admin
@@ -479,7 +479,7 @@ type CreateSuperAdminResp struct {
 //
 // @Tags auth
 //
-// @Success 200 {object} auth.CreateAdminResp 
+// @Success 200 {object} auth.CreateAdminResp
 //
 // @Security ApiKeyAuth
 func (a AuthController) CreateSuperAdmin(c *gin.Context) {
@@ -522,10 +522,19 @@ func (a AuthController) CreateSuperAdmin(c *gin.Context) {
 	c.JSON(
 		http.StatusCreated,
 		CreateAdminResp{
-			ID: superAdmin.ID,
+			ID:    superAdmin.ID,
 			Login: superAdmin.Login,
 		},
 	)
+}
+
+type GetSuperAdminResp struct {
+	ID    int    `json:"id"`
+	Login string `json:"login"`
+}
+
+type GetSuperAdminsResp struct {
+	Admins []GetSuperAdminResp `json:"admins"`
 }
 
 // GetSuperAdmins
@@ -550,19 +559,19 @@ func (a AuthController) GetSuperAdmins(c *gin.Context) {
 		return
 	}
 
-	var adminsResp GetAdminsResp
+	var adminsResp GetSuperAdminsResp
 	for _, admin := range admins {
-		adminsResp.Admins = append(adminsResp.Admins, GetAdminResp{ID: admin.ID, Login: admin.Login})
+		adminsResp.Admins = append(adminsResp.Admins, GetSuperAdminResp{ID: admin.ID, Login: admin.Login})
 	}
 
 	c.JSON(
 		http.StatusOK,
 		adminsResp,
-	)	
+	)
 }
 
 type DeleteAdminReq struct {
-	ID	int `uri:"id"`
+	ID int `uri:"id"`
 }
 
 // DeleteAdmin
@@ -592,7 +601,7 @@ func (a AuthController) DeleteAdmin(c *gin.Context) {
 	if ent.IsNotFound(err) {
 		c.String(http.StatusNotFound, "admin not found")
 		c.Abort()
-		return		
+		return
 	} else if err != nil {
 		c.String(http.StatusInternalServerError, "failed to delete admin")
 		c.Abort()
@@ -637,7 +646,7 @@ func (a AuthController) DeleteSuperAdmin(c *gin.Context) {
 	if ent.IsNotFound(err) {
 		c.String(http.StatusNotFound, "admin not found")
 		c.Abort()
-		return		
+		return
 	} else if err != nil {
 		c.String(http.StatusInternalServerError, "failed to delete admin")
 		c.Abort()
