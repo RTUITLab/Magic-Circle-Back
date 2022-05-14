@@ -30,6 +30,8 @@ definitions:
     properties:
       id:
         type: integer
+      institute_id:
+        type: integer
       login:
         type: string
     type: object
