@@ -1144,6 +1144,13 @@ const docTemplate = `{
                 "expire": {
                     "type": "string"
                 },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "admin",
+                        "super.admin"
+                    ]
+                },
                 "token": {
                     "type": "string"
                 }

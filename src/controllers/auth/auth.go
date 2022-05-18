@@ -111,6 +111,7 @@ func (a *AuthController) initJwt() {
 				}
 
 				if super != nil && super.Login == req.Login && super.Password == req.Password {
+					c.Set("role", role.SUPERADMIN)
 					return &paylaod.Payload{
 						ID:   super.ID,
 						Role: role.SUPERADMIN,
@@ -129,7 +130,7 @@ func (a *AuthController) initJwt() {
 				} else if err != nil {
 					return nil, err
 				}
-
+				c.Set("role", role.ADMIN)
 				return &paylaod.Payload{
 					ID:          admin.ID,
 					Role:        role.ADMIN,
@@ -144,6 +145,15 @@ func (a *AuthController) initJwt() {
 			TokenLookup:   "header: Authorization",
 			TokenHeadName: "Bearer",
 			TimeFunc:      time.Now,
+			LoginResponse: func(c *gin.Context, code int, message string, expire time.Time) {
+				r, _ := c.Get("role")
+				c.JSON(http.StatusOK, gin.H{
+					"code":   http.StatusOK,
+					"token":  message,
+					"expire": expire.Format(time.RFC3339),
+					"role":   r,
+				})
+			},
 		},
 	)
 	if err != nil {
@@ -176,6 +186,7 @@ func (a AuthController) createSuperAdmin(ctx context.Context) {
 type LoginResp struct {
 	Expite time.Time `json:"expire"`
 	Token  string    `json:"token"`
+	Role   string    `json:"role" enums:"admin,super.admin"`
 }
 
 // LoginHandler

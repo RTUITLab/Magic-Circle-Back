@@ -21,7 +21,7 @@ func DirectionFromEnt(d *ent.Direction) Direction {
 
 type Institute struct {
 	ID   int    `json:"id"`
-	Name string `json:"name"`
+	Name string `json:"name"` 
 }
 
 func InstituteFromEnt(i *ent.Institute) Institute {
