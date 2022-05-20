@@ -222,6 +222,22 @@ func (a AuthController) LoginHandler(c *gin.Context) {
 //
 // @Security ApiKeyAuth
 func (a AuthController) RefreshHandler(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+
+	userId := int(claims["userId"].(float64))
+
+	_, err := a.Client.SuperAdmin.Get(c, userId)
+	if ent.IsNotFound(err) {
+		c.String(http.StatusForbidden, "User is deleted")
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("Refresh", err)).Error("Failed to refresh")
+		c.String(http.StatusInternalServerError, "Failed to refresh")
+		c.Abort()
+		return
+	}
+
 	a.jwtHandlers.RefreshHandler(c)
 }
 
@@ -562,7 +578,13 @@ type GetSuperAdminsResp struct {
 //
 // @Security ApiKeyAuth
 func (a AuthController) GetSuperAdmins(c *gin.Context) {
-	admins, err := a.Client.SuperAdmin.Query().All(c)
+	claims := jwt.ExtractClaims(c)
+	userId := int(claims["userId"].(float64))
+	admins, err := a.Client.SuperAdmin.Query().
+		Where(
+			superadmin.IDNEQ(userId),
+		).
+		All(c)
 	if err != nil {
 		log.WithFields(newLogFields("GetAdmins", err)).Error("Failed to get Admins")
 		c.String(http.StatusInternalServerError, "Failed to get Admins")
@@ -590,6 +612,8 @@ type DeleteAdminReq struct {
 // @Summary delete admin
 //
 // @Router /v1/auth/admin/{id} [delete]
+// 
+// @Param id path integer true "id of admin"
 //
 // @Produce json
 //
@@ -627,6 +651,8 @@ func (a AuthController) DeleteAdmin(c *gin.Context) {
 // @Summary delete super admin
 //
 // @Router /v1/auth/superadmin/{id} [delete]
+// 
+// @Param id path integer true "id of superadmin"
 //
 // @Produce json
 //

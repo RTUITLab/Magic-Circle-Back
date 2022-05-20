@@ -367,6 +367,12 @@ paths:
       - auth
   /v1/auth/admin/{id}:
     delete:
+      parameters:
+      - description: id of admin
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -506,6 +512,12 @@ paths:
       - auth
   /v1/auth/superadmin/{id}:
     delete:
+      parameters:
+      - description: id of superadmin
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

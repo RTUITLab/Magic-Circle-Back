@@ -127,7 +127,11 @@ func NewRouter(c *Controllers) *gin.Engine {
 				POST("/login", c.Auth.LoginHandler)
 
 			auth.
-				GET("/refreshToken", c.Auth.RefreshHandler)
+				GET(
+					"/refreshToken",
+					c.Auth.AuthMiddleare(),
+					c.Auth.RefreshHandler,
+				)
 			auth.
 				POST(
 					"/admin/:intstitute_id", 

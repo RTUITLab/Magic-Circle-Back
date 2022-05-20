@@ -191,6 +191,15 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "delete admin",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of admin",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": ""
@@ -374,6 +383,15 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "delete super admin",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id of superadmin",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": ""
