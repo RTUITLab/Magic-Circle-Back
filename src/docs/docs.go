@@ -1162,6 +1162,12 @@ const docTemplate = `{
                 "expire": {
                     "type": "string"
                 },
+                "instituteId": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                },
                 "role": {
                     "type": "string",
                     "enum": [

@@ -112,6 +112,7 @@ func (a *AuthController) initJwt() {
 
 				if super != nil && super.Login == req.Login && super.Password == req.Password {
 					c.Set("role", role.SUPERADMIN)
+					c.Set("login", super.Login)
 					return &paylaod.Payload{
 						ID:   super.ID,
 						Role: role.SUPERADMIN,
@@ -131,6 +132,8 @@ func (a *AuthController) initJwt() {
 					return nil, err
 				}
 				c.Set("role", role.ADMIN)
+				c.Set("login", admin.Login)
+				c.Set("instId", admin.InstituteID)
 				return &paylaod.Payload{
 					ID:          admin.ID,
 					Role:        role.ADMIN,
@@ -146,13 +149,29 @@ func (a *AuthController) initJwt() {
 			TokenHeadName: "Bearer",
 			TimeFunc:      time.Now,
 			LoginResponse: func(c *gin.Context, code int, message string, expire time.Time) {
-				r, _ := c.Get("role")
-				c.JSON(http.StatusOK, gin.H{
-					"code":   http.StatusOK,
-					"token":  message,
-					"expire": expire.Format(time.RFC3339),
-					"role":   r,
-				})
+				var resp LoginResp
+				{
+					resp.Expire = expire.Format(time.RFC3339)
+					resp.Token = message
+
+					// Get Role
+					r, _ := c.Get("role")
+					resp.Role = r.(role.Role).String()
+
+					// Get login
+					login, _ := c.Get("login")
+					resp.Login = login.(string)
+
+					// Get InstId
+					instId, _ := c.Get("instId")
+					if instId != nil {
+						intInstId := instId.(int)
+						resp.InstituteId = &intInstId
+					}
+
+				}
+
+				c.JSON(http.StatusOK, resp)
 			},
 		},
 	)
@@ -184,9 +203,11 @@ func (a AuthController) createSuperAdmin(ctx context.Context) {
 }
 
 type LoginResp struct {
-	Expite time.Time `json:"expire"`
-	Token  string    `json:"token"`
-	Role   string    `json:"role" enums:"admin,super.admin"`
+	Expire      string `json:"expire"`
+	Token       string `json:"token"`
+	Role        string `json:"role" enums:"admin,super.admin"`
+	InstituteId *int   `json:"instituteId,omitempty" extension:"x-nullable"`
+	Login       string `json:"login"`
 }
 
 // LoginHandler
@@ -612,7 +633,7 @@ type DeleteAdminReq struct {
 // @Summary delete admin
 //
 // @Router /v1/auth/admin/{id} [delete]
-// 
+//
 // @Param id path integer true "id of admin"
 //
 // @Produce json
@@ -651,7 +672,7 @@ func (a AuthController) DeleteAdmin(c *gin.Context) {
 // @Summary delete super admin
 //
 // @Router /v1/auth/superadmin/{id} [delete]
-// 
+//
 // @Param id path integer true "id of superadmin"
 //
 // @Produce json
