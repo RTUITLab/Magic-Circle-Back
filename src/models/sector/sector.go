@@ -2,47 +2,38 @@ package sector
 
 import (
 	"github.com/0B1t322/Magic-Circle/ent"
+	"github.com/0B1t322/Magic-Circle/models/direction"
+	"github.com/0B1t322/Magic-Circle/models/institute"
 	"github.com/0B1t322/Magic-Circle/models/profile"
 )
 
 type Profile = profile.Profile
-
-type Direction struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-func DirectionFromEnt(d *ent.Direction) Direction {
-	return Direction{
-		ID:   d.ID,
-		Name: d.Name,
-	}
-}
-
-type Institute struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"` 
-}
-
-func InstituteFromEnt(i *ent.Institute) Institute {
-	return Institute{
-		ID:   i.ID,
-		Name: i.Name,
-	}
-}
+type Institute = institute.Institute
+type Direction = direction.Direction
 
 type AdditionalDescription struct {
-	Profile              Profile             `json:"profile"`
-	Direction            Direction `json:"direction"`
 	Institute            Institute `json:"institute"`
-	AdditionalDecription string              `json:"additionalDescription"`
+	AdditionalDecription string    `json:"additionalDescription"`
 }
 
 func NewAdditionalDescription(a *ent.AdjacentTable) AdditionalDescription {
 	return AdditionalDescription{
-		Profile:              profile.ProfileFromEnt(a.Edges.Profile),
-		Direction:            DirectionFromEnt(a.Edges.Profile.Edges.Direction),
-		Institute:            InstituteFromEnt(a.Edges.Profile.Edges.Direction.Edges.Institute),
+		Institute:            Institute{
+			ID: a.Edges.Profile.Edges.Direction.Edges.Institute.ID,
+			Name: a.Edges.Profile.Edges.Direction.Edges.Institute.Name,
+			Directions: []Direction{
+				{
+					ID:       a.Edges.Profile.Edges.Direction.ID,
+					Name:     a.Edges.Profile.Edges.Direction.Name,
+					Profiles: []Profile{
+						{
+							ID:   a.Edges.Profile.ID,
+							Name: a.Edges.Profile.Name,
+						},
+					},
+				},
+			},
+		},
 		AdditionalDecription: a.AdditionalDescription,
 	}
 }

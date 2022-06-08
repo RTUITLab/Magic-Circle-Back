@@ -225,25 +225,14 @@ definitions:
     properties:
       additionalDescription:
         type: string
-      direction:
-        $ref: '#/definitions/sector.Direction'
       institute:
         $ref: '#/definitions/sector.Institute'
-      profile:
-        $ref: '#/definitions/sector.Profile'
     type: object
   sector.CreateSectorReq:
     properties:
       coords:
         type: string
       description:
-        type: string
-    type: object
-  sector.Direction:
-    properties:
-      id:
-        type: integer
-      name:
         type: string
     type: object
   sector.GetAllSectorsResp:
@@ -255,13 +244,10 @@ definitions:
     type: object
   sector.Institute:
     properties:
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
-  sector.Profile:
-    properties:
+      directions:
+        items:
+          $ref: '#/definitions/direction.Direction'
+        type: array
       id:
         type: integer
       name:

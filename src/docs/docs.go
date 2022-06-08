@@ -1426,14 +1426,8 @@ const docTemplate = `{
                 "additionalDescription": {
                     "type": "string"
                 },
-                "direction": {
-                    "$ref": "#/definitions/sector.Direction"
-                },
                 "institute": {
                     "$ref": "#/definitions/sector.Institute"
-                },
-                "profile": {
-                    "$ref": "#/definitions/sector.Profile"
                 }
             }
         },
@@ -1444,17 +1438,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "description": {
-                    "type": "string"
-                }
-            }
-        },
-        "sector.Direction": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
                     "type": "string"
                 }
             }
@@ -1473,17 +1456,12 @@ const docTemplate = `{
         "sector.Institute": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
+                "directions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/direction.Direction"
+                    }
                 },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "sector.Profile": {
-            "type": "object",
-            "properties": {
                 "id": {
                     "type": "integer"
                 },
