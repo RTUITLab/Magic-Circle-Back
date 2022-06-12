@@ -369,7 +369,50 @@ func (s SectorController) GetAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, GetAllSectorsResp{Sectors: NewSectors(get)})
+	var sectors []Sector
+	for _, s := range get {
+		insts, _ := s.QueryAdjacentTables().
+						QueryProfile().
+						QueryDirection().
+						QueryInstitute().
+						WithDirections(
+							func(dq *ent.DirectionQuery) {
+								dq.WithProfile(
+									func(pq *ent.ProfileQuery) {
+										pq.WithAdjacentTables(
+											func(atq *ent.AdjacentTableQuery) {
+												atq.WithSector()
+											},
+										)
+									},
+								)
+							},
+						).
+						All(c)
+		sectors = append(sectors, NewSectorWithInsts(s, insts))
+	}
+	
+	c.JSON(http.StatusOK, GetAllSectorsResp{Sectors: sectors})
+}
+
+// Search institues from slice
+func NewSectorWithInsts(s *ent.Sector, insts []*ent.Institute) Sector {
+	sector := Sector{
+		ID: s.ID,
+		Coords: s.Coords,
+		Description: s.Description,
+	}
+
+	descs := map[int]string{}
+	{
+		for _, aj := range s.Edges.AdjacentTables {
+			descs[aj.ProfileID] = aj.AdditionalDescription
+		}
+	}
+
+	sector.Institutes = NewInstituteCreator(descs).NewInstitututes(insts)
+
+	return sector
 }
 
 type DeleteSectorReq struct {
@@ -584,7 +627,6 @@ type AddAdditionalDescriptionReq struct {
 	AdditionalDescription string `json:"additionalDescription"`
 }
 
-
 // AddAdditionalDescription
 //
 // @Summary Update additional description
@@ -592,9 +634,9 @@ type AddAdditionalDescriptionReq struct {
 // @Router /v1/sector/{sector_id}/profile/{profile_id} [put]
 //
 // @Security ApiKeyAuth
-// 
+//
 // @Param sector_id path integer true "id of sector"
-// 
+//
 // @Param profile_id path integer true "id of propfile"
 //
 // @Tags sector
@@ -609,13 +651,13 @@ type AddAdditionalDescriptionReq struct {
 func (s SectorController) AddAdditionalDescription(c *gin.Context) {
 	var req AddAdditionalDescriptionReq
 	{
-		if err  := c.ShouldBindUri(&req); err != nil {
+		if err := c.ShouldBindUri(&req); err != nil {
 			c.String(http.StatusBadRequest, "Bad id's")
 			c.Abort()
 			return
 		}
 
-		if err  := c.ShouldBindJSON(&req); err != nil {
+		if err := c.ShouldBindJSON(&req); err != nil {
 			c.String(http.StatusBadRequest, "Unexpected body")
 			c.Abort()
 			return
@@ -623,23 +665,21 @@ func (s SectorController) AddAdditionalDescription(c *gin.Context) {
 	}
 
 	adj, err := s.Client.AdjacentTable.
-					Query().
-					Where(
-						adjacenttable.SectorID(req.SectorID),
-						adjacenttable.ProfileID(req.ProfileID),
-					).
-					WithProfile(
-						func(pq *ent.ProfileQuery) {
-							pq.WithDirection(
-								func(dq *ent.DirectionQuery) {
-									dq.WithInstitute(
-
-									)
-								},
-							)
-						},
-					).
-					Only(c)
+		Query().
+		Where(
+			adjacenttable.SectorID(req.SectorID),
+			adjacenttable.ProfileID(req.ProfileID),
+		).
+		WithProfile(
+			func(pq *ent.ProfileQuery) {
+				pq.WithDirection(
+					func(dq *ent.DirectionQuery) {
+						dq.WithInstitute()
+					},
+				)
+			},
+		).
+		Only(c)
 	if ent.IsNotFound(err) {
 		c.String(http.StatusNotFound, "Not found additional description with this sector id and profile id")
 		c.Abort()
@@ -665,7 +705,7 @@ func (s SectorController) AddAdditionalDescription(c *gin.Context) {
 		log.WithFields(newLogFields("AddAdditionalDescription", err)).Error("Failed to create sectors")
 		c.String(http.StatusInternalServerError, "Failed to create sectors")
 		c.Abort()
-		return	
+		return
 	}
 
 	upd.Edges = adj.Edges

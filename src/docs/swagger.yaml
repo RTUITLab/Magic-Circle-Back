@@ -223,8 +223,6 @@ definitions:
     type: object
   sector.AdditionalDescription:
     properties:
-      additionalDescription:
-        type: string
       institute:
         $ref: '#/definitions/sector.Institute'
     type: object
@@ -234,6 +232,17 @@ definitions:
         type: string
       description:
         type: string
+    type: object
+  sector.Direction:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      profiles:
+        items:
+          $ref: '#/definitions/sector.Profile'
+        type: array
     type: object
   sector.GetAllSectorsResp:
     properties:
@@ -246,8 +255,17 @@ definitions:
     properties:
       directions:
         items:
-          $ref: '#/definitions/direction.Direction'
+          $ref: '#/definitions/sector.Direction'
         type: array
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  sector.Profile:
+    properties:
+      additionalDescription:
+        type: string
       id:
         type: integer
       name:
@@ -255,16 +273,16 @@ definitions:
     type: object
   sector.Sector:
     properties:
-      additionalDescriptions:
-        items:
-          $ref: '#/definitions/sector.AdditionalDescription'
-        type: array
       coords:
         type: string
       description:
         type: string
       id:
         type: integer
+      institutes:
+        items:
+          $ref: '#/definitions/sector.Institute'
+        type: array
     type: object
   sector.UpdateSectorReq:
     properties:

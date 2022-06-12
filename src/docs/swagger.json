@@ -1415,9 +1415,6 @@
         "sector.AdditionalDescription": {
             "type": "object",
             "properties": {
-                "additionalDescription": {
-                    "type": "string"
-                },
                 "institute": {
                     "$ref": "#/definitions/sector.Institute"
                 }
@@ -1431,6 +1428,23 @@
                 },
                 "description": {
                     "type": "string"
+                }
+            }
+        },
+        "sector.Direction": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "profiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sector.Profile"
+                    }
                 }
             }
         },
@@ -1451,8 +1465,22 @@
                 "directions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/direction.Direction"
+                        "$ref": "#/definitions/sector.Direction"
                     }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "sector.Profile": {
+            "type": "object",
+            "properties": {
+                "additionalDescription": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -1465,12 +1493,6 @@
         "sector.Sector": {
             "type": "object",
             "properties": {
-                "additionalDescriptions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/sector.AdditionalDescription"
-                    }
-                },
                 "coords": {
                     "type": "string"
                 },
@@ -1479,6 +1501,12 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "institutes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sector.Institute"
+                    }
                 }
             }
         },

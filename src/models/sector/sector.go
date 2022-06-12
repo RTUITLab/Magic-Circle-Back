@@ -2,39 +2,47 @@ package sector
 
 import (
 	"github.com/0B1t322/Magic-Circle/ent"
-	"github.com/0B1t322/Magic-Circle/models/direction"
-	"github.com/0B1t322/Magic-Circle/models/institute"
-	"github.com/0B1t322/Magic-Circle/models/profile"
 )
 
-type Profile = profile.Profile
-type Institute = institute.Institute
-type Direction = direction.Direction
+type Profile struct {
+	ID                   int    `json:"id"`
+	Name                 string `json:"name"`
+	AdditionalDecription string `json:"additionalDescription"`
+}
+type Institute struct {
+	ID         int         `json:"id"`
+	Name       string      `json:"name"`
+	Directions []Direction `json:"directions"`
+}
+type Direction struct {
+	ID       int       `json:"id"`
+	Name     string    `json:"name"`
+	Profiles []Profile `json:"profiles"`
+}
 
 type AdditionalDescription struct {
-	Institute            Institute `json:"institute"`
-	AdditionalDecription string    `json:"additionalDescription"`
+	Institute Institute `json:"institute"`
 }
 
 func NewAdditionalDescription(a *ent.AdjacentTable) AdditionalDescription {
 	return AdditionalDescription{
-		Institute:            Institute{
-			ID: a.Edges.Profile.Edges.Direction.Edges.Institute.ID,
+		Institute: Institute{
+			ID:   a.Edges.Profile.Edges.Direction.Edges.Institute.ID,
 			Name: a.Edges.Profile.Edges.Direction.Edges.Institute.Name,
 			Directions: []Direction{
 				{
-					ID:       a.Edges.Profile.Edges.Direction.ID,
-					Name:     a.Edges.Profile.Edges.Direction.Name,
+					ID:   a.Edges.Profile.Edges.Direction.ID,
+					Name: a.Edges.Profile.Edges.Direction.Name,
 					Profiles: []Profile{
 						{
-							ID:   a.Edges.Profile.ID,
-							Name: a.Edges.Profile.Name,
+							ID:                   a.Edges.Profile.ID,
+							Name:                 a.Edges.Profile.Name,
+							AdditionalDecription: a.AdditionalDescription,
 						},
 					},
 				},
 			},
 		},
-		AdditionalDecription: a.AdditionalDescription,
 	}
 }
 
@@ -45,19 +53,109 @@ func NewAdditionalDescriptions(as []*ent.AdjacentTable) (slice []AdditionalDescr
 	return slice
 }
 
-type Sector struct {
-	ID                     int                     `json:"id"`
-	Coords                 string                  `json:"coords"`
-	Description            string                  `json:"description"`
-	AdditionalDescriptions []AdditionalDescription `json:"additionalDescriptions"`
+// Return slice of unique instutes
+func NewInstitues(ads []AdditionalDescription) (slice []Institute) {
+	set := map[int]Institute{}
+	for _, ad := range ads {
+		if _, find := set[ad.Institute.ID]; !find {
+			set[ad.Institute.ID] = ad.Institute
+		}
+	}
+
+	for _, inst := range set {
+		slice = append(slice, inst)
+	}
+
+	return slice
 }
 
+func FindDirectionsForInstitue(ads []AdditionalDescription, instId int) (slice []Direction) {
+	set := map[int]Direction{}
+
+	for _, ad := range ads {
+		if ad.Institute.ID == instId {
+			for _, dir := range ad.Institute.Directions {
+				if _, find := set[dir.ID]; !find {
+					set[dir.ID] = dir
+				}
+			}
+		}
+	}
+
+	for _, dir := range set {
+		slice = append(slice, dir)
+	}
+
+	return slice
+}
+
+func FindProfilesForDirection(ads []AdditionalDescription, instId, dirId int) (slice []Profile) {
+	set := map[int]Profile{}
+
+	for _, ad := range ads {
+		if ad.Institute.ID == instId {
+			for _, dir := range ad.Institute.Directions {
+				if dirId == dir.ID {
+					for _, prof := range dir.Profiles {
+						if _, find := set[prof.ID]; !find {
+							set[prof.ID] = prof
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for _, prof := range set {
+		slice = append(slice, prof)
+	}
+
+	return slice
+}
+
+// func NewInstutesFromSector(s *ent.Sector) (insts []Institute) {
+// 	set := map[int]Institute{}
+
+// 	for _, a := range s.Edges.AdjacentTables {
+// 		if inst, find := set[a.Edges.Profile.Edges.Direction.Edges.Institute.ID]; !find {
+// 			set[a.Edges.Profile.Edges.Direction.Edges.Institute.ID] = Institute{
+// 				ID:   a.Edges.Profile.Edges.Direction.Edges.Institute.ID,
+// 				Name: a.Edges.Profile.Edges.Direction.Edges.Institute.Name,
+// 				Directions: []Direction{
+// 					{
+// 						ID:   a.Edges.Profile.Edges.Direction.ID,
+// 						Name: a.Edges.Profile.Edges.Direction.Name,
+// 						Profiles: []Profile{
+// 							{
+// 								ID:                   a.Edges.Profile.ID,
+// 								Name:                 a.Edges.Profile.Name,
+// 								AdditionalDecription: a.AdditionalDescription,
+// 							},
+// 						},
+// 					},
+// 				},
+// 			}
+// 		} else if !find {
+// 			// try insert direction
+
+// 		}
+
+// 	}
+// }
+
+type Sector struct {
+	ID                    int                     `json:"id"`
+	Coords                string                  `json:"coords"`
+	Description           string                  `json:"description"`
+	Institutes            []Institute             `json:"institutes,omitempty"`
+}
+
+// Institues not set
 func NewSector(s *ent.Sector) Sector {
 	return Sector{
-		ID:                     s.ID,
-		Coords:                 s.Coords,
-		Description:            s.Description,
-		AdditionalDescriptions: NewAdditionalDescriptions(s.Edges.AdjacentTables),
+		ID:          s.ID,
+		Coords:      s.Coords,
+		Description: s.Description,
 	}
 }
 
@@ -66,4 +164,50 @@ func NewSectors(ss []*ent.Sector) (slice []Sector) {
 		slice = append(slice, NewSector(s))
 	}
 	return slice
+}
+
+func NewInstitututes(insts []*ent.Institute) (slice []Institute) {
+	for _, i := range insts {
+		slice = append(slice, NewInstitute(i))
+	}
+
+	return slice
+}
+
+func NewInstitute(inst *ent.Institute) Institute {
+	return Institute{
+		ID:         inst.ID,
+		Name:       inst.Name,
+		Directions: NewDirections(inst.Edges.Directions),
+	}
+}
+
+func NewDirections(dirs []*ent.Direction) (slice []Direction) {
+	for _, d := range dirs {
+		slice = append(slice, NewDirection(d))
+	}
+	return slice
+}
+
+func NewDirection(dir *ent.Direction) Direction {
+	return Direction{
+		ID:       dir.ID,
+		Name:     dir.Name,
+		Profiles: NewProfiles(dir.Edges.Profile),
+	}
+}
+
+func NewProfiles(profs []*ent.Profile) (slice []Profile) {
+	for _, p := range profs {
+		slice = append(slice, NewProfile(p))
+	}
+
+	return slice
+}
+
+func NewProfile(prof *ent.Profile) Profile {
+	return Profile{
+		ID:                   prof.ID,
+		Name:                 prof.Name,
+	}
 }

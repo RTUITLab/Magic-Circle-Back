@@ -1423,9 +1423,6 @@ const docTemplate = `{
         "sector.AdditionalDescription": {
             "type": "object",
             "properties": {
-                "additionalDescription": {
-                    "type": "string"
-                },
                 "institute": {
                     "$ref": "#/definitions/sector.Institute"
                 }
@@ -1439,6 +1436,23 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
+                }
+            }
+        },
+        "sector.Direction": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "profiles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sector.Profile"
+                    }
                 }
             }
         },
@@ -1459,8 +1473,22 @@ const docTemplate = `{
                 "directions": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/direction.Direction"
+                        "$ref": "#/definitions/sector.Direction"
                     }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "sector.Profile": {
+            "type": "object",
+            "properties": {
+                "additionalDescription": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -1473,12 +1501,6 @@ const docTemplate = `{
         "sector.Sector": {
             "type": "object",
             "properties": {
-                "additionalDescriptions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/sector.AdditionalDescription"
-                    }
-                },
                 "coords": {
                     "type": "string"
                 },
@@ -1487,6 +1509,12 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "institutes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sector.Institute"
+                    }
                 }
             }
         },
