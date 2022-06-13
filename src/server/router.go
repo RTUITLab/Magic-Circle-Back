@@ -16,10 +16,20 @@ func NewRouter(c *Controllers) *gin.Engine {
 
 	v1 := baseRouter.Group("/v1")
 	{
+
+		sectorIds := v1.Group("/sectorIds")
+		{
+			sectorIds.
+				GET("", c.Sector.GetAllIds)
+		}
+
 		sector := v1.Group("/sector")
 		{
 			sector.
 				GET("", c.Sector.GetAll)
+			
+			sector.
+				GET("/:id", c.Sector.GetSector)
 
 			sector.
 				POST(

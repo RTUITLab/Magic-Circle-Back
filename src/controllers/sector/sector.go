@@ -372,6 +372,114 @@ func (s SectorController) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, GetAllSectorsResp{Sectors: NewSectors(get)})
 }
 
+type GetAllSectorsIdsResp struct {
+	Sectors []CompactSector `json:"sectors"`
+}
+
+// GetAllIds
+//
+// @Summary Get Sectors ids and coords
+//
+// @Description return all sectors
+//
+// @Description quey params can make a logical predicates for example
+// @Description request: "/sectors?instutute=1+2&profile=1" equal "WHERE (institute_id=1 and profile_id=1) or institute_id=2"
+//
+// @Tags sector
+//
+// @Router /v1/sectorIds [get]
+//
+// @Param institute query string false "institute name"
+//
+// @Param direction query string false "direction name"
+//
+// @Param profile query string false "profile name"
+//
+// @Produce json
+//
+// @Success 200 {object} sector.GetAllSectorsIdsResp
+//
+// @Failure 500 {string} srting
+func (s SectorController) GetAllIds(c *gin.Context) {
+	var req GetAllSectorsReq
+	{
+		req.InstituteName = c.Query("institute")
+		req.DirectionName = c.Query("direction")
+		req.ProfileName = c.Query("profile")
+	}
+
+	get, err := s.getAll(c, req)
+	if err != nil {
+		log.WithFields(newLogFields("GetAll", err)).Error("Failed to get sectors")
+		c.String(http.StatusInternalServerError, "Failed to get sectors")
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, GetAllSectorsIdsResp{Sectors: NewCompactsSector(get)})
+}
+
+type GetSectorReq struct {
+	ID int `json:"-" uri:"id"`
+}
+
+// GetSector
+//
+// @Summary get sector
+//
+// @Description return sector
+//
+// @Tags sector
+//
+// @Router /v1/sector/{id} [get]
+//
+// @Param id path string false "sector id"
+//
+// @Produce json
+//
+// @Success 200 {object} sector.Sector
+//
+// @Failure 500 {string} srting
+func (s SectorController) GetSector(c *gin.Context) {
+	var req GetSectorReq
+	{
+		if err := c.ShouldBindUri(&req); err != nil {
+			c.String(http.StatusBadRequest, "Unexpected id")
+			c.Abort()
+			return
+		}
+	}
+
+	get, err := s.Client.Sector.Query().
+					Where(
+						sector.ID(req.ID),
+					).WithAdjacentTables(
+						func(atq *ent.AdjacentTableQuery) {
+							atq.WithProfile(
+								func(pq *ent.ProfileQuery) {
+									pq.WithDirection(
+										func(dq *ent.DirectionQuery) {
+											dq.WithInstitute()
+										},
+									)
+								},
+							)
+						},
+					).Only(c)
+	if ent.IsNotFound(err) {
+		c.String(http.StatusNotFound, "Sector not found")
+		c.Abort()
+		return
+	} else if err != nil {
+		log.WithFields(newLogFields("GetSector", err)).Error("Failed to get sector")
+		c.String(http.StatusInternalServerError, "Failed to get sector")
+		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, NewSector(get))
+}
+
 type DeleteSectorReq struct {
 	ID int `json:"-" uri:"id"`
 }

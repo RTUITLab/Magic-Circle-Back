@@ -226,6 +226,13 @@ definitions:
       institute:
         $ref: '#/definitions/sector.Institute'
     type: object
+  sector.CompactSector:
+    properties:
+      coords:
+        type: string
+      id:
+        type: integer
+    type: object
   sector.CreateSectorReq:
     properties:
       coords:
@@ -242,6 +249,13 @@ definitions:
       profiles:
         items:
           $ref: '#/definitions/sector.Profile'
+        type: array
+    type: object
+  sector.GetAllSectorsIdsResp:
+    properties:
+      sectors:
+        items:
+          $ref: '#/definitions/sector.CompactSector'
         type: array
     type: object
   sector.GetAllSectorsResp:
@@ -871,6 +885,27 @@ paths:
       summary: Delete Sector
       tags:
       - sector
+    get:
+      description: return sector
+      parameters:
+      - description: sector id
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sector.Sector'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: get sector
+      tags:
+      - sector
     put:
       consumes:
       - application/json
@@ -934,6 +969,39 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update additional description
+      tags:
+      - sector
+  /v1/sectorIds:
+    get:
+      description: |-
+        return all sectors
+        quey params can make a logical predicates for example
+        request: "/sectors?instutute=1+2&profile=1" equal "WHERE (institute_id=1 and profile_id=1) or institute_id=2"
+      parameters:
+      - description: institute name
+        in: query
+        name: institute
+        type: string
+      - description: direction name
+        in: query
+        name: direction
+        type: string
+      - description: profile name
+        in: query
+        name: profile
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sector.GetAllSectorsIdsResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get Sectors ids and coords
       tags:
       - sector
   /v1/sectors:

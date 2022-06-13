@@ -113,41 +113,31 @@ func FindProfilesForDirection(ads []AdditionalDescription, instId, dirId int) (s
 	return slice
 }
 
-// func NewInstutesFromSector(s *ent.Sector) (insts []Institute) {
-// 	set := map[int]Institute{}
-
-// 	for _, a := range s.Edges.AdjacentTables {
-// 		if inst, find := set[a.Edges.Profile.Edges.Direction.Edges.Institute.ID]; !find {
-// 			set[a.Edges.Profile.Edges.Direction.Edges.Institute.ID] = Institute{
-// 				ID:   a.Edges.Profile.Edges.Direction.Edges.Institute.ID,
-// 				Name: a.Edges.Profile.Edges.Direction.Edges.Institute.Name,
-// 				Directions: []Direction{
-// 					{
-// 						ID:   a.Edges.Profile.Edges.Direction.ID,
-// 						Name: a.Edges.Profile.Edges.Direction.Name,
-// 						Profiles: []Profile{
-// 							{
-// 								ID:                   a.Edges.Profile.ID,
-// 								Name:                 a.Edges.Profile.Name,
-// 								AdditionalDecription: a.AdditionalDescription,
-// 							},
-// 						},
-// 					},
-// 				},
-// 			}
-// 		} else if !find {
-// 			// try insert direction
-
-// 		}
-
-// 	}
-// }
-
 type Sector struct {
-	ID                    int                     `json:"id"`
-	Coords                string                  `json:"coords"`
-	Description           string                  `json:"description"`
-	Institutes            []Institute             `json:"institutes,omitempty"`
+	ID          int         `json:"id"`
+	Coords      string      `json:"coords"`
+	Description string      `json:"description"`
+	Institutes  []Institute `json:"institutes,omitempty"`
+}
+
+type CompactSector struct {
+	ID     int    `json:"id"`
+	Coords string `json:"coords"`
+}
+
+func NewCompactSector(s *ent.Sector) CompactSector {
+	return CompactSector{
+		ID:     s.ID,
+		Coords: s.Coords,
+	}
+}
+
+func NewCompactsSector(ss []*ent.Sector) (slice []CompactSector) {
+	for _, s := range ss {
+		slice = append(slice, NewCompactSector(s))
+	}
+
+	return slice
 }
 
 // Institues not set
@@ -156,7 +146,7 @@ func NewSector(s *ent.Sector) Sector {
 		ID:          s.ID,
 		Coords:      s.Coords,
 		Description: s.Description,
-		Institutes: NewInstitutesFromSector(s),
+		Institutes:  NewInstitutesFromSector(s),
 	}
 }
 
@@ -169,8 +159,8 @@ func NewSectors(ss []*ent.Sector) (slice []Sector) {
 
 func NewInstitutesFromSector(s *ent.Sector) []Institute {
 	insts := map[int]*ent.Institute{}
-	dirs :=  map[int]*ent.Direction{}
-	profs :=  map[int]*ent.Profile{}
+	dirs := map[int]*ent.Direction{}
+	profs := map[int]*ent.Profile{}
 
 	for _, aj := range s.Edges.AdjacentTables {
 		inst := aj.Edges.Profile.Edges.Direction.Edges.Institute

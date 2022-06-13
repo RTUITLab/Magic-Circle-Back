@@ -873,6 +873,38 @@ const docTemplate = `{
             }
         },
         "/v1/sector/{id}": {
+            "get": {
+                "description": "return sector",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sector"
+                ],
+                "summary": "get sector",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "sector id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sector.Sector"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "put": {
                 "security": [
                     {
@@ -1012,6 +1044,52 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/sector.AdditionalDescription"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/sectorIds": {
+            "get": {
+                "description": "return all sectors\nquey params can make a logical predicates for example\nrequest: \"/sectors?instutute=1+2\u0026profile=1\" equal \"WHERE (institute_id=1 and profile_id=1) or institute_id=2\"",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sector"
+                ],
+                "summary": "Get Sectors ids and coords",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "institute name",
+                        "name": "institute",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "direction name",
+                        "name": "direction",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "profile name",
+                        "name": "profile",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sector.GetAllSectorsIdsResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -1428,6 +1506,17 @@ const docTemplate = `{
                 }
             }
         },
+        "sector.CompactSector": {
+            "type": "object",
+            "properties": {
+                "coords": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "sector.CreateSectorReq": {
             "type": "object",
             "properties": {
@@ -1452,6 +1541,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/sector.Profile"
+                    }
+                }
+            }
+        },
+        "sector.GetAllSectorsIdsResp": {
+            "type": "object",
+            "properties": {
+                "sectors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sector.CompactSector"
                     }
                 }
             }
