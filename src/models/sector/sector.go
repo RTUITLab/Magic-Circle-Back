@@ -156,6 +156,7 @@ func NewSector(s *ent.Sector) Sector {
 		ID:          s.ID,
 		Coords:      s.Coords,
 		Description: s.Description,
+		Institutes: NewInstitutesFromSector(s),
 	}
 }
 
@@ -164,6 +165,53 @@ func NewSectors(ss []*ent.Sector) (slice []Sector) {
 		slice = append(slice, NewSector(s))
 	}
 	return slice
+}
+
+func NewInstitutesFromSector(s *ent.Sector) []Institute {
+	insts := map[int]*ent.Institute{}
+	dirs :=  map[int]*ent.Direction{}
+	profs :=  map[int]*ent.Profile{}
+
+	for _, aj := range s.Edges.AdjacentTables {
+		inst := aj.Edges.Profile.Edges.Direction.Edges.Institute
+		dir := aj.Edges.Profile.Edges.Direction
+		prof := aj.Edges.Profile
+		{
+			if _, find := insts[inst.ID]; !find {
+				insts[inst.ID] = inst
+			}
+
+			if _, find := dirs[dir.ID]; !find {
+				dirs[dir.ID] = dir
+			}
+
+			if _, find := profs[prof.ID]; !find {
+				prof.Edges.AdjacentTables = append(prof.Edges.AdjacentTables, aj)
+				profs[prof.ID] = prof
+			}
+		}
+	}
+
+	for _, prof := range profs {
+		dir := dirs[prof.DirectionID]
+		dir.Edges.Profile = append(dir.Edges.Profile, prof)
+		dirs[prof.DirectionID] = dir
+	}
+
+	for _, dir := range dirs {
+		inst := insts[dir.InstituteID]
+		inst.Edges.Directions = append(inst.Edges.Directions, dir)
+		insts[dir.InstituteID] = inst
+	}
+
+	var instSlice []*ent.Institute
+	{
+		for _, inst := range insts {
+			instSlice = append(instSlice, inst)
+		}
+	}
+
+	return NewInstitututes(instSlice)
 }
 
 func NewInstitututes(insts []*ent.Institute) (slice []Institute) {
@@ -209,5 +257,6 @@ func NewProfile(prof *ent.Profile) Profile {
 	return Profile{
 		ID:                   prof.ID,
 		Name:                 prof.Name,
+		AdditionalDecription: prof.Edges.AdjacentTables[0].AdditionalDescription,
 	}
 }

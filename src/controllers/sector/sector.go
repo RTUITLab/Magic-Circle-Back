@@ -368,51 +368,8 @@ func (s SectorController) GetAll(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
-	var sectors []Sector
-	for _, s := range get {
-		insts, _ := s.QueryAdjacentTables().
-						QueryProfile().
-						QueryDirection().
-						QueryInstitute().
-						WithDirections(
-							func(dq *ent.DirectionQuery) {
-								dq.WithProfile(
-									func(pq *ent.ProfileQuery) {
-										pq.WithAdjacentTables(
-											func(atq *ent.AdjacentTableQuery) {
-												atq.WithSector()
-											},
-										)
-									},
-								)
-							},
-						).
-						All(c)
-		sectors = append(sectors, NewSectorWithInsts(s, insts))
-	}
 	
-	c.JSON(http.StatusOK, GetAllSectorsResp{Sectors: sectors})
-}
-
-// Search institues from slice
-func NewSectorWithInsts(s *ent.Sector, insts []*ent.Institute) Sector {
-	sector := Sector{
-		ID: s.ID,
-		Coords: s.Coords,
-		Description: s.Description,
-	}
-
-	descs := map[int]string{}
-	{
-		for _, aj := range s.Edges.AdjacentTables {
-			descs[aj.ProfileID] = aj.AdditionalDescription
-		}
-	}
-
-	sector.Institutes = NewInstituteCreator(descs).NewInstitututes(insts)
-
-	return sector
+	c.JSON(http.StatusOK, GetAllSectorsResp{Sectors: NewSectors(get)})
 }
 
 type DeleteSectorReq struct {
