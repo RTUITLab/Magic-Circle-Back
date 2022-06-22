@@ -35,7 +35,6 @@ func NewRouter(c *Controllers) *gin.Engine {
 				POST(
 				"", 
 					c.Auth.AuthMiddleare(),
-					c.Auth.IsSuperAdminMiddleware,
 					c.Sector.Create,
 				)
 
@@ -69,7 +68,6 @@ func NewRouter(c *Controllers) *gin.Engine {
 				POST(
 					"",
 					c.Auth.AuthMiddleare(),
-					c.Auth.IsSuperAdminMiddleware,
 					c.Sector.CreateSectors,
 				)
 		}
